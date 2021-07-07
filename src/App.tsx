@@ -7,6 +7,7 @@ import Web3 from 'web3';
 import { Button, Loader, Title, Card, Text, Select, Divider, TextField } from '@gnosis.pm/safe-react-components';
 import { useSafeAppsSDK, SafeProvider } from '@gnosis.pm/safe-apps-react-sdk';
 
+
 import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
 import { ConnextModal } from '@connext/vector-modal';
 

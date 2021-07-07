@@ -1,9 +1,18 @@
 import React, { useState } from "react";
 import { ConnextModal } from "@connext/vector-modal";
-import { Grid, Button, TextField, Select, MenuItem} from "@material-ui/core";
+import useStyles from './styles';
+import { Grid, Button, TextField, Select, MenuItem, Card, Paper} from "@material-ui/core";
+import SwapHorizontalCircleIcon from '@material-ui/icons/SwapHorizontalCircle';
 import styled from 'styled-components';
+import Icon from '@material-ui/core/Icon';
+import { useSafeAppsSDK } from '@gnosis.pm/safe-apps-react-sdk';
+import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
 
 export default function Modal() {
+  
+  const classes = useStyles();
+  const { sdk, safe } = useSafeAppsSDK();
+  const web3Provider = new SafeAppProvider(safe, sdk);
   const [showModal, setShowModal] = useState(false);
 
   const [withdrawalAddress, setWithdrawalAddress] = useState("");
@@ -13,17 +22,7 @@ export default function Modal() {
 
   //const chainConfig = process.env.NEXT_PUBLIC_CHAIN_PROVIDERS;
   //const chainProviders = JSON.parse(chainConfig!);
-  const Container = styled.form`
-  margin-bottom: 2rem;
-  width: 100%;
-  max-width: 480px;
-  margin-top: 20px;
-  margin-left: 20px;
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-column-gap: 1rem;
-  grid-row-gap: 1rem;
-`;
+
 
   const handleChange = (event) => {
     setWithdrawalAddress(event.target.value);
@@ -197,7 +196,11 @@ export default function Modal() {
   
   return (
     <>
-    <Container>
+    
+    <Grid className={classes.grid} container spacing={2}>
+
+     <Grid item xs={12} sm={6}>
+     <Card className={classes.card}>
     
       {/* <Grid container spacing={2} >
         <Grid item style={{ marginTop: 16 }}>
@@ -220,11 +223,12 @@ export default function Modal() {
           </Button>
         </Grid>
       </Grid> */}
-      <form onSubmit={handleSubmit} noValidate>
-        <Grid container spacing={2}>
+      <form className={classes.form}  onSubmit={handleSubmit} noValidate>
+       <Grid className={classes.grid} container spacing={2}>
 
-          <Grid item xs={12}>
+          <Grid item xs={8}>
             <Select
+              variant="outlined"
               id="demo-controlled-open-select"
               open={open}
               onClose={handleClose}
@@ -244,7 +248,7 @@ export default function Modal() {
             </Select>
           </Grid>
 
-          <Grid item xs={12}>
+          <Grid item xs={8}>
             <TextField
               label="Receiver Address"
               name="receiverAddress"
@@ -257,8 +261,9 @@ export default function Modal() {
             />
           </Grid>
 
-          <Grid item xs={12}>
+          <Grid item xs={8}>
             <TextField
+           
               label="Transfer Amount"
               name="transferAmount"
               aria-describedby="transferAmount"
@@ -267,16 +272,17 @@ export default function Modal() {
               onChange={amountController}
               required
               fullWidth
+           
             
             />
           </Grid>
           
-        </Grid>
         
-      </form>
-      <Grid container spacing={2} >
-        <Grid item style={{ marginTop: 16 }}>
+      
+        <Grid className={classes.grid} item style={{ marginTop: 16 }} xs={8}>
           <Button
+          startIcon={ <SwapHorizontalCircleIcon/>}
+          className={classes.button}
             variant="contained"
             color="primary"
             type="submit"
@@ -296,9 +302,9 @@ export default function Modal() {
           >
             Cross-Chain Transfer
           </Button>
-        </Grid>
+    
       </Grid>
-
+      </Grid>
       <ConnextModal
         showModal={showModal}
         transferAmount={transferAmount}
@@ -312,11 +318,22 @@ export default function Modal() {
         onReady={params => console.log('MODAL IS READY =======>', params)}
         depositChainProvider={"https://rinkeby.infura.io/v3/31a0f6f85580403986edab0be5f7673c"}
         withdrawChainProvider={"https://kovan.infura.io/v3/31a0f6f85580403986edab0be5f7673c"}
-        injectedProvider={injectedProvider}
+        injectedProvider={web3Provider}
         loginProvider={injectedProvider}
-      />
-  
-      </Container>
+          />
+        
+      </form>
+      
+
+   
+    </Card>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+          <Paper>Support</Paper>
+          </Grid>
+
+        </Grid>
+    
     </>
   );
 }
