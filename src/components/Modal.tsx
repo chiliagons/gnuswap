@@ -9,7 +9,18 @@ import { useSafeAppsSDK } from '@gnosis.pm/safe-apps-react-sdk';
 import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
 
 export default function Modal() {
-  
+  const Container = styled.form`
+  margin-bottom: 2rem;
+  width: 100%;
+  max-width: 480px;
+  margin-top: 20px;
+  margin-left: 20px;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-column-gap: 1rem;
+  grid-row-gap: 1rem;
+`;
+
   const classes = useStyles();
   const { sdk, safe } = useSafeAppsSDK();
   const web3Provider = new SafeAppProvider(safe, sdk);
@@ -196,7 +207,8 @@ export default function Modal() {
   
   return (
     <>
-    
+    <Container>
+
     <Grid className={classes.grid} container spacing={2}>
 
      <Grid item xs={12} sm={6}>
@@ -333,6 +345,7 @@ export default function Modal() {
           </Grid>
 
         </Grid>
+        </Container>
     
     </>
   );
