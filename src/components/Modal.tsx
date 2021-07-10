@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ConnextModal } from '@connext/vector-modal';
 import useStyles from './styles';
-import { Grid, Button, TextField, Select, MenuItem, Card, Paper, Typography } from '@material-ui/core';
+import { Container, Grid, Button, TextField, Select, MenuItem, Card, Paper, Typography } from '@material-ui/core';
 import SwapHorizontalCircleIcon from '@material-ui/icons/SwapHorizontalCircle';
 import HelpIcon from '@material-ui/icons/Help';
 import styled from 'styled-components';
@@ -15,20 +15,19 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import { useSafeAppsSDK } from '@gnosis.pm/safe-apps-react-sdk';
 import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
 import { isClassExpression } from 'typescript';
+// const Container = styled.form`
+//   margin-bottom: 2rem;
+//   width: 100%;
+
+//   margin-top: 20px;
+//   margin-left: 20px;
+//   display: grid;
+//   grid-template-columns: 1fr;
+//   grid-column-gap: 1rem;
+//   grid-row-gap: 1rem;
+// `;
 
 export default function Modal() {
-  const Container = styled.form`
-    margin-bottom: 2rem;
-    width: 100%;
-
-    margin-top: 20px;
-    margin-left: 20px;
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-column-gap: 1rem;
-    grid-row-gap: 1rem;
-  `;
-
   const classes = useStyles();
   const { sdk, safe } = useSafeAppsSDK();
   const web3Provider = new SafeAppProvider(safe, sdk);
@@ -42,7 +41,8 @@ export default function Modal() {
   //const chainConfig = process.env.NEXT_PUBLIC_CHAIN_PROVIDERS;
   //const chainProviders = JSON.parse(chainConfig!);
 
-  const handleChange = (event) => {
+  const handleAddressChange = (event) => {
+    console.log(event.target.value);
     setWithdrawalAddress(event.target.value);
   };
   const amountController = (event) => {
@@ -138,20 +138,6 @@ export default function Modal() {
 
   const networks: NETWORK[] = [
     {
-      depositChainId: 5,
-      depositChainName: 'Goerli Testnet',
-      withdrawChainId: 80001,
-      withdrawChainName: 'Matic Testnet',
-      tokens: GOERLI_MUMBAI_TOKENS,
-    },
-    {
-      depositChainId: 80001,
-      depositChainName: 'Matic Testnet',
-      withdrawChainId: 5,
-      withdrawChainName: 'Goerli Testnet',
-      tokens: MUMBAI_GOERLI_TOKENS,
-    },
-    {
       depositChainId: 4,
       depositChainName: 'Rinkeby Testnet',
       withdrawChainId: 42,
@@ -164,6 +150,20 @@ export default function Modal() {
       withdrawChainId: 4,
       withdrawChainName: 'Rinkeby Testnet',
       tokens: KOVAN_RINKEBY_TOKENS,
+    },
+    {
+      depositChainId: 5,
+      depositChainName: 'Goerli Testnet',
+      withdrawChainId: 80001,
+      withdrawChainName: 'Matic Testnet',
+      tokens: GOERLI_MUMBAI_TOKENS,
+    },
+    {
+      depositChainId: 80001,
+      depositChainName: 'Matic Testnet',
+      withdrawChainId: 5,
+      withdrawChainName: 'Goerli Testnet',
+      tokens: MUMBAI_GOERLI_TOKENS,
     },
     // {
     //   depositChainId: 42,
@@ -249,7 +249,6 @@ export default function Modal() {
                       onChange={handleNetwork}
                       fullWidth
                       defaultValue={id}
-                      // component={Select}
                     >
                       {networks.map((t, index) => {
                         return (
@@ -265,11 +264,11 @@ export default function Modal() {
                     <TextField
                       className={classes.text}
                       label="Receiver Address"
-                      name="receiverAddress"
+                      name=""
                       aria-describedby="receiverAddress"
                       defaultValue={withdrawalAddress}
                       type="search"
-                      onChange={handleChange}
+                      onChange={handleAddressChange}
                       required
                       fullWidth
                     />
