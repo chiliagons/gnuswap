@@ -1,9 +1,7 @@
 import { makeStyles } from '@material-ui/core/styles';
 
 export default makeStyles((theme) => ({
-
   root: {
-  
     flexGrow: 1,
     '& > .fa': {
       margin: theme.spacing(2),
@@ -12,31 +10,29 @@ export default makeStyles((theme) => ({
       margin: theme.spacing(1),
     },
   },
-  text :{
-    fontFamily:'Poppins',
+  text: {
+    fontFamily: 'Poppins',
   },
-  supportcard:{
-    borderRadius:'15px',
-    paddingTop: '3px'
+  supportcard: {
+    borderRadius: '15px',
+    paddingTop: '3px',
   },
-  button:{
-    fontFamily:'Poppins',
-    backgroundColor:'#008c73',
-    display:'flex',
-    borderRadius:'8px',
+  button: {
+    fontFamily: 'Poppins',
+    backgroundColor: '#008c73',
+    display: 'flex',
+    borderRadius: '8px',
     textTransform: 'capitalize',
-    alignContent:'center',
-    flexDirection: 'row',    
+    alignContent: 'center',
+    flexDirection: 'row',
     justifyContent: 'center',
-
-
   },
 
   input: {
     borderRadius: 4,
     position: 'relative',
     backgroundColor: theme.palette.background.paper,
-    color:'#008c73',
+    color: '#008c73',
     border: '1px solid #ced4da',
     fontSize: 16,
     padding: '10px 26px 10px 12px',
@@ -60,28 +56,29 @@ export default makeStyles((theme) => ({
       boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
     },
   },
-  card:{
-    fontFamily:'Poppins',
+  card: {
+    fontFamily: 'Poppins',
     display: 'flex',
-    alignContent:'center',
-    flexDirection: 'row',    
+    alignContent: 'center',
+    flexDirection: 'row',
     justifyContent: 'center',
     height: 'auto',
     marginLeft: '2%',
-    borderRadius:'15px'
-  
+    borderRadius: '15px',
   },
-  
+
   grid: {
-    fontFamily:'Poppins',
+    fontFamily: 'Poppins',
     display: 'flex',
-    alignContent:'center',
-    flexDirection: 'row',    
+    alignContent: 'center',
+    flexDirection: 'row',
     justifyContent: 'center',
     height: 'auto',
+    marginTop: 10,
+    marginBottom: 10,
   },
   form: {
-    fontFamily:'Poppins',
+    fontFamily: 'Poppins',
     paddingTop: '2%',
     paddingBottom: '2%',
     display: 'flex',

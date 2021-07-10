@@ -78,8 +78,8 @@ export default function Modal() {
   return (
     <>
       <Container>
-        <Grid className={classes.grid} container spacing={2}>
-          <Grid item xs={12} sm={6}>
+        <Grid className={classes.grid} container spacing={8}>
+          <Grid item xs={12} sm={8}>
             <Card elevation={5} className={classes.card}>
               {/* <Grid container spacing={2} >
         <Grid item style={{ marginTop: 16 }}>
