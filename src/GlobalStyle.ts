@@ -1,6 +1,7 @@
 import { createGlobalStyle } from 'styled-components';
 import avertaFont from '@gnosis.pm/safe-react-components/dist/fonts/averta-normal.woff2';
 import avertaBoldFont from '@gnosis.pm/safe-react-components/dist/fonts/averta-bold.woff2';
+import './index.css';
 
 const GlobalStyle = createGlobalStyle`
     html {
@@ -14,6 +15,7 @@ const GlobalStyle = createGlobalStyle`
        height: 100%;
        margin: 0px;
        padding: 0px;
+       font-family: 'Poppins';
     }
 
     #root {

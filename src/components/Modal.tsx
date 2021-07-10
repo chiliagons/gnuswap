@@ -1,18 +1,26 @@
 import React, { useState } from "react";
 import { ConnextModal } from "@connext/vector-modal";
 import useStyles from './styles';
-import { Grid, Button, TextField, Select, MenuItem, Card, Paper} from "@material-ui/core";
+import { Grid, Button, TextField, Select, MenuItem, Card, Paper, Typography} from "@material-ui/core";
 import SwapHorizontalCircleIcon from '@material-ui/icons/SwapHorizontalCircle';
+import HelpIcon from '@material-ui/icons/Help';
 import styled from 'styled-components';
 import Icon from '@material-ui/core/Icon';
+import List from '@material-ui/core/List';
+import Divider from '@material-ui/core/Divider';
+import InboxIcon from '@material-ui/icons/Inbox';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItem, { ListItemProps } from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
 import { useSafeAppsSDK } from '@gnosis.pm/safe-apps-react-sdk';
 import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
+import { isClassExpression } from "typescript";
 
 export default function Modal() {
   const Container = styled.form`
   margin-bottom: 2rem;
   width: 100%;
-  max-width: 480px;
+
   margin-top: 20px;
   margin-left: 20px;
   display: grid;
@@ -212,7 +220,7 @@ export default function Modal() {
     <Grid className={classes.grid} container spacing={2}>
 
      <Grid item xs={12} sm={6}>
-     <Card className={classes.card}>
+     <Card elevation={5} className={classes.card}>
     
       {/* <Grid container spacing={2} >
         <Grid item style={{ marginTop: 16 }}>
@@ -262,6 +270,7 @@ export default function Modal() {
 
           <Grid item xs={8}>
             <TextField
+              className={classes.text}
               label="Receiver Address"
               name="receiverAddress"
               aria-describedby="receiverAddress"
@@ -340,8 +349,32 @@ export default function Modal() {
    
     </Card>
           </Grid>
+         
           <Grid item xs={12} sm={4}>
-          <Paper>Support</Paper>
+    
+          <Card className={classes.supportcard}  elevation={5}>
+            <Typography className={classes.text} align='center' variant='h6'>Support</Typography>
+            <List component="nav" aria-label="main mailbox folders">
+        <ListItem >
+          <ListItemIcon>
+            <HelpIcon/>
+          </ListItemIcon>
+          <Typography  className={classes.text}>How it works</Typography>
+        </ListItem>
+      </List>
+      <Divider />
+      <List component="nav" aria-label="secondary mailbox folders">
+        <ListItem>
+         <Typography className={classes.text}>1. Choose the network option</Typography>
+        </ListItem>
+        <ListItem><Typography className={classes.text}>2. Enter the reciever address</Typography></ListItem>
+        <ListItem><Typography className={classes.text}>3. Enter the amount you want to swap</Typography></ListItem>
+        {/* <ListItemLink href="#simple-list">
+          <ListItemText primary="Spam" />
+        </ListItemLink> */}
+      </List>
+          </Card>
+    
           </Grid>
 
         </Grid>

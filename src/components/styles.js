@@ -1,7 +1,9 @@
 import { makeStyles } from '@material-ui/core/styles';
 
 export default makeStyles((theme) => ({
+
   root: {
+  
     flexGrow: 1,
     '& > .fa': {
       margin: theme.spacing(2),
@@ -10,7 +12,15 @@ export default makeStyles((theme) => ({
       margin: theme.spacing(1),
     },
   },
+  text :{
+    fontFamily:'Poppins',
+  },
+  supportcard:{
+    borderRadius:'15px',
+    paddingTop: '3px'
+  },
   button:{
+    fontFamily:'Poppins',
     backgroundColor:'#008c73',
     display:'flex',
     borderRadius:'8px',
@@ -21,6 +31,7 @@ export default makeStyles((theme) => ({
 
 
   },
+
   input: {
     borderRadius: 4,
     position: 'relative',
@@ -50,16 +61,19 @@ export default makeStyles((theme) => ({
     },
   },
   card:{
+    fontFamily:'Poppins',
     display: 'flex',
     alignContent:'center',
     flexDirection: 'row',    
     justifyContent: 'center',
     height: 'auto',
-    marginLeft: '2%'
+    marginLeft: '2%',
+    borderRadius:'15px'
+  
   },
   
   grid: {
-    
+    fontFamily:'Poppins',
     display: 'flex',
     alignContent:'center',
     flexDirection: 'row',    
@@ -67,6 +81,7 @@ export default makeStyles((theme) => ({
     height: 'auto',
   },
   form: {
+    fontFamily:'Poppins',
     paddingTop: '2%',
     paddingBottom: '2%',
     display: 'flex',
