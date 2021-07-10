@@ -1,20 +1,16 @@
 import React, { useState } from 'react';
 import { ConnextModal } from '@connext/vector-modal';
 import useStyles from './styles';
-import { Container, Grid, Button, TextField, Select, MenuItem, Card, Paper, Typography } from '@material-ui/core';
+import { Container, Grid, Button, TextField, Select, MenuItem, Card, Typography } from '@material-ui/core';
 import SwapHorizontalCircleIcon from '@material-ui/icons/SwapHorizontalCircle';
 import HelpIcon from '@material-ui/icons/Help';
-import styled from 'styled-components';
-import Icon from '@material-ui/core/Icon';
+// import styled from 'styled-components';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
-import InboxIcon from '@material-ui/icons/Inbox';
-import ListItemText from '@material-ui/core/ListItemText';
-import ListItem, { ListItemProps } from '@material-ui/core/ListItem';
+import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import { useSafeAppsSDK } from '@gnosis.pm/safe-apps-react-sdk';
 import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
-import { isClassExpression } from 'typescript';
 // const Container = styled.form`
 //   margin-bottom: 2rem;
 //   width: 100%;
