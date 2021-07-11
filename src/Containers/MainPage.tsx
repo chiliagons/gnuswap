@@ -4,7 +4,7 @@ import Modal from '../components/Modal';
 // import { useStyles } from '../components/styles';
 import { useTheme } from '@material-ui/core/styles';
 import SwipeableViews from 'react-swipeable-views';
-
+import TransactionPage from './TransactionPage';
 //Tab Helper Functions
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -47,7 +47,7 @@ const MainPage: React.FC = () => {
           <Modal />
         </TabPanel>
         <TabPanel value={value} index={1}>
-          <h3>Past Records</h3>
+          <TransactionPage />
         </TabPanel>
       </SwipeableViews>
     </div>
