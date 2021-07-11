@@ -38,7 +38,7 @@ const MainPage: React.FC = () => {
     <div>
       <AppBar position="static" color="default">
         <Tabs value={value} onChange={handleChange} variant="fullWidth" centered indicatorColor="primary" textColor="primary">
-          <Tab label="Create Transaction" {...a11yProps(0)} value={0} />
+          <Tab label="Swap Cross Chain" {...a11yProps(0)} value={0} />
           <Tab label="Past Records" {...a11yProps(1)} />
         </Tabs>
       </AppBar>
