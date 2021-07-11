@@ -2,9 +2,20 @@ import React from 'react';
 import { Container, Tabs, Tab, AppBar } from '@material-ui/core';
 import Modal from '../components/Modal';
 // import { useStyles } from '../components/styles';
-import { useTheme } from '@material-ui/core/styles';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import SwipeableViews from 'react-swipeable-views';
 import TransactionPage from './TransactionPage';
+
+const useStyles = makeStyles({
+  tabs: {
+    color: 'black',
+  },
+  tab__indicator: {
+    backgroundColor: '#80c7b9',
+    height: '10px',
+    top: '45px',
+  },
+});
 //Tab Helper Functions
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -22,7 +33,7 @@ function a11yProps(index) {
   };
 }
 const MainPage: React.FC = () => {
-  // const classes = useStyles();
+  const classes = useStyles();
   const theme = useTheme();
   const [value, setValue] = React.useState(0);
 
@@ -37,7 +48,14 @@ const MainPage: React.FC = () => {
   return (
     <div>
       <AppBar position="static" color="default">
-        <Tabs value={value} onChange={handleChange} variant="fullWidth" centered indicatorColor="primary" textColor="primary">
+        <Tabs
+          className={classes.tabs}
+          TabIndicatorProps={{ className: classes.tab__indicator }}
+          value={value}
+          onChange={handleChange}
+          variant="fullWidth"
+          centered
+        >
           <Tab label="Swap Cross Chain" {...a11yProps(0)} value={0} />
           <Tab label="Past Records" {...a11yProps(1)} />
         </Tabs>
@@ -47,7 +65,9 @@ const MainPage: React.FC = () => {
           <Modal />
         </TabPanel>
         <TabPanel value={value} index={1}>
-          <TransactionPage />
+          <Container>
+            <TransactionPage />
+          </Container>
         </TabPanel>
       </SwipeableViews>
     </div>
