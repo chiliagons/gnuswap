@@ -19,7 +19,7 @@ export default makeStyles((theme) => ({
   },
   button: {
     fontFamily: 'Poppins',
-    backgroundColor: '#008c73',
+    backgroundColor: '#80c7b9',
     display: 'flex',
     borderRadius: '8px',
     textTransform: 'capitalize',
