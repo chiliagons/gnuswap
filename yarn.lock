@@ -2244,39 +2244,33 @@
     "@ethersproject/properties" "^5.4.0"
     "@ethersproject/strings" "^5.4.0"
 
-"@gnosis.pm/safe-apps-provider@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.npmjs.org/@gnosis.pm/safe-apps-provider/-/safe-apps-provider-0.3.0.tgz"
-  integrity sha512-QL9NnhEYxbgmxpMmOfhOL1nyUcah9Qg4aBXf0F6QjRVc8OPUOSCrYa3pL2Uqd8pUIo98zvk/n7QBPaxWk08ZAQ==
+"@gnosis.pm/safe-apps-provider@^0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@gnosis.pm/safe-apps-provider/-/safe-apps-provider-0.6.0.tgz#07cc78df57ca4d0fa9c24c4040ea6322ac759a23"
+  integrity sha512-xtB3lbEqJocYUhg6CVXJVBIah6hZCfRSUXw1e7VHe7QkZlwNIhuom4bF5ZIQlmNPzXF/XjC/Bl4//1R88rjs+w==
   dependencies:
-    "@gnosis.pm/safe-apps-sdk" "2.3.0"
+    "@gnosis.pm/safe-apps-sdk" "4.0.0"
     events "^3.3.0"
 
-"@gnosis.pm/safe-apps-react-sdk@2.3.0":
-  version "2.3.0"
-  resolved "https://registry.npmjs.org/@gnosis.pm/safe-apps-react-sdk/-/safe-apps-react-sdk-2.3.0.tgz"
-  integrity sha512-ZWeR4Y4JDr781tD7B2n2jG0i2L2BxqGf/iwNIDq8fkEYT1jKfPzEev4HyizuKQgpMtuCg1ojxZxn5Lzw5Eu8Gg==
+"@gnosis.pm/safe-apps-react-sdk@4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@gnosis.pm/safe-apps-react-sdk/-/safe-apps-react-sdk-4.0.0.tgz#15c5014bbf3e0bff6ef4c296f9b8c184a50eb7fa"
+  integrity sha512-1+UoqdWUJOZ5cM+1hAosCMx2zHBNMC6YVm3vKYBfG8Er/z4VTimR27QldjVN241s/INA4Lw/LYmL5jFlynhOLw==
   dependencies:
-    "@gnosis.pm/safe-apps-sdk" "2.3.0"
-    "@types/jest" "^26.0.22"
+    "@gnosis.pm/safe-apps-sdk" "4.0.0"
 
-"@gnosis.pm/safe-apps-sdk@2.3.0":
-  version "2.3.0"
-  resolved "https://registry.npmjs.org/@gnosis.pm/safe-apps-sdk/-/safe-apps-sdk-2.3.0.tgz"
-  integrity sha512-Psu896peovf21k5pBk/+WQnJUE5Jtj82ILumGfSADP7xD20U6DJT7Z8X9jnb+QZnin6Q5gU57ht2tKmc3T+5lQ==
-  dependencies:
-    semver "^7.3.2"
+"@gnosis.pm/safe-apps-sdk@4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@gnosis.pm/safe-apps-sdk/-/safe-apps-sdk-4.0.0.tgz#2fa53ba3e6a88c606787cc7c4d7836181e256024"
+  integrity sha512-D+jFrRnhzmDbuA3D6tLH615WXdOtBEsv3qCAbBfXFDUiDbXFPVZbMdgnWUowA8he6PBbBYTn7LbSJaq/K5T3ZA==
 
-"@gnosis.pm/safe-react-components@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.npmjs.org/@gnosis.pm/safe-react-components/-/safe-react-components-0.3.0.tgz"
-  integrity sha512-IGOePDKLNgEdlkBfqGJ1gjEsEqIYI8bWeU1LvT0kHa0dlGwn7HEUnqp44K4YQ18bbc86Bq9m80H/0/Nn1buVwA==
+"@gnosis.pm/safe-react-components@^0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@gnosis.pm/safe-react-components/-/safe-react-components-0.6.0.tgz#9e6b34c3e02373d5116d66e67688d149c4a14239"
+  integrity sha512-L5ExDY9T5a/W4R1E2R5QUAHuiIJ3gNo7fs4XRPZ1vkf8vg9qgR4HOsy7gGrehKQhIxXDyZRNvNGq1lSb/DSoKw==
   dependencies:
     classnames "^2.2.6"
-    polished "3.6.5"
-    react-docgen-typescript-loader "^3.7.2"
     react-media "^1.10.0"
-    url-loader "^4.1.0"
 
 "@hapi/address@2.x.x":
   version "2.1.4"
@@ -3055,7 +3049,7 @@
   dependencies:
     "@types/istanbul-lib-report" "*"
 
-"@types/jest@*", "@types/jest@^26.0.10", "@types/jest@^26.0.22":
+"@types/jest@*", "@types/jest@^26.0.10":
   version "26.0.23"
   resolved "https://registry.npmjs.org/@types/jest/-/jest-26.0.23.tgz"
   integrity sha512-ZHLmWMJ9jJ9PTiT58juykZpL7KjwJywFN3Rr2pTSkyQfydf/rk22yS7W8p5DaVUMQ2BQC7oYiU3FjbTM/mYrOA==
@@ -3508,18 +3502,6 @@
     "@webassemblyjs/ast" "1.9.0"
     "@webassemblyjs/wast-parser" "1.9.0"
     "@xtuc/long" "4.2.2"
-
-"@webpack-contrib/schema-utils@^1.0.0-beta.0":
-  version "1.0.0-beta.0"
-  resolved "https://registry.npmjs.org/@webpack-contrib/schema-utils/-/schema-utils-1.0.0-beta.0.tgz"
-  integrity sha512-LonryJP+FxQQHsjGBi6W786TQB1Oym+agTpY0c+Kj8alnIw+DLUJb6SI8Y1GHGhLCH1yPRrucjObUmxNICQ1pg==
-  dependencies:
-    ajv "^6.1.0"
-    ajv-keywords "^3.1.0"
-    chalk "^2.3.2"
-    strip-ansi "^4.0.0"
-    text-table "^0.2.0"
-    webpack-log "^1.1.2"
 
 "@xtuc/ieee754@^1.2.0":
   version "1.2.0"
@@ -5537,7 +5519,7 @@ chai@4.3.1:
     pathval "^1.1.1"
     type-detect "^4.0.5"
 
-chalk@2.4.2, chalk@^2.0.0, chalk@^2.0.1, chalk@^2.1.0, chalk@^2.3.2, chalk@^2.4.1, chalk@^2.4.2:
+chalk@2.4.2, chalk@^2.0.0, chalk@^2.4.1, chalk@^2.4.2:
   version "2.4.2"
   resolved "https://registry.npmjs.org/chalk/-/chalk-2.4.2.tgz"
   integrity sha512-Mti+f9lpJNcwF4tWV8/OrTTtF1gZi+f8FqlyAdouralcFWFQWF2+NgCHShjkCb+IFBLq9buZwE1xckQU4peSuQ==
@@ -11475,25 +11457,10 @@ log-symbols@3.0.0:
   dependencies:
     chalk "^2.4.2"
 
-log-symbols@^2.1.0:
-  version "2.2.0"
-  resolved "https://registry.npmjs.org/log-symbols/-/log-symbols-2.2.0.tgz"
-  integrity sha512-VeIAFslyIerEJLXHziedo2basKbMKtTw3vfn5IzG0XTjhAVEJyNHnL2p7vc+wBDSdQuUpNw3M2u6xb9QsAY5Eg==
-  dependencies:
-    chalk "^2.0.1"
-
 loglevel@^1.6.8:
   version "1.7.1"
   resolved "https://registry.npmjs.org/loglevel/-/loglevel-1.7.1.tgz"
   integrity sha512-Hesni4s5UkWkwCGJMQGAh71PaLUmKFM60dHvq0zi/vDhhrzuk+4GgNbTXJ12YYQJn6ZKBDNIjYcuQGKudvqrIw==
-
-loglevelnext@^1.0.1:
-  version "1.0.5"
-  resolved "https://registry.npmjs.org/loglevelnext/-/loglevelnext-1.0.5.tgz"
-  integrity sha512-V/73qkPuJmx4BcBF19xPBr+0ZRVBhc4POxvZTZdMeXpJ4NItXSJ/MSwuFT0kQJlCbXvdlZoQQ/418bS1y9Jh6A==
-  dependencies:
-    es6-symbol "^3.1.1"
-    object.assign "^4.1.0"
 
 looper@^2.0.0:
   version "2.0.0"
@@ -13170,13 +13137,6 @@ pnp-webpack-plugin@1.6.4:
   dependencies:
     ts-pnp "^1.1.6"
 
-polished@3.6.5:
-  version "3.6.5"
-  resolved "https://registry.npmjs.org/polished/-/polished-3.6.5.tgz"
-  integrity sha512-VwhC9MlhW7O5dg/z7k32dabcAFW1VI2+7fSe8cE/kXcfL7mVdoa5UxciYGW2sJU78ldDLT6+ROEKIZKFNTnUXQ==
-  dependencies:
-    "@babel/runtime" "^7.9.2"
-
 popper.js@1.16.1-lts:
   version "1.16.1-lts"
   resolved "https://registry.npmjs.org/popper.js/-/popper.js-1.16.1-lts.tgz"
@@ -14288,20 +14248,6 @@ react-dev-utils@^11.0.2:
     shell-quote "1.7.2"
     strip-ansi "6.0.0"
     text-table "0.2.0"
-
-react-docgen-typescript-loader@^3.7.2:
-  version "3.7.2"
-  resolved "https://registry.npmjs.org/react-docgen-typescript-loader/-/react-docgen-typescript-loader-3.7.2.tgz"
-  integrity sha512-fNzUayyUGzSyoOl7E89VaPKJk9dpvdSgyXg81cUkwy0u+NBvkzQG3FC5WBIlXda0k/iaxS+PWi+OC+tUiGxzPA==
-  dependencies:
-    "@webpack-contrib/schema-utils" "^1.0.0-beta.0"
-    loader-utils "^1.2.3"
-    react-docgen-typescript "^1.15.0"
-
-react-docgen-typescript@^1.15.0:
-  version "1.22.0"
-  resolved "https://registry.npmjs.org/react-docgen-typescript/-/react-docgen-typescript-1.22.0.tgz"
-  integrity sha512-MPLbF8vzRwAG3GcjdL+OHQlhgtWsLTXs+7uJiHfEeT3Ur7IsZaNYqRTLQ9sj2nB6M6jylcPCeCmH7qbszJmecg==
 
 react-dom@^17.0.1:
   version "17.0.2"
@@ -16929,7 +16875,7 @@ urix@^0.1.0:
   resolved "https://registry.npmjs.org/urix/-/urix-0.1.0.tgz"
   integrity sha1-2pN/emLiH+wf0Y1Js1wpNQZ6bHI=
 
-url-loader@4.1.1, url-loader@^4.1.0:
+url-loader@4.1.1:
   version "4.1.1"
   resolved "https://registry.npmjs.org/url-loader/-/url-loader-4.1.1.tgz"
   integrity sha512-3BTV812+AVHHOJQO8O5MkWgZ5aosP7GnROJwvzLS9hWDj00lZ6Z0wNak423Lp9PBZN05N+Jk/N5Si8jRAlGyWA==
@@ -17070,7 +17016,7 @@ uuid@3.3.2:
   resolved "https://registry.npmjs.org/uuid/-/uuid-3.3.2.tgz"
   integrity sha512-yXJmeNaw3DnnKAOKJE51sL/ZaYfWJRl1pK9dr19YFCu0ObS231AB1/LbqTKRAQ5kw8A90rA6fr4riOUpTZvQZA==
 
-uuid@3.4.0, uuid@^3.1.0, uuid@^3.3.2, uuid@^3.4.0:
+uuid@3.4.0, uuid@^3.3.2, uuid@^3.4.0:
   version "3.4.0"
   resolved "https://registry.npmjs.org/uuid/-/uuid-3.4.0.tgz"
   integrity sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==
@@ -17748,16 +17694,6 @@ webpack-dev-server@3.11.0:
     webpack-log "^2.0.0"
     ws "^6.2.1"
     yargs "^13.3.2"
-
-webpack-log@^1.1.2:
-  version "1.2.0"
-  resolved "https://registry.npmjs.org/webpack-log/-/webpack-log-1.2.0.tgz"
-  integrity sha512-U9AnICnu50HXtiqiDxuli5gLB5PGBo7VvcHx36jRZHwK4vzOYLbImqT4lwWwoMHdQWwEKw736fCHEekokTEKHA==
-  dependencies:
-    chalk "^2.1.0"
-    log-symbols "^2.1.0"
-    loglevelnext "^1.0.1"
-    uuid "^3.1.0"
 
 webpack-log@^2.0.0:
   version "2.0.0"

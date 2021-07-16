@@ -60,7 +60,7 @@ const MainPage: React.FC = () => {
           <Tab label="Past Records" {...a11yProps(1)} />
         </Tabs>
       </AppBar>
-      <SwipeableViews axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'} index={value} onChangeIndex={handleChangeIndex}>
+      {/* <SwipeableViews axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'} index={value} onChangeIndex={handleChangeIndex}> */}
         <TabPanel value={value} index={0}>
           <Modal />
         </TabPanel>
@@ -69,7 +69,7 @@ const MainPage: React.FC = () => {
             <TransactionPage />
           </Container>
         </TabPanel>
-      </SwipeableViews>
+      {/* </SwipeableViews> */}
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ConnextModal } from '@connext/vector-modal';
 import useStyles from './styles';
-import { Container, Grid, Button, TextField, Select, MenuItem, Card, Typography } from '@material-ui/core';
+import {  Container, Grid, Button, TextField, Select, MenuItem, Card, Typography } from '@material-ui/core';
 import SwapHorizontalCircleIcon from '@material-ui/icons/SwapHorizontalCircle';
 import HelpIcon from '@material-ui/icons/Help';
 // import styled from 'styled-components';
@@ -14,7 +14,7 @@ import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
 import { networks } from '../Constants/Networks';
 import { NETWORK } from '../Models/Networks.model';
 
-//Container giving some problems here
+// //Container giving some problems here
 // const Container = styled.form`
 //   margin-bottom: 2rem;
 //   width: 100%;
@@ -102,7 +102,7 @@ export default function Modal() {
           </Button>
         </Grid>
       </Grid> */}
-              <form className={classes.form} onSubmit={handleSubmit} noValidate>
+              {/* <form className={classes.form} onSubmit={handleSubmit} noValidate> */}
                 <Grid className={classes.grid} container spacing={2}>
                   <Grid item xs={8}>
                     <Select
@@ -193,7 +193,7 @@ export default function Modal() {
                   injectedProvider={web3Provider}
                   loginProvider={injectedProvider}
                 />
-              </form>
+              {/* </form> */}
             </Card>
           </Grid>
 
