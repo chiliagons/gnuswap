@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ConnextModal } from '@connext/vector-modal';
 import useStyles from './styles';
-import {  Container, Grid, Button, TextField, Select, MenuItem, Card, Typography } from '@material-ui/core';
+import {  Container, Grid, Select, MenuItem, Card, Typography } from '@material-ui/core';
 import SwapHorizontalCircleIcon from '@material-ui/icons/SwapHorizontalCircle';
 import HelpIcon from '@material-ui/icons/Help';
 // import styled from 'styled-components';
@@ -12,6 +12,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import { useSafeAppsSDK } from '@gnosis.pm/safe-apps-react-sdk';
 import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
 import { networks } from '../Constants/Networks';
+import { TextField, Button} from '@gnosis.pm/safe-react-components';
 import { NETWORK } from '../Models/Networks.model';
 
 // //Container giving some problems here
@@ -127,15 +128,15 @@ export default function Modal() {
 
                   <Grid item xs={8}>
                     <TextField
-                      className={classes.text}
+                    
                       label="Receiver Address"
                       name=""
                       aria-describedby="receiverAddress"
-                      defaultValue={withdrawalAddress}
+                      value={withdrawalAddress}
                       type="search"
                       onChange={handleAddressChange}
                       required
-                      fullWidth
+                 
                     />
                   </Grid>
 
@@ -144,18 +145,19 @@ export default function Modal() {
                       label="Transfer Amount"
                       name="transferAmount"
                       aria-describedby="transferAmount"
-                      defaultValue={transferAmount}
+                      value={transferAmount}
                       type="search"
                       onChange={amountController}
                       required
-                      fullWidth
+              
                     />
                   </Grid>
 
                   <Grid className={classes.grid} item style={{ marginTop: 16 }} xs={8}>
+                  
                     <Button
-                      startIcon={<SwapHorizontalCircleIcon />}
-                      className={classes.button}
+                    size="md"
+                     iconType="chain"
                       variant="contained"
                       color="primary"
                       type="submit"
