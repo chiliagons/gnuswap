@@ -33,6 +33,12 @@
     "test": "react-app-rewired test",
     "eject": "react-scripts eject"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged",
+      "pre-push": "npm run lint"
+    }
+  },
   "eslintConfig": {
     "extends": [
       "react-app",
@@ -66,5 +72,9 @@
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/Aman-zishan/gnuswap/issues"
+  },
+  "devDependencies": {
+    "pretty-quick": "^3.1.0",
+    "husky": "^6.0.0"
   }
 }
