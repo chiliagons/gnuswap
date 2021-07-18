@@ -61,14 +61,14 @@ const MainPage: React.FC = () => {
         </Tabs>
       </AppBar>
       {/* <SwipeableViews axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'} index={value} onChangeIndex={handleChangeIndex}> */}
-        <TabPanel value={value} index={0}>
-          <Modal />
-        </TabPanel>
-        <TabPanel value={value} index={1}>
-          <Container>
-            <TransactionPage />
-          </Container>
-        </TabPanel>
+      <TabPanel value={value} index={0}>
+        <Modal />
+      </TabPanel>
+      <TabPanel value={value} index={1}>
+        <Container>
+          <TransactionPage />
+        </Container>
+      </TabPanel>
       {/* </SwipeableViews> */}
     </div>
   );
