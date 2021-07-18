@@ -1,9 +1,9 @@
 {
-  "short_name": "Safe App",
-  "name": "Gnosis Safe App Starter",
-  "description": "Describe your Safe App here",
-  "providedBy": {"name": "Gnosis", "url": "https://gnosis.io"},
-  "iconPath": "logo.svg",
+  "short_name": "GNUSWAP",
+  "name": "Gnuswap - Cross Chain Asset Transfer",
+  "description": "Allows you to transfer assets across chains using connext.network",
+  "providedBy": {"name": "gnuswap", "url": "https://github.com/chiliagons/gnuswap"},
+  "iconPath": "gnuswap.png",
   "icons": [
     {
       "src": "favicon.ico",
