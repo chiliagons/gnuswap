@@ -78,33 +78,13 @@ export default function Modal() {
 
   return (
     <>
+    <Divider />
       <Container>
         <Grid className={classes.grid} container spacing={8}>
           <Grid item xs={12} sm={8}>
             <Card elevation={5} className={classes.card}>
-              {/* <Grid container spacing={2} >
-        <Grid item style={{ marginTop: 16 }}>
-          <Button
-            variant="contained"
-            color="primary"
-            type="submit"
-            disabled={!!injectedProvider}
-            onClick={async () => {
-              if ((window as any).ethereum) {
-                const req = await (window as any).ethereum.send(
-                  "eth_requestAccounts"
-                );
-                console.log("req: ", req);
-                setInjectedProvider((window as any).ethereum);
-              }
-            }}
-          >
-            Connect Metamask
-          </Button>
-        </Grid>
-      </Grid> */}
-              {/* <form className={classes.form} onSubmit={handleSubmit} noValidate> */}
-                <Grid className={classes.grid} container spacing={2}>
+            
+                <Grid className={classes.gridWithSpace} style={{ marginTop: 16 }} container spacing={2}>
                   <Grid item xs={8}>
                     <Select
                       variant="outlined"
@@ -153,7 +133,7 @@ export default function Modal() {
                     />
                   </Grid>
 
-                  <Grid className={classes.grid} item style={{ marginTop: 16 }} xs={8}>
+                  <Grid className={classes.grid} item xs={8}>
                   
                     <Button
                     size="md"
