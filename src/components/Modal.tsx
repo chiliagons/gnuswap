@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { ConnextModal } from '@connext/vector-modal';
 import useStyles from './styles';
-import {  Container, Grid, Select, MenuItem, Card, Typography } from '@material-ui/core';
+import {  Container, Grid, Select, MenuItem, Typography } from '@material-ui/core';
 import SwapHorizontalCircleIcon from '@material-ui/icons/SwapHorizontalCircle';
 import HelpIcon from '@material-ui/icons/Help';
-// import styled from 'styled-components';
+
+import { Card, Divider } from '@gnosis.pm/safe-react-components';
 import List from '@material-ui/core/List';
-import Divider from '@material-ui/core/Divider';
+
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import { useSafeAppsSDK } from '@gnosis.pm/safe-apps-react-sdk';
@@ -15,18 +16,6 @@ import { networks } from '../Constants/Networks';
 import { TextField, Button} from '@gnosis.pm/safe-react-components';
 import { NETWORK } from '../Models/Networks.model';
 
-// //Container giving some problems here
-// const Container = styled.form`
-//   margin-bottom: 2rem;
-//   width: 100%;
-
-//   margin-top: 20px;
-//   margin-left: 20px;
-//   display: grid;
-//   grid-template-columns: 1fr;
-//   grid-column-gap: 1rem;
-//   grid-row-gap: 1rem;
-// `;
 
 export default function Modal() {
   const classes = useStyles();
@@ -82,9 +71,9 @@ export default function Modal() {
       <Container>
         <Grid className={classes.grid} container spacing={8}>
           <Grid item xs={12} sm={8}>
-            <Card elevation={5} className={classes.card}>
+            <Card className={classes.card}>
             
-                <Grid className={classes.gridWithSpace} style={{ marginTop: 16 }} container spacing={2}>
+                <Grid className={classes.gridWithSpace} container spacing={2}>
                   <Grid item xs={8}>
                     <Select
                       variant="outlined"
@@ -180,7 +169,7 @@ export default function Modal() {
           </Grid>
 
           <Grid item xs={12} sm={4}>
-            <Card className={classes.supportcard} elevation={5}>
+            <Card className={classes.supportcard}>
               <Typography className={classes.text} align="center" variant="h6">
                 Support
               </Typography>

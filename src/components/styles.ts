@@ -77,6 +77,7 @@ export default makeStyles((theme) => ({
     marginTop: 10,
     marginBottom: 10,
   },
+
   gridWithSpace: {
     fontFamily: 'Poppins',
     display: 'flex',
@@ -87,6 +88,7 @@ export default makeStyles((theme) => ({
     marginTop: 16,
     marginBottom: 16,
   },
+  
   form: {
     fontFamily: 'Poppins',
     paddingTop: '2%',
