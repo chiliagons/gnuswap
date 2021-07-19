@@ -1,7 +1,0 @@
-{
-  "rules": {
-    "eqeqeq": ["error", "always"],
-    "semi": ["error", "always"],
-    "quotes": ["error", "single"]
-  }
-}

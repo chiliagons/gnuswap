@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ConnextModal } from '@connext/vector-modal';
 import useStyles from './styles';
-import { Container, Grid, Select, MenuItem, Typography } from '@material-ui/core';
+import {  Container, Grid, Select, MenuItem, Typography } from '@material-ui/core';
 import SwapHorizontalCircleIcon from '@material-ui/icons/SwapHorizontalCircle';
 import HelpIcon from '@material-ui/icons/Help';
 
@@ -13,8 +13,9 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import { useSafeAppsSDK } from '@gnosis.pm/safe-apps-react-sdk';
 import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
 import { networks } from '../Constants/Networks';
-import { TextField, Button } from '@gnosis.pm/safe-react-components';
+import { TextField, Button} from '@gnosis.pm/safe-react-components';
 import { NETWORK } from '../Models/Networks.model';
+
 
 export default function Modal() {
   const classes = useStyles();
@@ -66,98 +67,103 @@ export default function Modal() {
 
   return (
     <>
-      <Divider />
+    <Divider />
       <Container>
         <Grid className={classes.grid} container spacing={8}>
           <Grid item xs={12} sm={8}>
             <Card className={classes.card}>
-              <Grid className={classes.gridWithSpace} container spacing={2}>
-                <Grid item xs={8}>
-                  <Select
-                    variant="outlined"
-                    id="demo-controlled-open-select"
-                    open={open}
-                    onClose={handleClose}
-                    onOpen={handleOpen}
-                    onChange={handleNetwork}
-                    fullWidth
-                    defaultValue={id}
-                  >
-                    {networks.map((t, index) => {
-                      return (
-                        <MenuItem value={index} key={index}>
-                          {t.depositChainName} to {t.withdrawChainName}
-                        </MenuItem>
-                      );
-                    })}
-                  </Select>
-                </Grid>
+            
+                <Grid className={classes.gridWithSpace} container spacing={2}>
+                  <Grid item xs={8}>
+                    <Select
+                      variant="outlined"
+                      id="demo-controlled-open-select"
+                      open={open}
+                      onClose={handleClose}
+                      onOpen={handleOpen}
+                      onChange={handleNetwork}
+                      fullWidth
+                      defaultValue={id}
+                    >
+                      {networks.map((t, index) => {
+                        return (
+                          <MenuItem value={index} key={index}>
+                            {t.depositChainName} to {t.withdrawChainName}
+                          </MenuItem>
+                        );
+                      })}
+                    </Select>
+                  </Grid>
 
-                <Grid item xs={8}>
-                  <TextField
-                    label="Receiver Address"
-                    name=""
-                    aria-describedby="receiverAddress"
-                    value={withdrawalAddress}
-                    type="search"
-                    onChange={handleAddressChange}
-                    required
-                  />
-                </Grid>
+                  <Grid item xs={8}>
+                    <TextField
+                    
+                      label="Receiver Address"
+                      name=""
+                      aria-describedby="receiverAddress"
+                      value={withdrawalAddress}
+                      type="search"
+                      onChange={handleAddressChange}
+                      required
+                 
+                    />
+                  </Grid>
 
-                <Grid item xs={8}>
-                  <TextField
-                    label="Transfer Amount"
-                    name="transferAmount"
-                    aria-describedby="transferAmount"
-                    value={transferAmount}
-                    type="search"
-                    onChange={amountController}
-                    required
-                  />
-                </Grid>
+                  <Grid item xs={8}>
+                    <TextField
+                      label="Transfer Amount"
+                      name="transferAmount"
+                      aria-describedby="transferAmount"
+                      value={transferAmount}
+                      type="search"
+                      onChange={amountController}
+                      required
+              
+                    />
+                  </Grid>
 
-                <Grid className={classes.grid} item xs={8}>
-                  <Button
+                  <Grid className={classes.grid} item xs={8}>
+                  
+                    <Button
                     size="md"
-                    iconType="chain"
-                    variant="contained"
-                    color="primary"
-                    type="submit"
-                    disabled={!withdrawalAddress || !chain || !transferAmount}
-                    onClick={async () => {
-                      // if (!injectedProvider) {
-                      //   alert("Please connect to Metamask to use this dapp.");
-                      //   throw new Error("Metamask not available");
-                      // }
-                      try {
-                        setInjectedProvider((window as any).ethereum);
-                      } catch (error) {
-                        console.log(error.message);
-                      }
-                      setShowModal(true);
-                    }}
-                  >
-                    Cross-Chain Transfer
-                  </Button>
+                     iconType="chain"
+                      variant="contained"
+                      color="primary"
+                      type="submit"
+                      disabled={!withdrawalAddress || !chain || !transferAmount}
+                      onClick={async () => {
+                        // if (!injectedProvider) {
+                        //   alert("Please connect to Metamask to use this dapp.");
+                        //   throw new Error("Metamask not available");
+                        // }
+                        try {
+                          setInjectedProvider((window as any).ethereum);
+                        } catch (error) {
+                          console.log(error.message);
+                        }
+                        setShowModal(true);
+                      }}
+                    >
+                      Cross-Chain Transfer
+                    </Button>
+                  </Grid>
                 </Grid>
-              </Grid>
-              <ConnextModal
-                showModal={showModal}
-                transferAmount={transferAmount}
-                routerPublicIdentifier="vector7tbbTxQp8ppEQUgPsbGiTrVdapLdU5dH7zTbVuXRf1M4CEBU9Q"
-                depositAssetId={chain!.tokens[0].depositAssetId}
-                depositChainId={chain!.depositChainId}
-                withdrawAssetId={chain!.tokens[0].withdrawAssetId}
-                withdrawChainId={chain!.withdrawChainId}
-                withdrawalAddress={withdrawalAddress}
-                onClose={() => setShowModal(false)}
-                onReady={(params) => console.log('MODAL IS READY =======>', params)}
-                depositChainProvider={'https://rinkeby.infura.io/v3/31a0f6f85580403986edab0be5f7673c'}
-                withdrawChainProvider={'https://kovan.infura.io/v3/31a0f6f85580403986edab0be5f7673c'}
-                injectedProvider={web3Provider}
-                loginProvider={injectedProvider}
-              />
+                <ConnextModal
+                  showModal={showModal}
+                  transferAmount={transferAmount}
+                  routerPublicIdentifier="vector7tbbTxQp8ppEQUgPsbGiTrVdapLdU5dH7zTbVuXRf1M4CEBU9Q"
+                  depositAssetId={chain!.tokens[0].depositAssetId}
+                  depositChainId={chain!.depositChainId}
+                  withdrawAssetId={chain!.tokens[0].withdrawAssetId}
+                  withdrawChainId={chain!.withdrawChainId}
+                  withdrawalAddress={withdrawalAddress}
+                  onClose={() => setShowModal(false)}
+                  onReady={(params) => console.log('MODAL IS READY =======>', params)}
+                  depositChainProvider={'https://rinkeby.infura.io/v3/31a0f6f85580403986edab0be5f7673c'}
+                  withdrawChainProvider={'https://kovan.infura.io/v3/31a0f6f85580403986edab0be5f7673c'}
+                  injectedProvider={web3Provider}
+                  loginProvider={injectedProvider}
+                />
               {/* </form> */}
             </Card>
           </Grid>

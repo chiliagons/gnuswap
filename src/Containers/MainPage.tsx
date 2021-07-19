@@ -3,8 +3,8 @@ import { Container, Tabs, Tab, AppBar } from '@material-ui/core';
 import Modal from '../components/Modal';
 // import { useStyles } from '../components/styles';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import SwipeableViews from 'react-swipeable-views';
-import TransactionPage from './TransactionPage';
+//import SwipeableViews from 'react-swipeable-views';
+import TransactionPage from '../components/TransactionPage';
 
 const useStyles = makeStyles({
   tabs: {
@@ -61,14 +61,14 @@ const MainPage: React.FC = () => {
         </Tabs>
       </AppBar>
       {/* <SwipeableViews axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'} index={value} onChangeIndex={handleChangeIndex}> */}
-      <TabPanel value={value} index={0}>
-        <Modal />
-      </TabPanel>
-      <TabPanel value={value} index={1}>
-        <Container>
-          <TransactionPage />
-        </Container>
-      </TabPanel>
+        <TabPanel value={value} index={0}>
+          <Modal />
+        </TabPanel>
+        <TabPanel value={value} index={1}>
+          <Container>
+            <TransactionPage />
+          </Container>
+        </TabPanel>
       {/* </SwipeableViews> */}
     </div>
   );
