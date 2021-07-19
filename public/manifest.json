@@ -2,16 +2,16 @@
   "short_name": "GNUSWAP",
   "name": "Gnuswap - Cross Chain Asset Transfer",
   "description": "Allows you to transfer assets across chains using connext.network",
-  "providedBy": {"name": "gnuswap", "url": "https://github.com/chiliagons/gnuswap"},
+  "providedBy": { "name": "gnuswap", "url": "https://github.com/chiliagons/gnuswap" },
   "iconPath": "gnuswap.png",
   "icons": [
     {
-      "src": "favicon.ico",
+      "src": "gnuswap.png",
       "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "type": "image/png"
     },
     {
-      "src": "logo192.png",
+      "src": "gnuswap.png",
       "type": "image/png",
       "sizes": "192x192"
     },
