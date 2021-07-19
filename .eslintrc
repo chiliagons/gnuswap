@@ -1,8 +1,0 @@
-{
-  "parser": "babel-eslint",
-  "rules": {
-    "eqeqeq": ["error", "always"],
-    "semi": ["error", "always"],
-    "quotes": ["error", "off"]
-  }
-}
