@@ -66,7 +66,6 @@ export default function Modal() {
 
   return (
     <>
-      <Divider />
       <Container>
         <Grid className={classes.grid} container spacing={8}>
           <Grid item xs={12} sm={8}>
