@@ -3,8 +3,8 @@ import { Container, Tabs, Tab, AppBar } from '@material-ui/core';
 import Modal from '../components/Modal';
 // import { useStyles } from '../components/styles';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-import SwipeableViews from 'react-swipeable-views';
-import TransactionPage from './TransactionPage';
+//import SwipeableViews from 'react-swipeable-views';
+import TransactionPage from '../components/TransactionPage';
 
 const useStyles = makeStyles({
   tabs: {
