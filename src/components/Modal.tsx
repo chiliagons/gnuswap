@@ -192,6 +192,22 @@ export default function Modal() {
                 <ListItem>
                   <Typography className={classes.text}>3. Enter the amount you want to swap</Typography>
                 </ListItem>
+                <ListItem>
+                  <Typography className={classes.text}>4. The app is powered by connext.network</Typography>
+                </ListItem>
+                <ListItem>
+                  <Typography className={classes.text}>5. A pop up from connext network will pop up to confirm details</Typography>
+                </ListItem>
+                <ListItem>
+                  <Typography className={classes.text}>6. Confirm and wait for the transfer to take place</Typography>
+                </ListItem>
+                <ListItem>
+                  <Typography className={classes.text}>7. In case of any issues you can create a support ticket <a target="blank" className={classes.a} href="https://support.connext.network/hc/en-us">here</a></Typography>
+                </ListItem>
+                
+
+
+
                 {/* <ListItemLink href="#simple-list">
           <ListItemText primary="Spam" />
         </ListItemLink> */}

@@ -10,6 +10,9 @@ export default makeStyles((theme) => ({
       margin: theme.spacing(1),
     },
   },
+  a:{
+textDecoration: 'none'
+  },
   text: {
     fontFamily: 'Poppins',
   },
