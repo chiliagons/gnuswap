@@ -33,7 +33,6 @@ We utilized the Gnosis UI SDK to keep the elements as native as possible.
 
 ## Future Scope
 
-* We intend to further enable gnuswap users to be able to add liquidity to the routers in return for gnuswap tokens all within the gnosis safe app.
 * This allows projects to utilize their tokens and generate returns all from the familiar safe interface.
 * Meta-transactions can be added so as to make the process, more seamless
 * Specific L2 bridges maybe used inorder to make the transfer more efficient
