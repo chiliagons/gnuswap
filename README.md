@@ -15,7 +15,7 @@ GNUSwap is an Gnosis Safe App to exchange token across multiple chains. Gnosis s
 ![Gnosis Safe Logo](https://i.imgur.com/AakfZs8.png)
 
 * We chose gnosis as it is widely used by many crypto projects to manage assets
-* Multi sig
+* Multi sig features
 * It is has an application sdk which can be used to integrate with the wallet
 * The gnosis ecosystem is growing and has a lot of good dapps/defi protcols
 * It would be very convineant to transfer assets across chains owned by multiple parties
