@@ -1,8 +1,13 @@
+
 <p align="center">
 <img src="public/gnuswap.png" width="20%">
 </p>
 <h1 align="center">gnuswap</h1>
 gnuswap is an Gnosis Safe App to exchange token across multiple chains. Gnosis safe is a widely used application by companies, asset holders as it helps in managing asset owned by multiple stakeholders by levarages multisig capabilities of the gnosis safe. It helps transfer assets easily within the safe.
+
+## App screen
+
+![Screenshot (481)](https://user-images.githubusercontent.com/55238388/126329570-70ef5120-3882-4a3d-be2c-2119e3869294.png)
 
 ## Features
 
@@ -28,7 +33,6 @@ We utilized the Gnosis UI SDK to keep the elements as native as possible.
 
 ## Future Scope
 
-* We intend to further enable gnuswap users to be able to add liquidity to the routers in return for gnuswap tokens all within the gnosis safe app.
 * This allows projects to utilize their tokens and generate returns all from the familiar safe interface.
 * Meta-transactions can be added so as to make the process, more seamless
 * Specific L2 bridges maybe used inorder to make the transfer more efficient
