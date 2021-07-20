@@ -18,7 +18,7 @@
     "@types/react-dom": "^17.0.0",
     "@types/styled-components": "^5.1.2",
     "react": "^17.0.1",
-    "react-app-rewired": "^2.1.6",
+    "react-app-rewired": "^2.1.8",
     "react-dom": "^17.0.1",
     "react-scripts": "4.0.2",
     "rebuild": "^0.1.2",
