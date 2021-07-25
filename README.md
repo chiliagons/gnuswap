@@ -1,3 +1,12 @@
+# THIS APP IS NOT PRODUCTION READY, IT IS IN DEVELOPMENT
+
+## DEVELOPMENT PHASES
+### 1. UI Implementation
+This is the current phase, here we implement all the  UI elements required. REMINDER: Implementation is not complete.
+### 2. Error Handling
+This is the phase in which most of the implementation will be complete and additional error handling will be provided.
+### 3. Final fine tuning and production ready testing
+The last phase will incorporate all the final goto production blockers and deploy to production.
 
 <p align="center">
 <img src="public/gnuswap.png" width="20%">
