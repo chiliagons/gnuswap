@@ -13,6 +13,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import { useSafeAppsSDK } from '@gnosis.pm/safe-apps-react-sdk';
 import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
 import { networks } from '../Constants/Networks';
+import { mockTokens } from '../Constants/Tokens';
 import { TextField, Button } from '@gnosis.pm/safe-react-components';
 import { NETWORK } from '../Models/Networks.model';
 
@@ -25,13 +26,13 @@ export default function Modal() {
   const [withdrawalAddress, setWithdrawalAddress] = useState('');
   const [transferAmount, setTransferAmount] = useState('');
   const [openNetworkOptions, setOpenNetworkOptions] = React.useState(false);
+  const [openTokenOptions, setOpenTokenOptions] = React.useState(false);
   const [injectedProvider, setInjectedProvider] = React.useState();
 
   //const chainConfig = process.env.NEXT_PUBLIC_CHAIN_PROVIDERS;
   //const chainProviders = JSON.parse(chainConfig!);
 
   const handleAddressChange = (event) => {
-    console.log(event.target.value);
     setWithdrawalAddress(event.target.value);
   };
   const amountController = (event) => {
@@ -49,10 +50,17 @@ export default function Modal() {
     return errors;
   };
 
-  const handleNetwork = (event) => {
+  //Handlers
+  const handleNetworkOptions = (event) => {
     setChain(networks[event.target.value]);
     setid(event.target.value);
   };
+
+  const handleTokenSelection = (event) => {
+    setToken(mockTokens[event.target.value]);
+    setTokenId(event.target.value);
+  };
+
   const handleCloseNetworkOptions = () => {
     setOpenNetworkOptions(false);
   };
@@ -61,8 +69,18 @@ export default function Modal() {
     setOpenNetworkOptions(true);
   };
 
+  const handleCloseTokenOptions = () => {
+    setOpenTokenOptions(false);
+  };
+
+  const handleOpenTokenOptions = () => {
+    setOpenTokenOptions(true);
+  };
+
   const [chain, setChain] = useState<NETWORK>(networks[0]);
   const [id, setid] = useState(0);
+  const [token, setToken] = useState(mockTokens[0]);
+  const [tokenId, setTokenId] = useState(0);
 
   return (
     <>
@@ -79,9 +97,9 @@ export default function Modal() {
                     open={openNetworkOptions}
                     onClose={handleCloseNetworkOptions}
                     onOpen={handleOpenNetworkOptions}
-                    onChange={handleNetwork}
+                    onChange={handleNetworkOptions}
                     fullWidth
-                    defaultValue={id}
+                    defaultValue={id ? id : 0}
                   >
                     {networks.map((t, index) => {
                       return (
@@ -115,6 +133,29 @@ export default function Modal() {
                     onChange={amountController}
                     required
                   />
+                </Grid>
+
+                <Grid item xs={8}>
+                  <Select
+                    disabled={!withdrawalAddress}
+                    label="Select the token"
+                    variant="outlined"
+                    id="demo-controlled-openToken-select"
+                    open={openTokenOptions}
+                    onClose={handleCloseTokenOptions}
+                    onOpen={handleOpenTokenOptions}
+                    onChange={handleTokenSelection}
+                    fullWidth
+                    value={tokenId ? tokenId : 0}
+                  >
+                    {mockTokens.map((token, index) => {
+                      return (
+                        <MenuItem value={index} key={index}>
+                          {token.name}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
                 </Grid>
 
                 <Grid className={classes.grid} item xs={8}>
