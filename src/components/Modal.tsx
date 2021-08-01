@@ -24,7 +24,7 @@ export default function Modal() {
 
   const [withdrawalAddress, setWithdrawalAddress] = useState('');
   const [transferAmount, setTransferAmount] = useState('');
-  const [networkOptions, setNetworkOptions] = React.useState(false);
+  const [openNetworkOptions, setOpenNetworkOptions] = React.useState(false);
   const [injectedProvider, setInjectedProvider] = React.useState();
 
   //const chainConfig = process.env.NEXT_PUBLIC_CHAIN_PROVIDERS;
@@ -54,11 +54,11 @@ export default function Modal() {
     setid(event.target.value);
   };
   const handleCloseNetworkOptions = () => {
-    setNetworkOptions(false);
+    setOpenNetworkOptions(false);
   };
 
   const handleOpenNetworkOptions = () => {
-    setNetworkOptions(true);
+    setOpenNetworkOptions(true);
   };
 
   const [chain, setChain] = useState<NETWORK>(networks[0]);
@@ -76,7 +76,7 @@ export default function Modal() {
                   <Select
                     variant="outlined"
                     id="demo-controlled-open-select"
-                    open={networkOptions}
+                    open={openNetworkOptions}
                     onClose={handleCloseNetworkOptions}
                     onOpen={handleOpenNetworkOptions}
                     onChange={handleNetwork}
