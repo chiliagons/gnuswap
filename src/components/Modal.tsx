@@ -91,6 +91,7 @@ export default function Modal() {
             <Card className={classes.card}>
               <Grid className={classes.gridWithSpace} container spacing={2}>
                 <Grid item xs={8}>
+                  you are currently on : <h4>Insert Network</h4>
                   <Select
                     variant="outlined"
                     id="demo-controlled-open-select"
@@ -101,16 +102,16 @@ export default function Modal() {
                     fullWidth
                     defaultValue={id ? id : 0}
                   >
+                    <MenuItem disabled>Select Receiver Network</MenuItem>
                     {networks.map((t, index) => {
                       return (
                         <MenuItem value={index} key={index}>
-                          {t.depositChainName} to {t.withdrawChainName}
+                          {t.withdrawChainName}
                         </MenuItem>
                       );
                     })}
                   </Select>
                 </Grid>
-
                 <Grid item xs={8}>
                   <TextField
                     label="Receiver Address"
@@ -122,7 +123,6 @@ export default function Modal() {
                     required
                   />
                 </Grid>
-
                 <Grid item xs={8}>
                   <TextField
                     label="Transfer Amount"
@@ -134,7 +134,6 @@ export default function Modal() {
                     required
                   />
                 </Grid>
-
                 <Grid item xs={8}>
                   <Select
                     disabled={!withdrawalAddress}
@@ -157,7 +156,6 @@ export default function Modal() {
                     })}
                   </Select>
                 </Grid>
-
                 <Grid className={classes.grid} item xs={8}>
                   <Button
                     size="md"
