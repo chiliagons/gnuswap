@@ -5,15 +5,16 @@ import { theme, Loader, Title, Stepper } from '@gnosis.pm/safe-react-components'
 
 import GlobalStyle from './GlobalStyle';
 import SafeProvider from '@gnosis.pm/safe-apps-react-sdk';
-import App from './App';
-import MainPage from './Containers/MainPage';
+//import App from './App';
+import App from './Nxtp';
+//import MainPage from './Containers/MainPage';
 
 ReactDOM.render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <GlobalStyle />
       <SafeProvider>
-        <MainPage />
+        <App />
       </SafeProvider>
     </ThemeProvider>
   </React.StrictMode>,
