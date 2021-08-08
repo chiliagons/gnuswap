@@ -1,20 +1,16 @@
 import React, { useState } from 'react';
 import { ConnextModal } from '@connext/vector-modal';
 import useStyles from './styles';
-import { Container, Grid, Select, MenuItem, Typography } from '@material-ui/core';
-import SwapHorizontalCircleIcon from '@material-ui/icons/SwapHorizontalCircle';
+import { Container, Grid, Select, MenuItem, Typography, List, ListItem, ListItemIcon } from '@material-ui/core';
 import HelpIcon from '@material-ui/icons/Help';
 
-import { Card, Divider } from '@gnosis.pm/safe-react-components';
-import List from '@material-ui/core/List';
+import { Card, Divider, TextField, Button } from '@gnosis.pm/safe-react-components';
 
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import { useSafeAppsSDK } from '@gnosis.pm/safe-apps-react-sdk';
 import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
+
 import { networks } from '../Constants/Networks';
 import { mockTokens } from '../Constants/Tokens';
-import { TextField, Button } from '@gnosis.pm/safe-react-components';
 import { NETWORK } from '../Models/Networks.model';
 
 export default function Modal() {
