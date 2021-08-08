@@ -124,17 +124,6 @@ export default function Modal() {
                   />
                 </Grid>
                 <Grid item xs={8}>
-                  <TextField
-                    label="Transfer Amount"
-                    name="transferAmount"
-                    aria-describedby="transferAmount"
-                    value={transferAmount}
-                    type="search"
-                    onChange={amountController}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={8}>
                   <Select
                     disabled={!withdrawalAddress}
                     label="Select the token"
@@ -156,6 +145,18 @@ export default function Modal() {
                     })}
                   </Select>
                 </Grid>
+                <Grid item xs={8}>
+                  <TextField
+                    label="Transfer Amount"
+                    name="transferAmount"
+                    aria-describedby="transferAmount"
+                    value={transferAmount}
+                    type="search"
+                    onChange={amountController}
+                    required
+                  />
+                </Grid>
+
                 <Grid className={classes.grid} item xs={8}>
                   <Button
                     size="md"
