@@ -36,27 +36,29 @@ function App(): React.ReactElement | null {
   const [userBalance, setUserBalance] = useState<BigNumber>();
 
   const [form] = Form.useForm();
+  const ethereum = (window as any).ethereum;
 
   const connectMetamask = async () => {
-    const ethereum = (window as any).ethereum;
     if (typeof ethereum === 'undefined') {
       alert('Please install Metamask');
       return;
     }
     try {
       await ethereum.request({ method: 'eth_requestAccounts' });
-      const provider = new providers.Web3Provider(gnosisWeb3Provider);
-      const _signer = provider.getSigner();
-      const address = await _signer.getAddress();
+      // const provider = new providers.Web3Provider(ethereum);
+      // const _signer = provider.getSigner();
+      const provider2 = new providers.Web3Provider(gnosisWeb3Provider);
+      const _signerG = provider2.getSigner();
+      const address = await _signerG.getAddress();
       console.log('address: ', address);
 
       const sendingChain = form.getFieldValue('sendingChain');
       console.log('sendingChain: ', sendingChain);
 
-      const _balance = await getUserBalance(sendingChain, _signer);
+      const _balance = await getUserBalance(sendingChain, _signerG);
       setUserBalance(_balance);
-      setSigner(_signer);
-      setProvider(provider);
+      setSigner(_signerG);
+      setProvider(provider2);
       form.setFieldsValue({ receivingAddress: address });
 
       // metamask events
@@ -243,6 +245,10 @@ function App(): React.ReactElement | null {
     if (!nsdk) {
       return;
     }
+    const provider = new providers.Web3Provider(ethereum);
+    const _signer = provider.getSigner();
+    setSigner(_signer);
+    setProvider(provider);
 
     if (injectedProviderChainId !== sendingChainId) {
       alert('Please switch chains to the sending chain!');
@@ -270,6 +276,10 @@ function App(): React.ReactElement | null {
     if (!nsdk) {
       return;
     }
+    const provider2 = new providers.Web3Provider(gnosisWeb3Provider);
+    const _signerG = provider2.getSigner();
+    setSigner(_signerG);
+    setProvider(provider2);
     if (!auctionResponse) {
       alert('Please request quote first');
       throw new Error('Please request quote first');
