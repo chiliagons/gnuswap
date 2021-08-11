@@ -13,7 +13,7 @@ import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
 import { networks } from '../Constants/Networks';
 import { mockTokens } from '../Constants/Tokens';
 import { NETWORK } from '../Models/Networks.model';
-import { isConstructorDeclaration } from 'typescript';
+import { getSupportedCodeFixes, isConstructorDeclaration } from 'typescript';
 
 export default function Modal() {
   const classes = useStyles();
@@ -30,9 +30,8 @@ export default function Modal() {
   const [id, setid] = useState(0);
   const [token, setToken] = useState(mockTokens[0]);
   const [tokenId, setTokenId] = useState(0);
-  const [user2Address, setUser2Address] = useState();
+  const [userAddress, setUserAddress] = useState();
   const [errorFetchedChecker, setErrorFetchedChecker] = useState(false);
-  const userAddress = React.useRef();
 
   //const chainConfig = process.env.NEXT_PUBLIC_CHAIN_PROVIDERS;
   //const chainProviders = JSON.parse(chainConfig!);
@@ -82,40 +81,38 @@ export default function Modal() {
     setOpenTokenOptions(true);
   };
 
-  const getTokenInformation = () => {
-    console.log('insideGetToken');
+  const getUserAddress = () => {
     return web3Provider
       .request({ method: 'eth_accounts' })
       .then((accounts) => {
-        console.log(accounts, 'accounts');
         return accounts[0];
-        // setUser2Address(accounts[0]);
-        // userAddress.current = accounts;
-        // console.log(userAddress.current);
       })
       .catch((error) => console.error(error));
-    // await Axios.get(`https://safe-transaction.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`)
-    //   .then((response) => {
-    //     console.log(response);
-    //   })
-    //   .catch((error) => {
-    //     console.log(error);
-    //   });
+  };
+
+  const userAddressHandler = async () => {
+    const res: any = await getUserAddress();
+    if (res === '') {
+      setErrorFetchedChecker((c) => !c);
+    } else {
+      setUserAddress(res);
+      getSomething(userAddress);
+    }
+  };
+
+  const getSomething = async (inputAddress) => {
+    const address = '0x73551b69314de75364fb5B58e766e40cB2c2973f';
+    await Axios.get(`https://safe-transaction.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`)
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   useEffect(() => {
-    async function testFunc() {
-      const res: any = await getTokenInformation();
-      console.log(res);
-      if (res === '') {
-        setErrorFetchedChecker((c) => !c);
-      } else {
-        setUser2Address(res);
-        console.log('user2Address', user2Address);
-      }
-    }
-    testFunc();
-    //console.log('LOG__FROM_CountriesTable: Executed');
+    userAddressHandler();
   }, [errorFetchedChecker]);
 
   return (
@@ -127,7 +124,7 @@ export default function Modal() {
             <Card className={classes.card}>
               <Grid className={classes.gridWithSpace} container spacing={2}>
                 <Grid item xs={8}>
-                  you are currently on : <h4>{user2Address}</h4>
+                  you are currently on : <h4>{userAddress}</h4>
                   <Select
                     variant="outlined"
                     id="demo-controlled-open-select"
