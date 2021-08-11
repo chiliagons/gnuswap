@@ -32,7 +32,7 @@ export default function Modal() {
   const [tokenId, setTokenId] = useState(0);
   const [userAddress, setUserAddress] = useState();
   const [errorFetchedChecker, setErrorFetchedChecker] = useState(false);
-
+  const [tokenList, setTokenList] = useState(mockTokens);
   //const chainConfig = process.env.NEXT_PUBLIC_CHAIN_PROVIDERS;
   //const chainProviders = JSON.parse(chainConfig!);
 
@@ -90,21 +90,28 @@ export default function Modal() {
       .catch((error) => console.error(error));
   };
 
-  const userAddressHandler = async () => {
+  const onMountHandler = async () => {
     const res: any = await getUserAddress();
     if (res === '') {
       setErrorFetchedChecker((c) => !c);
     } else {
       setUserAddress(res);
-      getSomething(userAddress);
+      getTokensHandler(userAddress);
     }
   };
 
-  const getSomething = async (inputAddress) => {
-    const address = '0x73551b69314de75364fb5B58e766e40cB2c2973f';
+  const getTokensHandler = async (inputAddress) => {
+    // const address = '0x73551b69314de75364fb5B58e766e40cB2c2973f';
+    const address = inputAddress;
+    let tokenArr = [];
     await Axios.get(`https://safe-transaction.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`)
       .then((response) => {
-        console.log(response);
+        response.data.forEach((token) => {
+          if (token.token !== null) {
+            tokenArr.push(token.token);
+          }
+        });
+        setTokenList(tokenArr);
       })
       .catch((error) => {
         console.log(error);
@@ -112,7 +119,7 @@ export default function Modal() {
   };
 
   useEffect(() => {
-    userAddressHandler();
+    onMountHandler();
   }, [errorFetchedChecker]);
 
   return (
@@ -169,7 +176,7 @@ export default function Modal() {
                     fullWidth
                     value={tokenId ? tokenId : 0}
                   >
-                    {mockTokens.map((token, index) => {
+                    {tokenList.map((token, index) => {
                       return (
                         <MenuItem value={index} key={index}>
                           {token.name}
