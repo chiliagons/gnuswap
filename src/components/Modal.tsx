@@ -131,7 +131,8 @@ export default function Modal() {
             <Card className={classes.card}>
               <Grid className={classes.gridWithSpace} container spacing={2}>
                 <Grid item xs={8}>
-                  you are currently on : <h4>{userAddress}</h4>
+                  Current User Address: <h4>{userAddress}</h4>
+                  you are currently on : <h4>ADD NETWORK</h4>
                   <Select
                     variant="outlined"
                     id="demo-controlled-open-select"
