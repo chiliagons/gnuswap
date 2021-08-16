@@ -3,6 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@connext/nxtp-sdk": "0.0.16",
+    "@connext/nxtp-utils": "0.0.16",
+    "antd": "^4.16.9",
+    "axios": "^0.21.1",
+    "ethers": "^5.4.2",
+    "pino": "^6.13.0",
+    "rimraf": "^3.0.2",
     "@connext/vector-modal": "^1.0.6-beta.6",
     "@gnosis.pm/safe-apps-provider": "^0.6.0",
     "@gnosis.pm/safe-apps-react-sdk": "4.0.0",
