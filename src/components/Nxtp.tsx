@@ -8,9 +8,9 @@ import { AuctionResponse, getRandomBytes32, TransactionPreparedEvent } from '@co
 import { useSafeAppsSDK } from '@gnosis.pm/safe-apps-react-sdk';
 import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
 
-import './App.css';
-import { chainConfig, swapConfig } from './constants';
-import { getBalance, mintTokens as _mintTokens } from './utils';
+import '../App.css';
+import { chainConfig, swapConfig } from '../constants';
+import { getBalance, mintTokens as _mintTokens } from '../utils';
 
 const chainProviders: Record<number, { provider: providers.FallbackProvider; subgraph?: string; transactionManagerAddress?: string }> = {};
 Object.entries(chainConfig).forEach(([chainId, { provider, subgraph, transactionManagerAddress }]) => {
@@ -426,17 +426,11 @@ function App(): React.ReactElement | null {
 
   return (
     <div style={{ marginTop: 36, marginLeft: 12, marginRight: 12 }}>
-      <Row gutter={16}>
-        <Col span={3}></Col>
-        <Col span={5}>
-          <Typography.Title>NXTP</Typography.Title>
-        </Col>
-        <Col>
-          <Button type="primary" onClick={connectMetamask} disabled={!!web3Provider}>
-            Connect Metamask
-          </Button>
-        </Col>
-      </Row>
+      <Col>
+        <Button type="primary" onClick={connectMetamask} disabled={!!web3Provider}>
+          Connect Metamask
+        </Button>
+      </Col>
 
       {activeTransferTableColumns.length > 0 && (
         <>
@@ -475,13 +469,6 @@ function App(): React.ReactElement | null {
           </Row>
         </>
       )}
-
-      <Row gutter={16}>
-        <Col span={3}></Col>
-        <Col span={8}>
-          <Typography.Title level={2}>New Transfer</Typography.Title>
-        </Col>
-      </Row>
       <Row gutter={16}>
         <Col span={16}>
           <Form

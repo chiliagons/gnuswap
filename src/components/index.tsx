@@ -1,4 +1,3 @@
-  
-import Modal from "./Modal";
+import Nxtp from './Nxtp';
 
-export { Modal };
+export { Nxtp };
