@@ -11,6 +11,7 @@ import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
 import '../App.css';
 import { chainConfig, swapConfig } from '../constants';
 import { getBalance, mintTokens as _mintTokens } from '../utils';
+import { connect } from 'tls';
 
 const chainProviders: Record<number, { provider: providers.FallbackProvider; subgraph?: string; transactionManagerAddress?: string }> = {};
 Object.entries(chainConfig).forEach(([chainId, { provider, subgraph, transactionManagerAddress }]) => {
@@ -32,43 +33,62 @@ function App(): React.ReactElement | null {
   const [auctionResponse, setAuctionResponse] = useState<AuctionResponse>();
   const [activeTransferTableColumns, setActiveTransferTableColumns] = useState<ActiveTransaction[]>([]);
   const [selectedPool, setSelectedPool] = useState(swapConfig[0]);
-
+  const [errorFetchedChecker, setErrorFetchedChecker] = useState(false);
   const [userBalance, setUserBalance] = useState<BigNumber>();
 
   const [form] = Form.useForm();
   const ethereum = (window as any).ethereum;
-
+  // const getTokensHandler = async (inputAddress) => {
+  //   // const address = '0x73551b69314de75364fb5B58e766e40cB2c2973f';
+  //   const address = inputAddress;
+  //   let tokenArr = [];
+  //   //https://www.npmjs.com/package/isomorphic-fetch
+  //   await Axios.get(`https://safe-transaction.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`)
+  //     .then((response) => {
+  //       response.data.forEach((token) => {
+  //         if (token.token !== null) {
+  //           tokenArr.push(token.token);
+  //         }
+  //       });
+  //       setTokenList(tokenArr);
+  //     })
+  //     .catch((error) => {
+  //       console.log(error);
+  //     });
+  // };
   const connectMetamask = async () => {
-    if (typeof ethereum === 'undefined') {
-      alert('Please install Metamask');
-      return;
-    }
+    // if (typeof ethereum === 'undefined') {
+    //   alert('Please install Metamask');
+    //   return;
+    // }
     try {
-      await ethereum.request({ method: 'eth_requestAccounts' });
+      // await ethereum.request({ method: 'eth_requestAccounts' });
       // const provider = new providers.Web3Provider(ethereum);
       // const _signer = provider.getSigner();
       const provider2 = new providers.Web3Provider(gnosisWeb3Provider);
-      const _signerG = provider2.getSigner();
-      const address = await _signerG.getAddress();
-      console.log('address: ', address);
+      const _signerG = await provider2.getSigner();
+      if (_signerG) {
+        const address = await _signerG.getAddress();
+        console.log('address: ', address);
+        // debugger
 
-      const sendingChain = form.getFieldValue('sendingChain');
-      console.log('sendingChain: ', sendingChain);
+        const sendingChain = form.getFieldValue('sendingChain');
+        console.log('sendingChain: ', sendingChain);
 
-      const _balance = await getUserBalance(sendingChain, _signerG);
-      setUserBalance(_balance);
-      setSigner(_signerG);
-      setProvider(provider2);
-      form.setFieldsValue({ receivingAddress: address });
-
+        const _balance = await getUserBalance(sendingChain, _signerG);
+        setUserBalance(_balance);
+        setSigner(_signerG);
+        setProvider(provider2);
+        form.setFieldsValue({ receivingAddress: address });
+      }
       // metamask events
-      ethereum.on('chainChanged', (_chainId: string) => {
-        console.log('_chainId: ', _chainId);
-        window.location.reload();
-      });
+      // ethereum.on('chainChanged', (_chainId: string) => {
+      //   console.log('_chainId: ', _chainId);
+      //   window.location.reload();
+      // });
+      return true;
     } catch (e) {
-      console.error(e);
-      throw e;
+      return false;
     }
   };
 
@@ -85,6 +105,18 @@ function App(): React.ReactElement | null {
     const _balance = await getBalance(address, sendingAssetId, chainProviders[chainId].provider);
     return _balance;
   };
+
+  useEffect(() => {
+    async function testFunc() {
+      const flag: boolean = await connectMetamask();
+      console.log(flag);
+      if (!flag) {
+        setErrorFetchedChecker((c) => !c);
+      }
+    }
+    testFunc();
+    //console.log('LOG__FROM_CountriesTable: Executed');
+  }, [errorFetchedChecker]);
 
   useEffect(() => {
     const init = async () => {
@@ -426,11 +458,11 @@ function App(): React.ReactElement | null {
 
   return (
     <div style={{ marginTop: 36, marginLeft: 12, marginRight: 12 }}>
-      <Col>
+      {/* <Col>
         <Button type="primary" onClick={connectMetamask} disabled={!!web3Provider}>
           Connect Metamask
         </Button>
-      </Col>
+      </Col> */}
 
       {activeTransferTableColumns.length > 0 && (
         <>
@@ -556,7 +588,7 @@ function App(): React.ReactElement | null {
                     </Select>
                   </Form.Item>
                 </Col>
-                {form.getFieldValue('asset') === 'TEST' && (
+                {/* {form.getFieldValue('asset') === 'TEST' && (
                   <>
                     <Col span={6}>
                       <Button block onClick={() => mintTokens()}>
@@ -569,7 +601,7 @@ function App(): React.ReactElement | null {
                       </Button>
                     </Col>
                   </>
-                )}
+                )} */}
               </Row>
             </Form.Item>
 
