@@ -10,8 +10,8 @@ export default makeStyles((theme) => ({
       margin: theme.spacing(1),
     },
   },
-  a:{
-textDecoration: 'none'
+  a: {
+    textDecoration: 'none',
   },
   text: {
     fontFamily: 'Poppins',
@@ -91,7 +91,7 @@ textDecoration: 'none'
     marginTop: 16,
     marginBottom: 16,
   },
-  
+
   form: {
     fontFamily: 'Poppins',
     paddingTop: '2%',

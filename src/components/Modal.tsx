@@ -1,21 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ConnextModal } from '@connext/vector-modal';
+import Axios from 'axios';
 import useStyles from './styles';
-import {  Container, Grid, Select, MenuItem, Typography } from '@material-ui/core';
-import SwapHorizontalCircleIcon from '@material-ui/icons/SwapHorizontalCircle';
+import { Container, Grid, Select, MenuItem, Typography, List, ListItem, ListItemIcon } from '@material-ui/core';
 import HelpIcon from '@material-ui/icons/Help';
 
-import { Card, Divider } from '@gnosis.pm/safe-react-components';
-import List from '@material-ui/core/List';
+import { Card, Divider, TextField, Button } from '@gnosis.pm/safe-react-components';
 
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import { useSafeAppsSDK } from '@gnosis.pm/safe-apps-react-sdk';
 import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
-import { networks } from '../Constants/Networks';
-import { TextField, Button} from '@gnosis.pm/safe-react-components';
-import { NETWORK } from '../Models/Networks.model';
 
+import { networks } from '../Constants/Networks';
+import { mockTokens } from '../Constants/Tokens';
+import { NETWORK } from '../Models/Networks.model';
+import { getSupportedCodeFixes, isConstructorDeclaration } from 'typescript';
 
 export default function Modal() {
   const classes = useStyles();
@@ -25,14 +23,20 @@ export default function Modal() {
 
   const [withdrawalAddress, setWithdrawalAddress] = useState('');
   const [transferAmount, setTransferAmount] = useState('');
-  const [open, setOpen] = React.useState(false);
+  const [openNetworkOptions, setOpenNetworkOptions] = React.useState(false);
+  const [openTokenOptions, setOpenTokenOptions] = React.useState(false);
   const [injectedProvider, setInjectedProvider] = React.useState();
-
+  const [chain, setChain] = useState<NETWORK>(networks[0]);
+  const [id, setid] = useState(0);
+  const [token, setToken] = useState(mockTokens[0]);
+  const [tokenId, setTokenId] = useState(0);
+  const [userAddress, setUserAddress] = useState();
+  const [errorFetchedChecker, setErrorFetchedChecker] = useState(false);
+  const [tokenList, setTokenList] = useState(mockTokens);
   //const chainConfig = process.env.NEXT_PUBLIC_CHAIN_PROVIDERS;
   //const chainProviders = JSON.parse(chainConfig!);
 
   const handleAddressChange = (event) => {
-    console.log(event.target.value);
     setWithdrawalAddress(event.target.value);
   };
   const amountController = (event) => {
@@ -50,120 +54,191 @@ export default function Modal() {
     return errors;
   };
 
-  const handleNetwork = (event) => {
+  //Handlers
+  const handleNetworkOptions = (event) => {
     setChain(networks[event.target.value]);
     setid(event.target.value);
   };
-  const handleClose = () => {
-    setOpen(false);
+
+  const handleTokenSelection = (event) => {
+    setToken(mockTokens[event.target.value]);
+    setTokenId(event.target.value);
   };
 
-  const handleOpen = () => {
-    setOpen(true);
+  const handleCloseNetworkOptions = () => {
+    setOpenNetworkOptions(false);
   };
 
-  const [chain, setChain] = useState<NETWORK>(networks[0]);
-  const [id, setid] = useState(0);
+  const handleOpenNetworkOptions = () => {
+    setOpenNetworkOptions(true);
+  };
+
+  const handleCloseTokenOptions = () => {
+    setOpenTokenOptions(false);
+  };
+
+  const handleOpenTokenOptions = () => {
+    setOpenTokenOptions(true);
+  };
+
+  const getUserAddress = () => {
+    return web3Provider
+      .request({ method: 'eth_accounts' })
+      .then((accounts) => {
+        return accounts[0];
+      })
+      .catch((error) => console.error(error));
+  };
+
+  const onMountHandler = async () => {
+    const res: any = await getUserAddress();
+    if (res === '') {
+      setErrorFetchedChecker((c) => !c);
+    } else {
+      setUserAddress(res);
+      getTokensHandler(userAddress);
+    }
+  };
+
+  const getTokensHandler = async (inputAddress) => {
+    // const address = '0x73551b69314de75364fb5B58e766e40cB2c2973f';
+    const address = inputAddress;
+    let tokenArr = [];
+    await Axios.get(`https://safe-transaction.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`)
+      .then((response) => {
+        response.data.forEach((token) => {
+          if (token.token !== null) {
+            tokenArr.push(token.token);
+          }
+        });
+        setTokenList(tokenArr);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  useEffect(() => {
+    onMountHandler();
+  }, [errorFetchedChecker]);
 
   return (
     <>
-    <Divider />
+      <Divider />
       <Container>
         <Grid className={classes.grid} container spacing={8}>
           <Grid item xs={12} sm={8}>
             <Card className={classes.card}>
-            
-                <Grid className={classes.gridWithSpace} container spacing={2}>
-                  <Grid item xs={8}>
-                    <Select
-                      variant="outlined"
-                      id="demo-controlled-open-select"
-                      open={open}
-                      onClose={handleClose}
-                      onOpen={handleOpen}
-                      onChange={handleNetwork}
-                      fullWidth
-                      defaultValue={id}
-                    >
-                      {networks.map((t, index) => {
-                        return (
-                          <MenuItem value={index} key={index}>
-                            {t.depositChainName} to {t.withdrawChainName}
-                          </MenuItem>
-                        );
-                      })}
-                    </Select>
-                  </Grid>
-
-                  <Grid item xs={8}>
-                    <TextField
-                    
-                      label="Receiver Address"
-                      name=""
-                      aria-describedby="receiverAddress"
-                      value={withdrawalAddress}
-                      type="search"
-                      onChange={handleAddressChange}
-                      required
-                 
-                    />
-                  </Grid>
-
-                  <Grid item xs={8}>
-                    <TextField
-                      label="Transfer Amount"
-                      name="transferAmount"
-                      aria-describedby="transferAmount"
-                      value={transferAmount}
-                      type="search"
-                      onChange={amountController}
-                      required
-              
-                    />
-                  </Grid>
-
-                  <Grid className={classes.grid} item xs={8}>
-                  
-                    <Button
-                    size="md"
-                     iconType="chain"
-                      variant="contained"
-                      color="primary"
-                      type="submit"
-                      disabled={!withdrawalAddress || !chain || !transferAmount}
-                      onClick={async () => {
-                        // if (!injectedProvider) {
-                        //   alert("Please connect to Metamask to use this dapp.");
-                        //   throw new Error("Metamask not available");
-                        // }
-                        try {
-                          setInjectedProvider((window as any).ethereum);
-                        } catch (error) {
-                          console.log(error.message);
-                        }
-                        setShowModal(true);
-                      }}
-                    >
-                      Cross-Chain Transfer
-                    </Button>
-                  </Grid>
+              <Grid className={classes.gridWithSpace} container spacing={2}>
+                <Grid item xs={8}>
+                  Current User Address: <h4>{userAddress}</h4>
+                  you are currently on : <h4>ADD NETWORK</h4>
+                  <Select
+                    variant="outlined"
+                    id="demo-controlled-open-select"
+                    open={openNetworkOptions}
+                    onClose={handleCloseNetworkOptions}
+                    onOpen={handleOpenNetworkOptions}
+                    onChange={handleNetworkOptions}
+                    fullWidth
+                    defaultValue={id ? id : 0}
+                  >
+                    <MenuItem disabled>Select Receiver Network</MenuItem>
+                    {networks.map((t, index) => {
+                      return (
+                        <MenuItem value={index} key={index}>
+                          {t.withdrawChainName}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
                 </Grid>
-                <ConnextModal
-                  showModal={showModal}
-                  transferAmount={transferAmount}
-                  routerPublicIdentifier="vector7tbbTxQp8ppEQUgPsbGiTrVdapLdU5dH7zTbVuXRf1M4CEBU9Q"
-                  depositAssetId={chain!.tokens[0].depositAssetId}
-                  depositChainId={chain!.depositChainId}
-                  withdrawAssetId={chain!.tokens[0].withdrawAssetId}
-                  withdrawChainId={chain!.withdrawChainId}
-                  withdrawalAddress={withdrawalAddress}
-                  onClose={() => setShowModal(false)}
-                  onReady={(params) => console.log('MODAL IS READY =======>', params)}
-                  depositChainProvider={'https://rinkeby.infura.io/v3/31a0f6f85580403986edab0be5f7673c'}
-                  withdrawChainProvider={'https://kovan.infura.io/v3/31a0f6f85580403986edab0be5f7673c'}
-                  injectedProvider={web3Provider}
-                  loginProvider={injectedProvider}
-                />
+                <Grid item xs={8}>
+                  <TextField
+                    label="Receiver Address"
+                    name=""
+                    aria-describedby="receiverAddress"
+                    value={withdrawalAddress}
+                    type="search"
+                    onChange={handleAddressChange}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={8}>
+                  <Select
+                    disabled={!withdrawalAddress}
+                    label="Select the token"
+                    variant="outlined"
+                    id="demo-controlled-openToken-select"
+                    open={openTokenOptions}
+                    onClose={handleCloseTokenOptions}
+                    onOpen={handleOpenTokenOptions}
+                    onChange={handleTokenSelection}
+                    fullWidth
+                    value={tokenId ? tokenId : 0}
+                  >
+                    {tokenList.map((token, index) => {
+                      return (
+                        <MenuItem value={index} key={index}>
+                          {token.name}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                </Grid>
+                <Grid item xs={8}>
+                  <TextField
+                    label="Transfer Amount"
+                    name="transferAmount"
+                    aria-describedby="transferAmount"
+                    value={transferAmount}
+                    type="search"
+                    onChange={amountController}
+                    required
+                  />
+                </Grid>
+
+                <Grid className={classes.grid} item xs={8}>
+                  <Button
+                    size="md"
+                    iconType="chain"
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    disabled={!withdrawalAddress || !chain || !transferAmount}
+                    onClick={async () => {
+                      // if (!injectedProvider) {
+                      //   alert("Please connect to Metamask to use this dapp.");
+                      //   throw new Error("Metamask not available");
+                      // }
+                      try {
+                        setInjectedProvider((window as any).ethereum);
+                      } catch (error) {
+                        console.log(error.message);
+                      }
+                      setShowModal(true);
+                    }}
+                  >
+                    Cross-Chain Transfer
+                  </Button>
+                </Grid>
+              </Grid>
+              <ConnextModal
+                showModal={showModal}
+                transferAmount={transferAmount}
+                routerPublicIdentifier="vector7tbbTxQp8ppEQUgPsbGiTrVdapLdU5dH7zTbVuXRf1M4CEBU9Q"
+                depositAssetId={chain!.tokens[0].depositAssetId}
+                depositChainId={chain!.depositChainId}
+                withdrawAssetId={chain!.tokens[0].withdrawAssetId}
+                withdrawChainId={chain!.withdrawChainId}
+                withdrawalAddress={withdrawalAddress}
+                onClose={() => setShowModal(false)}
+                onReady={(params) => console.log('MODAL IS READY =======>', params)}
+                depositChainProvider={'https://rinkeby.infura.io/v3/31a0f6f85580403986edab0be5f7673c'}
+                withdrawChainProvider={'https://kovan.infura.io/v3/31a0f6f85580403986edab0be5f7673c'}
+                injectedProvider={web3Provider}
+                loginProvider={injectedProvider}
+              />
               {/* </form> */}
             </Card>
           </Grid>
@@ -202,11 +277,13 @@ export default function Modal() {
                   <Typography className={classes.text}>6. Confirm and wait for the transfer to take place</Typography>
                 </ListItem>
                 <ListItem>
-                  <Typography className={classes.text}>7. In case of any issues you can create a support ticket <a target="blank" className={classes.a} href="https://support.connext.network/hc/en-us">here</a></Typography>
+                  <Typography className={classes.text}>
+                    7. In case of any issues you can create a support ticket{' '}
+                    <a target="blank" className={classes.a} href="https://support.connext.network/hc/en-us">
+                      here
+                    </a>
+                  </Typography>
                 </ListItem>
-                
-
-
 
                 {/* <ListItemLink href="#simple-list">
           <ListItemText primary="Spam" />

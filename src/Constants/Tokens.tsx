@@ -32,6 +32,10 @@ export const KOVAN_RINKEBY_TOKENS: TOKEN[] = [
   },
 ];
 
+const tokenArr = [RINKEBY_KOVAN_TOKENS, KOVAN_RINKEBY_TOKENS, GOERLI_MUMBAI_TOKENS, MUMBAI_GOERLI_TOKENS];
+
+export const mockTokens = tokenArr.flat();
+
 // const KOVAN_ARBITRUM_TOKENS: TOKEN[] = [
 //   {
 //     name: "ETH",
