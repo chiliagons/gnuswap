@@ -3,7 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { Col, Row, Input, Typography, Form, Button, Select, Table } from 'antd';
 import { BigNumber, providers, Signer, utils } from 'ethers';
 import pino from 'pino';
+//@ts-ignore
 import { ActiveTransaction, NxtpSdk, NxtpSdkEvents } from '@connext/nxtp-sdk';
+//@ts-ignore
 import { AuctionResponse, getRandomBytes32, TransactionPreparedEvent } from '@connext/nxtp-utils';
 import { useSafeAppsSDK } from '@gnosis.pm/safe-apps-react-sdk';
 import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
