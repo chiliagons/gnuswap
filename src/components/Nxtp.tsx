@@ -117,7 +117,7 @@ function App(): React.ReactElement | null {
       }
     }
     testFunc();
-    //console.log('LOG__FROM_CountriesTable: Executed');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [errorFetchedChecker]);
 
   useEffect(() => {
@@ -227,6 +227,7 @@ function App(): React.ReactElement | null {
       });
     };
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [web3Provider, signer]);
 
   const switchChains = async (targetChainId: number) => {
