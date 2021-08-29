@@ -59,7 +59,7 @@ const App: React.FC = () => {
   const [tokenList, setTokenList] = useState<IBalance[]>([]);
   const [errorFetchedChecker, setErrorFetchedChecker] = useState(false);
   const [userBalance, setUserBalance] = useState<BigNumber>();
-  const [transferAmount, setTransferAmount] = useState<string>();
+  const [transferAmount, setTransferAmount] = useState('');
   var address_field = '';
   const [form] = Form.useForm();
   const ethereum = (window as any).ethereum;
@@ -602,9 +602,7 @@ const App: React.FC = () => {
                 <Form.Item>
                   <Row gutter={18}>
                     <Col span={16}>
-                      <Form.Item name="amount">
-                        <TextField label="transferAmount" value={transferAmount} type="number" />
-                      </Form.Item>
+                      <TextField label="Transfer Amount" value={transferAmount} type="text" />
                     </Col>
                     <Col span={8}>
                       Balance:{' '}
