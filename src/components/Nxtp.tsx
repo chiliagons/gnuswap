@@ -14,13 +14,25 @@ import { ActiveTransaction, NxtpSdk, NxtpSdkEvents } from '@connext/nxtp-sdk';
 import { AuctionResponse, getRandomBytes32, TransactionPreparedEvent } from '@connext/nxtp-utils';
 import { useSafeAppsSDK } from '@gnosis.pm/safe-apps-react-sdk';
 import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
-import { fetch } from 'isomorphic-fetch';
 import '../App.css';
 import { chainConfig, swapConfig } from '../constants';
 import { getBalance, mintTokens as _mintTokens } from '../utils';
 import { mockTokens } from '../Constants/Tokens';
 import { connect } from 'tls';
 import { MenuItem, Select, Grid, Container, Typography, List, ListItem, ListItemIcon } from '@material-ui/core';
+
+interface IToken {
+  name: string;
+  symbol: string;
+  decimals: number;
+  logoUri: string;
+}
+
+interface IBalance {
+  tokenAddress: string;
+  token: IToken;
+  balance: number;
+}
 
 const chainProviders: Record<number, { provider: providers.FallbackProvider; subgraph?: string; transactionManagerAddress?: string }> = {};
 Object.entries(chainConfig).forEach(([chainId, { provider, subgraph, transactionManagerAddress }]) => {
@@ -43,30 +55,37 @@ const App: React.FC = () => {
   const [auctionResponse, setAuctionResponse] = useState<AuctionResponse>();
   const [activeTransferTableColumns, setActiveTransferTableColumns] = useState<ActiveTransaction[]>([]);
   const [selectedPool, setSelectedPool] = useState(swapConfig[0]);
-  const [token, setToken] = useState(mockTokens[0]);
-  const [tokenList, setTokenList] = useState(mockTokens);
+  // const [token, setToken] = useState(mockTokens[0]);
+  const [tokenList, setTokenList] = useState<IBalance[]>([]);
   const [errorFetchedChecker, setErrorFetchedChecker] = useState(false);
   const [userBalance, setUserBalance] = useState<BigNumber>();
+  const [transferAmount, setTransferAmount] = useState<string>();
   var address_field = '';
   const [form] = Form.useForm();
   const ethereum = (window as any).ethereum;
+
   const getTokensHandler = async (inputAddress) => {
-    // const address = '0x73551b69314de75364fb5B58e766e40cB2c2973f';
     const address = inputAddress;
-    let tokenArr = [];
-    //https://www.npmjs.com/package/isomorphic-fetch
-    await fetch(`https://safe-transaction.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`)
+    let tokenArr: Array<IBalance> = [];
+
+    fetch(`https://safe-transaction.rinkeby.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`)
+      .then((res) => res.json())
       .then((response) => {
-        response.data.forEach((token) => {
-          if (token.token !== null) {
-            tokenArr.push(token.token);
+        response.forEach((_bal: IBalance) => {
+          if (_bal.token !== null) {
+            tokenArr.push(_bal);
           }
+          console.log('tokenArr---', tokenArr);
         });
         setTokenList(tokenArr);
       })
       .catch((error) => {
         console.log(error);
       });
+  };
+
+  const checkBalance = (bal) => {
+    setUserBalance(BigNumber.from(bal));
   };
   const connectMetamask = async () => {
     // if (typeof ethereum === 'undefined') {
@@ -83,12 +102,11 @@ const App: React.FC = () => {
         const address = await _signerG.getAddress();
         console.log('address: ', address);
         // debugger
-
+        getTokensHandler(address);
         const sendingChain = form.getFieldValue('sendingChain');
         console.log('sendingChain: ', sendingChain);
-
-        const _balance = await getUserBalance(sendingChain, _signerG);
-        setUserBalance(_balance);
+        // const _balance = await getUserBalance(sendingChain, _signerG);
+        // setUserBalance(_balance);
         setSigner(_signerG);
         setProvider(provider2);
         form.setFieldsValue({ receivingAddress: address });
@@ -434,34 +452,6 @@ const App: React.FC = () => {
     },
   ];
 
-  const mintTokens = async () => {
-    const testToken = swapConfig.find((sc) => sc.name === form.getFieldValue('asset'))?.assets[injectedProviderChainId!];
-    if (!testToken) {
-      throw new Error(`Not configured for TEST token on chain: ${injectedProviderChainId}`);
-    }
-    const resp = await _mintTokens(signer!, testToken);
-    console.log('resp: ', resp);
-  };
-
-  const addToMetamask = async () => {
-    const testToken = swapConfig.find((sc) => sc.name === form.getFieldValue('asset'))?.assets[injectedProviderChainId!];
-    if (!testToken) {
-      throw new Error(`Not configured for TEST token on chain: ${injectedProviderChainId}`);
-    }
-    const resp = await (window as any).ethereum.request({
-      method: 'wallet_watchAsset',
-      params: {
-        type: 'ERC20',
-        options: {
-          address: testToken,
-          symbol: 'TEST',
-          decimals: 18,
-        },
-      },
-    });
-    console.log('resp: ', resp);
-  };
-
   const getChainName = (chainId: number): string => {
     const chain = chainData.find((chain) => chain?.chainId === chainId);
     return chain?.name ?? chainId.toString();
@@ -540,7 +530,7 @@ const App: React.FC = () => {
                 <Form.Item name="sendingChain">
                   <Row gutter={18}>
                     <Col span={16}>
-                      <Form.Item name="sendingChain">
+                      {/* <Form.Item name="sendingChain">
                         <Select
                           variant="outlined"
                           onChange={async (val) => {
@@ -559,10 +549,10 @@ const App: React.FC = () => {
                             </MenuItem>
                           ))}
                         </Select>
-                      </Form.Item>
+                      </Form.Item> */}
                     </Col>
                     <Col span={8}>
-                      <Form.Item dependencies={['sendingChain']}>
+                      {/* <Form.Item dependencies={['sendingChain']}>
                         {() => (
                           <Button
                             size="md"
@@ -572,7 +562,7 @@ const App: React.FC = () => {
                             Switch
                           </Button>
                         )}
-                      </Form.Item>
+                      </Form.Item> */}
                     </Col>
                   </Row>
                 </Form.Item>
@@ -597,29 +587,15 @@ const App: React.FC = () => {
                   <Row gutter={16}>
                     <Col span={16}>
                       <Form.Item name="asset">
-                        <Select variant="outlined" onChange={(value) => (value ? setSelectedPool(swapConfig[parseInt(value?.toString())]) : '')}>
-                          {swapConfig.map(({ name }) => (
-                            <MenuItem key={name} value={name}>
-                              {name}
+                        <Select variant="outlined" onChange={(e) => checkBalance(e.target.value)}>
+                          {tokenList.map((_bal) => (
+                            <MenuItem key={_bal.token.symbol} value={_bal.balance}>
+                              {_bal.token.symbol}
                             </MenuItem>
                           ))}
                         </Select>
                       </Form.Item>
                     </Col>
-                    {/* {form.getFieldValue('asset') === 'TEST' && (
-                  <>
-                    <Col span={6}>
-                      <Button block onClick={() => mintTokens()}>
-                        Get TEST
-                      </Button>
-                    </Col>
-                    <Col span={6}>
-                      <Button disabled={!web3Provider} size="md" onClick={() => addToMetamask()}>
-                        Add to Metamask
-                      </Button>
-                    </Col>
-                  </>
-                )} */}
                   </Row>
                 </Form.Item>
 
@@ -627,12 +603,12 @@ const App: React.FC = () => {
                   <Row gutter={18}>
                     <Col span={16}>
                       <Form.Item name="amount">
-                        <Input type="number" />
+                        <TextField label="transferAmount" value={transferAmount} type="number" />
                       </Form.Item>
                     </Col>
                     <Col span={8}>
                       Balance:{' '}
-                      <Button onClick={() => form.setFieldsValue({ amount: utils.formatEther(userBalance ?? 0) })} size="md">
+                      <Button onClick={() => setTransferAmount(utils.formatEther(userBalance ?? 0))} size="md">
                         {utils.formatEther(userBalance ?? 0)}
                       </Button>
                     </Col>
@@ -707,19 +683,22 @@ const App: React.FC = () => {
               <Divider />
               <List component="nav" aria-label="secondary mailbox folders">
                 <ListItem>
-                  <Typography className={classes.text}>1. Choose the network option</Typography>
+                  <Typography className={classes.text}>1. Choose the receiving network</Typography>
                 </ListItem>
                 <ListItem>
-                  <Typography className={classes.text}>2. Enter the reciever address</Typography>
+                  <Typography className={classes.text}>2. Set the asset that you want to swap</Typography>
                 </ListItem>
                 <ListItem>
                   <Typography className={classes.text}>3. Enter the amount you want to swap</Typography>
                 </ListItem>
                 <ListItem>
-                  <Typography className={classes.text}>4. The app is powered by connext.network</Typography>
+                  <Typography className={classes.text}>2. Enter the reciever address</Typography>
                 </ListItem>
                 <ListItem>
-                  <Typography className={classes.text}>5. A pop up from connext network will pop up to confirm details</Typography>
+                  <Typography className={classes.text}>4. Get a quotation!</Typography>
+                </ListItem>
+                <ListItem>
+                  <Typography className={classes.text}>5. Once quote is received request for Cross Chain Swap</Typography>
                 </ListItem>
                 <ListItem>
                   <Typography className={classes.text}>6. Confirm and wait for the transfer to take place</Typography>
