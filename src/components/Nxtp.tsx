@@ -103,8 +103,6 @@ const App: React.FC = () => {
       const _signerG = await provider2.getSigner();
       if (_signerG) {
         const address = await _signerG.getAddress();
-        console.log('address: ', address);
-        // debugger
         getTokensHandler(address);
         const sendingChain = await _signerG.getChainId();
         console.log('sendingChain: ', sendingChain);
@@ -117,7 +115,6 @@ const App: React.FC = () => {
       }
       // metamask events
       // ethereum.on('chainChanged', (_chainId: string) => {
-      //   console.log('_chainId: ', _chainId);
       //   window.location.reload();
       // });
       return true;
@@ -129,7 +126,6 @@ const App: React.FC = () => {
   const getUserBalance = async (chainId: number, _signer: Signer) => {
     const address = await _signer.getAddress();
     const sendingAssetId = swapConfig.find((sc) => sc.name === form.getFieldValue('asset'))?.assets[chainId];
-    console.log('sendingAssetId: ', sendingAssetId);
     if (!sendingAssetId) {
       throw new Error('Bad configuration for swap');
     }
@@ -143,7 +139,6 @@ const App: React.FC = () => {
   useEffect(() => {
     async function testFunc() {
       const flag: boolean = await connectMetamask();
-      console.log(flag);
       if (!flag) {
         setErrorFetchedChecker((c) => !c);
       }
@@ -160,7 +155,6 @@ const App: React.FC = () => {
         return;
       }
       const { chainId } = await signer.provider!.getNetwork();
-      console.log('chainId: ', chainId);
       setInjectedProviderChainId(chainId);
       const _sdk = new NxtpSdk(
         chainProviders,
@@ -176,10 +170,8 @@ const App: React.FC = () => {
       // TODO: race condition with the event listeners
       // Will not update the transactions appropriately if sender tx prepared and no txs set
       setActiveTransferTableColumns(activeTxs);
-      console.log('activeTxs: ', activeTxs);
 
       _sdk.attach(NxtpSdkEvents.SenderTransactionPrepared, (data) => {
-        console.log('SenderTransactionPrepared:', data);
         const { amount, expiry, preparedBlockNumber, ...invariant } = data.txData;
         const table = [...activeTransferTableColumns];
         table.push({
@@ -196,17 +188,14 @@ const App: React.FC = () => {
       });
 
       _sdk.attach(NxtpSdkEvents.SenderTransactionFulfilled, (data) => {
-        console.log('SenderTransactionFulfilled:', data);
         setActiveTransferTableColumns(activeTransferTableColumns.filter((t) => t.crosschainTx.invariant.transactionId !== data.txData.transactionId));
       });
 
       _sdk.attach(NxtpSdkEvents.SenderTransactionCancelled, (data) => {
-        console.log('SenderTransactionCancelled:', data);
         setActiveTransferTableColumns(activeTransferTableColumns.filter((t) => t.crosschainTx.invariant.transactionId !== data.txData.transactionId));
       });
 
       _sdk.attach(NxtpSdkEvents.ReceiverTransactionPrepared, (data) => {
-        console.log('ReceiverTransactionPrepared:', data);
         const { amount, expiry, preparedBlockNumber, ...invariant } = data.txData;
         const index = activeTransferTableColumns.findIndex((col) => col.crosschainTx.invariant.transactionId === invariant.transactionId);
 
@@ -241,12 +230,10 @@ const App: React.FC = () => {
       });
 
       _sdk.attach(NxtpSdkEvents.ReceiverTransactionFulfilled, (data) => {
-        console.log('ReceiverTransactionFulfilled:', data);
         setActiveTransferTableColumns(activeTransferTableColumns.filter((t) => t.crosschainTx.invariant.transactionId !== data.txData.transactionId));
       });
 
       _sdk.attach(NxtpSdkEvents.ReceiverTransactionCancelled, (data) => {
-        console.log('ReceiverTransactionCancelled:', data);
         setActiveTransferTableColumns(activeTransferTableColumns.filter((t) => t.crosschainTx.invariant.transactionId !== data.txData.transactionId));
       });
 
@@ -357,7 +344,6 @@ const App: React.FC = () => {
       throw new Error('Wrong chain');
     }
     const transfer = await nsdk.prepareTransfer(auctionResponse, true);
-    console.log('transfer: ', transfer);
   };
 
   const finishTransfer = async ({ bidSignature, encodedBid, encryptedCallData, txData }: Omit<TransactionPreparedEvent, 'caller'>) => {
@@ -366,7 +352,6 @@ const App: React.FC = () => {
     }
 
     const finish = await nsdk.fulfillTransfer({ bidSignature, encodedBid, encryptedCallData, txData });
-    console.log('finish: ', finish);
     if (finish.metaTxResponse?.transactionHash || finish.metaTxResponse?.transactionHash === '') {
       setActiveTransferTableColumns(activeTransferTableColumns.filter((t) => t.crosschainTx.invariant.transactionId !== txData.transactionId));
     }
@@ -520,9 +505,6 @@ const App: React.FC = () => {
                 onFinish={() => {
                   transfer();
                 }}
-                onFieldsChange={(changed) => {
-                  console.log('changed: ', changed);
-                }}
                 initialValues={{
                   sendingChain: getChainName(parseInt(Object.keys(selectedPool.assets)[0])),
                   receivingChain: getChainName(parseInt(Object.keys(selectedPool.assets)[1])),
@@ -537,7 +519,6 @@ const App: React.FC = () => {
                         <Select
                           variant="outlined"
                           onChange={async (val) => {
-                            console.log('val: ', val);
                             if (!signer) {
                               console.error('No signer available');
                               return;
