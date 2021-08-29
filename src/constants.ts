@@ -5,5 +5,5 @@ export const chainConfig: Record<number, { provider: string[]; subgraph?: string
 // arrays of "swap pools"
 export type SwapConfig = { name: string; assets: { [chainId: number]: string } };
 export const swapConfig: SwapConfig[] = JSON.parse(
-  '[{"name":"TEST","assets":{"4":"0x9aC2c46d7AcC21c881154D57c0Dc1c55a3139198","5":"0x8a1Cad3703E0beAe0e0237369B4fcD04228d1682"}}]',
+  '[{"name":"TEST","assets":{"4":"0x9aC2c46d7AcC21c881154D57c0Dc1c55a3139198","5":"0x8a1Cad3703E0beAe0e0237369B4fcD04228d1682"}},{"name":"TEST TOKEN 2","assets":{"4":"0x9aC2c46d7AcC21c881154D57c0Dc1c55a3139198","5":"0x8a1Cad3703E0beAe0e0237369B4fcD04228d1682"}},{"name":"TEST TOKEN 3","assets":{"4":"0x9aC2c46d7AcC21c881154D57c0Dc1c55a3139198","5":"0x8a1Cad3703E0beAe0e0237369B4fcD04228d1682"}}]',
 );

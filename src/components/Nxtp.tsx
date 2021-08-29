@@ -7,10 +7,11 @@ import { ActiveTransaction, NxtpSdk, NxtpSdkEvents } from '@connext/nxtp-sdk';
 import { AuctionResponse, getRandomBytes32, TransactionPreparedEvent } from '@connext/nxtp-utils';
 import { useSafeAppsSDK } from '@gnosis.pm/safe-apps-react-sdk';
 import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
-
+import { fetch } from 'isomorphic-fetch';
 import '../App.css';
 import { chainConfig, swapConfig } from '../constants';
 import { getBalance, mintTokens as _mintTokens } from '../utils';
+import { mockTokens } from '../Constants/Tokens';
 import { connect } from 'tls';
 
 const chainProviders: Record<number, { provider: providers.FallbackProvider; subgraph?: string; transactionManagerAddress?: string }> = {};
@@ -33,29 +34,31 @@ function App(): React.ReactElement | null {
   const [auctionResponse, setAuctionResponse] = useState<AuctionResponse>();
   const [activeTransferTableColumns, setActiveTransferTableColumns] = useState<ActiveTransaction[]>([]);
   const [selectedPool, setSelectedPool] = useState(swapConfig[0]);
+  const [token, setToken] = useState(mockTokens[0]);
+  const [tokenList, setTokenList] = useState(mockTokens);
   const [errorFetchedChecker, setErrorFetchedChecker] = useState(false);
   const [userBalance, setUserBalance] = useState<BigNumber>();
 
   const [form] = Form.useForm();
   const ethereum = (window as any).ethereum;
-  // const getTokensHandler = async (inputAddress) => {
-  //   // const address = '0x73551b69314de75364fb5B58e766e40cB2c2973f';
-  //   const address = inputAddress;
-  //   let tokenArr = [];
-  //   //https://www.npmjs.com/package/isomorphic-fetch
-  //   await Axios.get(`https://safe-transaction.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`)
-  //     .then((response) => {
-  //       response.data.forEach((token) => {
-  //         if (token.token !== null) {
-  //           tokenArr.push(token.token);
-  //         }
-  //       });
-  //       setTokenList(tokenArr);
-  //     })
-  //     .catch((error) => {
-  //       console.log(error);
-  //     });
-  // };
+  const getTokensHandler = async (inputAddress) => {
+    // const address = '0x73551b69314de75364fb5B58e766e40cB2c2973f';
+    const address = inputAddress;
+    let tokenArr = [];
+    //https://www.npmjs.com/package/isomorphic-fetch
+    await fetch(`https://safe-transaction.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`)
+      .then((response) => {
+        response.data.forEach((token) => {
+          if (token.token !== null) {
+            tokenArr.push(token.token);
+          }
+        });
+        setTokenList(tokenArr);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
   const connectMetamask = async () => {
     // if (typeof ethereum === 'undefined') {
     //   alert('Please install Metamask');
