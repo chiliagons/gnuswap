@@ -1,6 +1,9 @@
 /* eslint-disable require-jsdoc */
 import React, { useEffect, useState } from 'react';
-import { Col, Row, Input, Typography, Form, Button, Select, Table } from 'antd';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { Card, Divider, TextField, Button } from '@gnosis.pm/safe-react-components';
+import { Col, Row, Input, Typography, Form, Table, Select } from 'antd';
 import { BigNumber, providers, Signer, utils } from 'ethers';
 import pino from 'pino';
 //@ts-ignore
@@ -24,7 +27,7 @@ Object.entries(chainConfig).forEach(([chainId, { provider, subgraph, transaction
   };
 });
 
-function App(): React.ReactElement | null {
+const App: React.FC = () => {
   const { sdk, safe } = useSafeAppsSDK();
   const gnosisWeb3Provider = new SafeAppProvider(safe, sdk);
   const [chainData, setChainData] = useState<any[]>([]);
@@ -397,17 +400,14 @@ function App(): React.ReactElement | null {
             : undefined;
         if (Date.now() / 1000 > variant.expiry) {
           return (
-            <Button
-              type="link"
-              onClick={() => nsdk?.cancel({ relayerFee: '0', signature: '0x', txData: sendingTxData }, crosschainTx.invariant.sendingChainId)}
-            >
+            <Button size="md" onClick={() => nsdk?.cancel({ relayerFee: '0', signature: '0x', txData: sendingTxData }, crosschainTx.invariant.sendingChainId)}>
               Cancel
             </Button>
           );
         } else if (status === NxtpSdkEvents.ReceiverTransactionPrepared) {
           return (
             <Button
-              type="link"
+              size="md"
               onClick={() => {
                 if (!receivingTxData) {
                   console.error('Incorrect data to fulfill');
@@ -459,6 +459,7 @@ function App(): React.ReactElement | null {
     return chain?.name ?? chainId.toString();
   };
 
+  //UI HERE
   return (
     <div style={{ marginTop: 36, marginLeft: 12, marginRight: 12 }}>
       {/* <Col>
@@ -551,10 +552,11 @@ function App(): React.ReactElement | null {
                   <Form.Item dependencies={['sendingChain']}>
                     {() => (
                       <Button
+                        size="md"
                         onClick={() => switchChains(parseInt(form.getFieldValue('sendingChain')))}
                         disabled={!web3Provider || injectedProviderChainId === parseInt(form.getFieldValue('sendingChain'))}
                       >
-                        Switch To Chain {getChainName(parseInt(form.getFieldValue('sendingChain')))}
+                        Switch
                       </Button>
                     )}
                   </Form.Item>
@@ -566,13 +568,13 @@ function App(): React.ReactElement | null {
               <Row gutter={16}>
                 <Col span={16}>
                   <Form.Item name="receivingChain">
-                    <Select>
+                    {/* <Select>
                       {Object.keys(selectedPool.assets).map((chainId) => (
                         <Select.Option key={chainId} value={chainId}>
                           {getChainName(parseInt(chainId))}
                         </Select.Option>
                       ))}
-                    </Select>
+                    </Select> */}
                   </Form.Item>
                 </Col>
               </Row>
@@ -582,13 +584,13 @@ function App(): React.ReactElement | null {
               <Row gutter={16}>
                 <Col span={12}>
                   <Form.Item name="asset">
-                    <Select onChange={(value) => (value ? setSelectedPool(swapConfig[parseInt(value?.toString())]) : '')}>
+                    {/* <Select onChange={(value) => (value ? setSelectedPool(swapConfig[parseInt(value?.toString())]) : '')}>
                       {swapConfig.map(({ name }) => (
                         <Select.Option key={name} value={name}>
                           {name}
                         </Select.Option>
                       ))}
-                    </Select>
+                    </Select> */}
                   </Form.Item>
                 </Col>
                 {/* {form.getFieldValue('asset') === 'TEST' && (
@@ -599,7 +601,7 @@ function App(): React.ReactElement | null {
                       </Button>
                     </Col>
                     <Col span={6}>
-                      <Button disabled={!web3Provider} type="link" onClick={() => addToMetamask()}>
+                      <Button disabled={!web3Provider} size="md" onClick={() => addToMetamask()}>
                         Add to Metamask
                       </Button>
                     </Col>
@@ -617,7 +619,7 @@ function App(): React.ReactElement | null {
                 </Col>
                 <Col span={8}>
                   Balance:{' '}
-                  <Button onClick={() => form.setFieldsValue({ amount: utils.formatEther(userBalance ?? 0) })} type="link">
+                  <Button onClick={() => form.setFieldsValue({ amount: utils.formatEther(userBalance ?? 0) })} size="md">
                     {utils.formatEther(userBalance ?? 0)}
                   </Button>
                 </Col>
@@ -634,8 +636,8 @@ function App(): React.ReactElement | null {
                 placeholder="..."
                 addonAfter={
                   <Button
+                    size="md"
                     disabled={!web3Provider || injectedProviderChainId !== parseInt(form.getFieldValue('sendingChain'))}
-                    type="primary"
                     onClick={async () => {
                       const sendingAssetId = swapConfig.find((sc) => sc.name === form.getFieldValue('asset'))?.assets[form.getFieldValue('sendingChain')];
                       const receivingAssetId = swapConfig.find((sc) => sc.name === form.getFieldValue('asset'))?.assets[form.getFieldValue('receivingChain')];
@@ -661,11 +663,7 @@ function App(): React.ReactElement | null {
 
             <Form.Item wrapperCol={{ offset: 8, span: 16 }} dependencies={['sendingChain', 'receivingChain']}>
               {() => (
-                <Button
-                  disabled={form.getFieldValue('sendingChain') === form.getFieldValue('receivingChain') || !auctionResponse}
-                  type="primary"
-                  htmlType="submit"
-                >
+                <Button disabled={form.getFieldValue('sendingChain') === form.getFieldValue('receivingChain') || !auctionResponse} size="md" type="submit">
                   Transfer
                 </Button>
               )}
@@ -675,6 +673,6 @@ function App(): React.ReactElement | null {
       </Row>
     </div>
   );
-}
+};
 
 export default App;
