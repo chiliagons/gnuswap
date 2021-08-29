@@ -602,7 +602,7 @@ const App: React.FC = () => {
                 <Form.Item>
                   <Row gutter={18}>
                     <Col span={16}>
-                      <TextField label="Transfer Amount" value={transferAmount} type="text" />
+                      <TextField label="Transfer Amount" value={transferAmount} type="text" onChange={(e) => setTransferAmount(e.target.value)} />
                     </Col>
                     <Col span={8}>
                       Balance:{' '}
