@@ -3,9 +3,11 @@ import React, { useEffect, useState } from 'react';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Card, Divider, TextField, Button } from '@gnosis.pm/safe-react-components';
-import { Col, Row, Input, Typography, Form, Table, Select } from 'antd';
+import { Col, Row, Input, Form, Table } from 'antd';
 import { BigNumber, providers, Signer, utils } from 'ethers';
+import useStyles from './styles';
 import pino from 'pino';
+import HelpIcon from '@material-ui/icons/Help';
 //@ts-ignore
 import { ActiveTransaction, NxtpSdk, NxtpSdkEvents } from '@connext/nxtp-sdk';
 //@ts-ignore
@@ -18,6 +20,7 @@ import { chainConfig, swapConfig } from '../constants';
 import { getBalance, mintTokens as _mintTokens } from '../utils';
 import { mockTokens } from '../Constants/Tokens';
 import { connect } from 'tls';
+import { MenuItem, Select, Grid, Container, Typography, List, ListItem, ListItemIcon } from '@material-ui/core';
 
 const chainProviders: Record<number, { provider: providers.FallbackProvider; subgraph?: string; transactionManagerAddress?: string }> = {};
 Object.entries(chainConfig).forEach(([chainId, { provider, subgraph, transactionManagerAddress }]) => {
@@ -29,6 +32,7 @@ Object.entries(chainConfig).forEach(([chainId, { provider, subgraph, transaction
 });
 
 const App: React.FC = () => {
+  const classes = useStyles();
   const { sdk, safe } = useSafeAppsSDK();
   const gnosisWeb3Provider = new SafeAppProvider(safe, sdk);
   const [chainData, setChainData] = useState<any[]>([]);
@@ -43,7 +47,7 @@ const App: React.FC = () => {
   const [tokenList, setTokenList] = useState(mockTokens);
   const [errorFetchedChecker, setErrorFetchedChecker] = useState(false);
   const [userBalance, setUserBalance] = useState<BigNumber>();
-
+  var address_field = '';
   const [form] = Form.useForm();
   const ethereum = (window as any).ethereum;
   const getTokensHandler = async (inputAddress) => {
@@ -88,6 +92,7 @@ const App: React.FC = () => {
         setSigner(_signerG);
         setProvider(provider2);
         form.setFieldsValue({ receivingAddress: address });
+        address_field = address;
       }
       // metamask events
       // ethereum.on('chainChanged', (_chainId: string) => {
@@ -464,12 +469,17 @@ const App: React.FC = () => {
 
   //UI HERE
   return (
-    <div style={{ marginTop: 36, marginLeft: 12, marginRight: 12 }}>
-      {/* <Col>
+    <>
+      <Divider />
+      <Container>
+        <Grid className={classes.grid} container spacing={8}>
+          <Grid item xs={12} sm={8}>
+            <Card className={classes.card}>
+              {/* <Col>
         <Button type="primary" onClick={connectMetamask} disabled={!!web3Provider}>
           Connect Metamask
         </Button>
-      </Col> */}
+      </Col> 
 
       {activeTransferTableColumns.length > 0 && (
         <>
@@ -507,96 +517,96 @@ const App: React.FC = () => {
             <Col span={3}></Col>
           </Row>
         </>
-      )}
-      <Row gutter={16}>
-        <Col span={16}>
-          <Form
-            form={form}
-            name="basic"
-            labelCol={{ span: 8 }}
-            wrapperCol={{ span: 16 }}
-            onFinish={() => {
-              transfer();
-            }}
-            onFieldsChange={(changed) => {
-              console.log('changed: ', changed);
-            }}
-            initialValues={{
-              sendingChain: getChainName(parseInt(Object.keys(selectedPool.assets)[0])),
-              receivingChain: getChainName(parseInt(Object.keys(selectedPool.assets)[1])),
-              asset: selectedPool.name,
-              amount: '1',
-            }}
-          >
-            <Form.Item label="Sending Chain" name="sendingChain">
-              <Row gutter={16}>
-                <Col span={16}>
-                  <Form.Item name="sendingChain">
-                    <Select
-                      onChange={async (val) => {
-                        console.log('val: ', val);
-                        if (!signer) {
-                          console.error('No signer available');
-                          return;
-                        }
-                        const _balance = await getUserBalance(val as number, signer);
-                        setUserBalance(_balance);
-                      }}
-                    >
-                      {Object.keys(selectedPool.assets).map((chainId) => (
-                        <Select.Option key={chainId} value={chainId}>
-                          {getChainName(parseInt(chainId))}
-                        </Select.Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                </Col>
-                <Col span={8}>
-                  <Form.Item dependencies={['sendingChain']}>
-                    {() => (
-                      <Button
-                        size="md"
-                        onClick={() => switchChains(parseInt(form.getFieldValue('sendingChain')))}
-                        disabled={!web3Provider || injectedProviderChainId === parseInt(form.getFieldValue('sendingChain'))}
-                      >
-                        Switch
-                      </Button>
-                    )}
-                  </Form.Item>
-                </Col>
-              </Row>
-            </Form.Item>
+              )*/}
 
-            <Form.Item label="Receiving Chain">
-              <Row gutter={16}>
-                <Col span={16}>
-                  <Form.Item name="receivingChain">
-                    {/* <Select>
-                      {Object.keys(selectedPool.assets).map((chainId) => (
-                        <Select.Option key={chainId} value={chainId}>
-                          {getChainName(parseInt(chainId))}
-                        </Select.Option>
-                      ))}
-                    </Select> */}
-                  </Form.Item>
-                </Col>
-              </Row>
-            </Form.Item>
+              <Form
+                form={form}
+                name="basic"
+                labelCol={{ span: 10 }}
+                wrapperCol={{ span: 100 }}
+                onFinish={() => {
+                  transfer();
+                }}
+                onFieldsChange={(changed) => {
+                  console.log('changed: ', changed);
+                }}
+                initialValues={{
+                  sendingChain: getChainName(parseInt(Object.keys(selectedPool.assets)[0])),
+                  receivingChain: getChainName(parseInt(Object.keys(selectedPool.assets)[1])),
+                  asset: selectedPool.name,
+                  amount: '1',
+                }}
+              >
+                <Form.Item name="sendingChain">
+                  <Row gutter={18}>
+                    <Col span={16}>
+                      <Form.Item name="sendingChain">
+                        <Select
+                          variant="outlined"
+                          onChange={async (val) => {
+                            console.log('val: ', val);
+                            if (!signer) {
+                              console.error('No signer available');
+                              return;
+                            }
+                            const _balance = await getUserBalance(val as unknown as number, signer);
+                            setUserBalance(_balance);
+                          }}
+                        >
+                          {Object.keys(selectedPool.assets).map((chainId) => (
+                            <MenuItem key={chainId} value={chainId}>
+                              {getChainName(parseInt(chainId))}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                    <Col span={8}>
+                      <Form.Item dependencies={['sendingChain']}>
+                        {() => (
+                          <Button
+                            size="md"
+                            onClick={() => switchChains(parseInt(form.getFieldValue('sendingChain')))}
+                            disabled={!web3Provider || injectedProviderChainId === parseInt(form.getFieldValue('sendingChain'))}
+                          >
+                            Switch
+                          </Button>
+                        )}
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </Form.Item>
 
-            <Form.Item label="Asset" name="asset">
-              <Row gutter={16}>
-                <Col span={12}>
-                  <Form.Item name="asset">
-                    {/* <Select onChange={(value) => (value ? setSelectedPool(swapConfig[parseInt(value?.toString())]) : '')}>
-                      {swapConfig.map(({ name }) => (
-                        <Select.Option key={name} value={name}>
-                          {name}
-                        </Select.Option>
-                      ))}
-                    </Select> */}
-                  </Form.Item>
-                </Col>
-                {/* {form.getFieldValue('asset') === 'TEST' && (
+                <Form.Item>
+                  <Row gutter={16}>
+                    <Col span={16}>
+                      <Form.Item name="receivingChain">
+                        <Select variant="outlined">
+                          {Object.keys(selectedPool.assets).map((chainId) => (
+                            <MenuItem key={chainId} value={chainId}>
+                              {getChainName(parseInt(chainId))}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </Form.Item>
+
+                <Form.Item name="asset">
+                  <Row gutter={16}>
+                    <Col span={16}>
+                      <Form.Item name="asset">
+                        <Select variant="outlined" onChange={(value) => (value ? setSelectedPool(swapConfig[parseInt(value?.toString())]) : '')}>
+                          {swapConfig.map(({ name }) => (
+                            <MenuItem key={name} value={name}>
+                              {name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </Form.Item>
+                    </Col>
+                    {/* {form.getFieldValue('asset') === 'TEST' && (
                   <>
                     <Col span={6}>
                       <Button block onClick={() => mintTokens()}>
@@ -610,71 +620,128 @@ const App: React.FC = () => {
                     </Col>
                   </>
                 )} */}
-              </Row>
-            </Form.Item>
+                  </Row>
+                </Form.Item>
 
-            <Form.Item label="Amount">
-              <Row gutter={16}>
-                <Col span={16}>
-                  <Form.Item name="amount">
-                    <Input type="number" />
-                  </Form.Item>
-                </Col>
-                <Col span={8}>
-                  Balance:{' '}
-                  <Button onClick={() => form.setFieldsValue({ amount: utils.formatEther(userBalance ?? 0) })} size="md">
-                    {utils.formatEther(userBalance ?? 0)}
-                  </Button>
-                </Col>
-              </Row>
-            </Form.Item>
+                <Form.Item>
+                  <Row gutter={18}>
+                    <Col span={16}>
+                      <Form.Item name="amount">
+                        <Input type="number" />
+                      </Form.Item>
+                    </Col>
+                    <Col span={8}>
+                      Balance:{' '}
+                      <Button onClick={() => form.setFieldsValue({ amount: utils.formatEther(userBalance ?? 0) })} size="md">
+                        {utils.formatEther(userBalance ?? 0)}
+                      </Button>
+                    </Col>
+                  </Row>
+                </Form.Item>
 
-            <Form.Item label="Receiving Address" name="receivingAddress">
-              <Input />
-            </Form.Item>
+                <Form.Item name="receivingAddress">
+                  <TextField label="Receiving Address" name="receivingAddress" aria-describedby="receivingAddress" value={address_field} type="text" required />
+                </Form.Item>
 
-            <Form.Item label="Received Amount" name="receivedAmount">
-              <Input
-                disabled
-                placeholder="..."
-                addonAfter={
-                  <Button
-                    size="md"
-                    disabled={!web3Provider || injectedProviderChainId !== parseInt(form.getFieldValue('sendingChain'))}
-                    onClick={async () => {
-                      const sendingAssetId = swapConfig.find((sc) => sc.name === form.getFieldValue('asset'))?.assets[form.getFieldValue('sendingChain')];
-                      const receivingAssetId = swapConfig.find((sc) => sc.name === form.getFieldValue('asset'))?.assets[form.getFieldValue('receivingChain')];
-                      if (!sendingAssetId || !receivingAssetId) {
-                        throw new Error("Configuration doesn't support selected swap");
-                      }
-                      const response = await getTransferQuote(
-                        parseInt(form.getFieldValue('sendingChain')),
-                        sendingAssetId,
-                        parseInt(form.getFieldValue('receivingChain')),
-                        receivingAssetId,
-                        utils.parseEther(form.getFieldValue('amount')).toString(),
-                        form.getFieldValue('receivingAddress'),
-                      );
-                      form.setFieldsValue({ receivedAmount: utils.formatEther(response!.bid.amountReceived) });
-                    }}
-                  >
-                    Get Quote
-                  </Button>
-                }
-              />
-            </Form.Item>
+                <Form.Item name="receivedAmount">
+                  <Input
+                    disabled
+                    placeholder="..."
+                    addonAfter={
+                      <Button
+                        size="md"
+                        disabled={!web3Provider || injectedProviderChainId !== parseInt(form.getFieldValue('sendingChain'))}
+                        onClick={async () => {
+                          const sendingAssetId = swapConfig.find((sc) => sc.name === form.getFieldValue('asset'))?.assets[form.getFieldValue('sendingChain')];
+                          const receivingAssetId = swapConfig.find((sc) => sc.name === form.getFieldValue('asset'))?.assets[
+                            form.getFieldValue('receivingChain')
+                          ];
+                          if (!sendingAssetId || !receivingAssetId) {
+                            throw new Error("Configuration doesn't support selected swap");
+                          }
+                          const response = await getTransferQuote(
+                            parseInt(form.getFieldValue('sendingChain')),
+                            sendingAssetId,
+                            parseInt(form.getFieldValue('receivingChain')),
+                            receivingAssetId,
+                            utils.parseEther(form.getFieldValue('amount')).toString(),
+                            form.getFieldValue('receivingAddress'),
+                          );
+                          form.setFieldsValue({ receivedAmount: utils.formatEther(response!.bid.amountReceived) });
+                        }}
+                      >
+                        Get Quote
+                      </Button>
+                    }
+                  />
+                </Form.Item>
 
-            <Form.Item wrapperCol={{ offset: 8, span: 16 }} dependencies={['sendingChain', 'receivingChain']}>
-              {() => (
-                <Button disabled={form.getFieldValue('sendingChain') === form.getFieldValue('receivingChain') || !auctionResponse} size="md" type="submit">
-                  Transfer
-                </Button>
-              )}
-            </Form.Item>
-          </Form>
-        </Col>
-      </Row>
-    </div>
+                <Form.Item wrapperCol={{ offset: 0, span: 15 }} dependencies={['sendingChain', 'receivingChain']}>
+                  {() => (
+                    <Button
+                      iconType="chain"
+                      disabled={form.getFieldValue('sendingChain') === form.getFieldValue('receivingChain') || !auctionResponse}
+                      size="md"
+                      type="submit"
+                    >
+                      Cross Chain Transfer
+                    </Button>
+                  )}
+                </Form.Item>
+              </Form>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Card className={classes.supportcard}>
+              <Typography className={classes.text} align="center" variant="h6">
+                Support
+              </Typography>
+              <List component="nav" aria-label="main mailbox folders">
+                <ListItem>
+                  <ListItemIcon>
+                    <HelpIcon />
+                  </ListItemIcon>
+                  <Typography className={classes.text}>How it works</Typography>
+                </ListItem>
+              </List>
+              <Divider />
+              <List component="nav" aria-label="secondary mailbox folders">
+                <ListItem>
+                  <Typography className={classes.text}>1. Choose the network option</Typography>
+                </ListItem>
+                <ListItem>
+                  <Typography className={classes.text}>2. Enter the reciever address</Typography>
+                </ListItem>
+                <ListItem>
+                  <Typography className={classes.text}>3. Enter the amount you want to swap</Typography>
+                </ListItem>
+                <ListItem>
+                  <Typography className={classes.text}>4. The app is powered by connext.network</Typography>
+                </ListItem>
+                <ListItem>
+                  <Typography className={classes.text}>5. A pop up from connext network will pop up to confirm details</Typography>
+                </ListItem>
+                <ListItem>
+                  <Typography className={classes.text}>6. Confirm and wait for the transfer to take place</Typography>
+                </ListItem>
+                <ListItem>
+                  <Typography className={classes.text}>
+                    7. In case of any issues you can create a support ticket{' '}
+                    <a target="blank" className={classes.a} href="https://support.connext.network/hc/en-us">
+                      here
+                    </a>
+                  </Typography>
+                </ListItem>
+
+                {/* <ListItemLink href="#simple-list">
+          <ListItemText primary="Spam" />
+        </ListItemLink> */}
+              </List>
+            </Card>
+          </Grid>
+        </Grid>
+      </Container>
+    </>
   );
 };
 
