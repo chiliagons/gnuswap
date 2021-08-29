@@ -60,6 +60,7 @@ const App: React.FC = () => {
   const [errorFetchedChecker, setErrorFetchedChecker] = useState(false);
   const [userBalance, setUserBalance] = useState<BigNumber>();
   const [transferAmount, setTransferAmount] = useState('');
+  const [sendingAssetToken, setSendingAssetToken] = useState<IBalance>();
   var address_field = '';
   const [form] = Form.useForm();
   const ethereum = (window as any).ethereum;
@@ -75,7 +76,6 @@ const App: React.FC = () => {
           if (_bal.token !== null) {
             tokenArr.push(_bal);
           }
-          console.log('tokenArr---', tokenArr);
         });
         setTokenList(tokenArr);
       })
@@ -84,9 +84,12 @@ const App: React.FC = () => {
       });
   };
 
-  const checkBalance = (bal) => {
-    setUserBalance(BigNumber.from(bal));
+  const setTokenWithBalance = (bal) => {
+    const tokenAsBal: IBalance = JSON.parse(bal);
+    setSendingAssetToken(tokenAsBal);
+    setUserBalance(BigNumber.from(tokenAsBal.balance));
   };
+
   const connectMetamask = async () => {
     // if (typeof ethereum === 'undefined') {
     //   alert('Please install Metamask');
@@ -103,7 +106,7 @@ const App: React.FC = () => {
         console.log('address: ', address);
         // debugger
         getTokensHandler(address);
-        const sendingChain = form.getFieldValue('sendingChain');
+        const sendingChain = await _signerG.getChainId();
         console.log('sendingChain: ', sendingChain);
         // const _balance = await getUserBalance(sendingChain, _signerG);
         // setUserBalance(_balance);
@@ -587,9 +590,9 @@ const App: React.FC = () => {
                   <Row gutter={16}>
                     <Col span={16}>
                       <Form.Item name="asset">
-                        <Select variant="outlined" onChange={(e) => checkBalance(e.target.value)}>
+                        <Select variant="outlined" onChange={(e) => setTokenWithBalance(e.target.value)}>
                           {tokenList.map((_bal) => (
-                            <MenuItem key={_bal.token.symbol} value={_bal.balance}>
+                            <MenuItem key={_bal.token.symbol} value={JSON.stringify(_bal)}>
                               {_bal.token.symbol}
                             </MenuItem>
                           ))}
@@ -622,19 +625,20 @@ const App: React.FC = () => {
                     disabled
                     placeholder="..."
                     addonAfter={
+                      //Need to select sendingChainId
+                      //need to select the asset from the drop down
                       <Button
                         size="md"
                         disabled={!web3Provider || injectedProviderChainId !== parseInt(form.getFieldValue('sendingChain'))}
                         onClick={async () => {
-                          const sendingAssetId = swapConfig.find((sc) => sc.name === form.getFieldValue('asset'))?.assets[form.getFieldValue('sendingChain')];
-                          const receivingAssetId = swapConfig.find((sc) => sc.name === form.getFieldValue('asset'))?.assets[
-                            form.getFieldValue('receivingChain')
-                          ];
+                          const sendingAssetId = sendingAssetToken.tokenAddress;
+                          const receivingAssetId = sendingAssetToken.tokenAddress;
                           if (!sendingAssetId || !receivingAssetId) {
                             throw new Error("Configuration doesn't support selected swap");
                           }
+                          debugger;
                           const response = await getTransferQuote(
-                            parseInt(form.getFieldValue('sendingChain')),
+                            injectedProviderChainId,
                             sendingAssetId,
                             parseInt(form.getFieldValue('receivingChain')),
                             receivingAssetId,
