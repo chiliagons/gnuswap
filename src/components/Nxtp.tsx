@@ -322,6 +322,7 @@ const App: React.FC = () => {
       transactionId,
       expiry: Math.floor(Date.now() / 1000) + 3600 * 24 * 3, // 3 days
     });
+
     setAuctionResponse(response);
     return response;
   };
@@ -586,7 +587,7 @@ const App: React.FC = () => {
                 <Form.Item>
                   <Row gutter={18}>
                     <Col span={16}>
-                      <TextField label="Transfer Amount" value={transferAmount} type="text" onChange={(e) => setTransferAmount(e.target.value)} />
+                      <TextField label="Transfer Amount" name="amount" value={transferAmount} type="text" onChange={(e) => setTransferAmount(e.target.value)} />
                     </Col>
                     <Col span={8}>
                       Balance:{' '}
@@ -617,13 +618,13 @@ const App: React.FC = () => {
                           if (!sendingAssetId || !receivingAssetId) {
                             throw new Error("Configuration doesn't support selected swap");
                           }
-                          debugger;
+
                           const response = await getTransferQuote(
                             injectedProviderChainId,
                             sendingAssetId,
                             parseInt(form.getFieldValue('receivingChain')),
                             receivingAssetId,
-                            utils.parseEther(form.getFieldValue('amount')).toString(),
+                            utils.parseEther(transferAmount).toString(),
                             form.getFieldValue('receivingAddress'),
                           );
                           form.setFieldsValue({ receivedAmount: utils.formatEther(response!.bid.amountReceived) });
