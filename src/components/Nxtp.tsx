@@ -22,7 +22,6 @@ import { connect } from 'tls';
 
 import { chainConfig, swapConfig } from '../constants';
 import { getBalance, mintTokens as _mintTokens } from '../utils';
-import { mockTokens } from '../Constants/Tokens';
 import { IBalance } from '../Models/Shared.model';
 
 const chainProviders: Record<number, { provider: providers.FallbackProvider; subgraph?: string; transactionManagerAddress?: string }> = {};

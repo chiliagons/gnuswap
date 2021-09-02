@@ -1,6 +1,6 @@
-import { TOKEN } from '../Models/Tokens.model';
+import { MOCKTOKEN } from '../Models/Tokens.model';
 
-export const GOERLI_MUMBAI_TOKENS: TOKEN[] = [
+export const GOERLI_MUMBAI_TOKENS: MOCKTOKEN[] = [
   {
     name: 'Test Token',
     depositAssetId: '0xbd69fC70FA1c3AED524Bb4E82Adc5fcCFFcD79Fa',
@@ -8,7 +8,7 @@ export const GOERLI_MUMBAI_TOKENS: TOKEN[] = [
   },
 ];
 
-export const MUMBAI_GOERLI_TOKENS: TOKEN[] = [
+export const MUMBAI_GOERLI_TOKENS: MOCKTOKEN[] = [
   {
     name: 'Test Token',
     depositAssetId: '0xfe4F5145f6e09952a5ba9e956ED0C25e3Fa4c7F1',
@@ -16,7 +16,7 @@ export const MUMBAI_GOERLI_TOKENS: TOKEN[] = [
   },
 ];
 
-export const RINKEBY_KOVAN_TOKENS: TOKEN[] = [
+export const RINKEBY_KOVAN_TOKENS: MOCKTOKEN[] = [
   {
     name: 'ETH',
     depositAssetId: '0x0000000000000000000000000000000000000000',
@@ -24,7 +24,7 @@ export const RINKEBY_KOVAN_TOKENS: TOKEN[] = [
   },
 ];
 
-export const KOVAN_RINKEBY_TOKENS: TOKEN[] = [
+export const KOVAN_RINKEBY_TOKENS: MOCKTOKEN[] = [
   {
     name: 'ETH',
     depositAssetId: '0x0000000000000000000000000000000000000000',
