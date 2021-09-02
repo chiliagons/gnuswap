@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable require-jsdoc */
 import React, { useEffect, useState } from 'react';
 import '../App.css';
@@ -8,20 +7,19 @@ import useStyles from './styles';
 import { Card, Divider, TextField, Button } from '@gnosis.pm/safe-react-components';
 import { MenuItem, Select, Grid, Container, Typography, List, ListItem, ListItemIcon } from '@material-ui/core';
 import HelpIcon from '@material-ui/icons/Help';
-import { Col, Row, Input, Form, Table } from 'antd';
+import { Col, Row, Input, Form } from 'antd';
 
 import { BigNumber, providers, Signer, utils } from 'ethers';
 //@ts-ignore
 import { ActiveTransaction, NxtpSdk, NxtpSdkEvents } from '@connext/nxtp-sdk';
 //@ts-ignore
-import { AuctionResponse, getRandomBytes32, TransactionPreparedEvent } from '@connext/nxtp-utils';
+import { AuctionResponse, getRandomBytes32 } from '@connext/nxtp-utils';
 import pino from 'pino';
 import { useSafeAppsSDK } from '@gnosis.pm/safe-apps-react-sdk';
 import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
-import { connect } from 'tls';
 
-import { getBalance, mintTokens as _mintTokens, chainProviders } from '../Utils/Shared';
-import { chainConfig, swapConfig } from '../constants';
+import { chainProviders } from '../Utils/Shared';
+import { swapConfig } from '../constants';
 import { IBalance } from '../Models/Shared.model';
 
 const App: React.FC = () => {
@@ -35,6 +33,7 @@ const App: React.FC = () => {
   const [nsdk, setSdk] = useState<NxtpSdk>();
   const [auctionResponse, setAuctionResponse] = useState<AuctionResponse>();
   const [activeTransferTableColumns, setActiveTransferTableColumns] = useState<ActiveTransaction[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedPool, setSelectedPool] = useState(swapConfig[0]);
   const [tokenList, setTokenList] = useState<IBalance[]>([]);
   const [errorFetchedChecker, setErrorFetchedChecker] = useState(false);
@@ -88,19 +87,6 @@ const App: React.FC = () => {
     } catch (e) {
       return false;
     }
-  };
-
-  const getUserBalance = async (chainId: number, _signer: Signer) => {
-    const address = await _signer.getAddress();
-    const sendingAssetId = swapConfig.find((sc) => sc.name === form.getFieldValue('asset'))?.assets[chainId];
-    if (!sendingAssetId) {
-      throw new Error('Bad configuration for swap');
-    }
-    if (!chainProviders || !chainProviders[chainId]) {
-      throw new Error('No config for chainId');
-    }
-    const _balance = await getBalance(address, sendingAssetId, chainProviders[chainId].provider);
-    return _balance;
   };
 
   useEffect(() => {
@@ -212,45 +198,6 @@ const App: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [web3Provider, signer]);
 
-  const switchChains = async (targetChainId: number) => {
-    if (!signer || !web3Provider) {
-      return;
-    }
-    if (injectedProviderChainId === targetChainId) {
-      return;
-    }
-    if (!chainConfig[targetChainId]) {
-      throw new Error(`No provider configured for chain ${targetChainId}`);
-    }
-    const ethereum = (window as any).ethereum;
-    if (typeof ethereum === 'undefined') {
-      alert('Please install Metamask');
-      return;
-    }
-    const chainId = '0x' + BigNumber.from(targetChainId)._hex.split('0x')[1].replace(/\b0+/g, '');
-    try {
-      await ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId }],
-      });
-    } catch (error) {
-      // This error code indicates that the chain has not been added to MetaMask.
-      if (error.code === 4902) {
-        try {
-          await ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [{ chainId, rpcUrl: chainConfig[targetChainId] }],
-          });
-        } catch (addError) {
-          // handle "add" error
-          throw new Error(`Error adding chain ${targetChainId}: ${addError.message}`);
-        }
-      }
-      throw error;
-      // handle other "switch" errors
-    }
-  };
-
   const getTransferQuote = async (
     sendingChainId: number,
     sendingAssetId: string,
@@ -307,18 +254,7 @@ const App: React.FC = () => {
       alert('Please switch chains to the sending chain!');
       throw new Error('Wrong chain');
     }
-    const transfer = await nsdk.prepareTransfer(auctionResponse, true);
-  };
-
-  const finishTransfer = async ({ bidSignature, encodedBid, encryptedCallData, txData }: Omit<TransactionPreparedEvent, 'caller'>) => {
-    if (!nsdk) {
-      return;
-    }
-
-    const finish = await nsdk.fulfillTransfer({ bidSignature, encodedBid, encryptedCallData, txData });
-    if (finish.metaTxResponse?.transactionHash || finish.metaTxResponse?.transactionHash === '') {
-      setActiveTransferTableColumns(activeTransferTableColumns.filter((t) => t.crosschainTx.invariant.transactionId !== txData.transactionId));
-    }
+    await nsdk.prepareTransfer(auctionResponse, true);
   };
 
   const getChainName = (chainId: number): string => {
