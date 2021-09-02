@@ -20,18 +20,9 @@ import { useSafeAppsSDK } from '@gnosis.pm/safe-apps-react-sdk';
 import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
 import { connect } from 'tls';
 
+import { getBalance, mintTokens as _mintTokens, chainProviders } from '../Utils/Shared';
 import { chainConfig, swapConfig } from '../constants';
-import { getBalance, mintTokens as _mintTokens } from '../utils';
 import { IBalance } from '../Models/Shared.model';
-
-const chainProviders: Record<number, { provider: providers.FallbackProvider; subgraph?: string; transactionManagerAddress?: string }> = {};
-Object.entries(chainConfig).forEach(([chainId, { provider, subgraph, transactionManagerAddress }]) => {
-  chainProviders[parseInt(chainId)] = {
-    provider: new providers.FallbackProvider(provider.map((p) => new providers.JsonRpcProvider(p, parseInt(chainId)))),
-    subgraph,
-    transactionManagerAddress,
-  };
-});
 
 const App: React.FC = () => {
   const classes = useStyles();

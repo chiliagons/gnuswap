@@ -1,5 +1,6 @@
 /* eslint-disable require-jsdoc */
 import { BigNumber, constants, Contract, providers, Signer, utils } from 'ethers';
+import { chainConfig } from '../constants';
 
 const TestTokenABI = [
   // Read-Only Functions
@@ -29,3 +30,12 @@ export const getBalance = async (address: string, assetId: string, provider: pro
   }
   return balance;
 };
+
+export const chainProviders: Record<number, { provider: providers.FallbackProvider; subgraph?: string; transactionManagerAddress?: string }> = {};
+Object.entries(chainConfig).forEach(([chainId, { provider, subgraph, transactionManagerAddress }]) => {
+  chainProviders[parseInt(chainId)] = {
+    provider: new providers.FallbackProvider(provider.map((p) => new providers.JsonRpcProvider(p, parseInt(chainId)))),
+    subgraph,
+    transactionManagerAddress,
+  };
+});
