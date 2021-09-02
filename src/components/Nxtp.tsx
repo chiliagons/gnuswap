@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable require-jsdoc */
 import React, { useEffect, useState } from 'react';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Card, Divider, TextField, Button } from '@gnosis.pm/safe-react-components';
+
 import { Col, Row, Input, Form, Table } from 'antd';
 import { BigNumber, providers, Signer, utils } from 'ethers';
 import useStyles from './styles';
@@ -55,7 +57,6 @@ const App: React.FC = () => {
   const [auctionResponse, setAuctionResponse] = useState<AuctionResponse>();
   const [activeTransferTableColumns, setActiveTransferTableColumns] = useState<ActiveTransaction[]>([]);
   const [selectedPool, setSelectedPool] = useState(swapConfig[0]);
-  // const [token, setToken] = useState(mockTokens[0]);
   const [tokenList, setTokenList] = useState<IBalance[]>([]);
   const [errorFetchedChecker, setErrorFetchedChecker] = useState(false);
   const [userBalance, setUserBalance] = useState<BigNumber>();
@@ -91,14 +92,7 @@ const App: React.FC = () => {
   };
 
   const connectMetamask = async () => {
-    // if (typeof ethereum === 'undefined') {
-    //   alert('Please install Metamask');
-    //   return;
-    // }
     try {
-      // await ethereum.request({ method: 'eth_requestAccounts' });
-      // const provider = new providers.Web3Provider(ethereum);
-      // const _signer = provider.getSigner();
       const provider2 = new providers.Web3Provider(gnosisWeb3Provider);
       const _signerG = await provider2.getSigner();
       if (_signerG) {
@@ -106,17 +100,11 @@ const App: React.FC = () => {
         getTokensHandler(address);
         const sendingChain = await _signerG.getChainId();
         console.log('sendingChain: ', sendingChain);
-        // const _balance = await getUserBalance(sendingChain, _signerG);
-        // setUserBalance(_balance);
         setSigner(_signerG);
         setProvider(provider2);
         form.setFieldsValue({ receivingAddress: address });
         address_field = address;
       }
-      // metamask events
-      // ethereum.on('chainChanged', (_chainId: string) => {
-      //   window.location.reload();
-      // });
       return true;
     } catch (e) {
       return false;
@@ -167,8 +155,6 @@ const App: React.FC = () => {
       setSdk(_sdk);
       const activeTxs = await _sdk.getActiveTransactions();
 
-      // TODO: race condition with the event listeners
-      // Will not update the transactions appropriately if sender tx prepared and no txs set
       setActiveTransferTableColumns(activeTxs);
 
       _sdk.attach(NxtpSdkEvents.SenderTransactionPrepared, (data) => {
@@ -201,8 +187,6 @@ const App: React.FC = () => {
 
         const table = [...activeTransferTableColumns];
         if (index === -1) {
-          // TODO: is there a better way to
-          // get the info here?
           table.push({
             crosschainTx: {
               invariant,
@@ -454,50 +438,6 @@ const App: React.FC = () => {
         <Grid className={classes.grid} container spacing={8}>
           <Grid item xs={12} sm={8}>
             <Card className={classes.card}>
-              {/* <Col>
-        <Button type="primary" onClick={connectMetamask} disabled={!!web3Provider}>
-          Connect Metamask
-        </Button>
-      </Col> 
-
-      {activeTransferTableColumns.length > 0 && (
-        <>
-          <Row gutter={16}>
-            <Col span={3}></Col>
-            <Col span={8}>
-              <Typography.Title level={2}>Active Transfers</Typography.Title>
-            </Col>
-          </Row>
-          <Row>
-            <Col span={3}></Col>
-            <Col span={20}>
-              <Table
-                columns={columns}
-                dataSource={activeTransferTableColumns.map((tx) => {
-                  // Use receiver side info by default
-                  const variant = tx.crosschainTx.receiving ?? tx.crosschainTx.sending;
-                  return {
-                    amount: variant.amount,
-                    status: tx.status,
-                    sendingChain: tx.crosschainTx.invariant.sendingChainId.toString(),
-                    receivingChain: tx.crosschainTx.invariant.receivingChainId.toString(),
-                    asset: 'TEST',
-                    key: tx.crosschainTx.invariant.transactionId,
-                    txId: `${tx.crosschainTx.invariant.transactionId.substr(0, 6)}...${tx.crosschainTx.invariant.transactionId.substr(
-                      tx.crosschainTx.invariant.transactionId.length - 5,
-                      tx.crosschainTx.invariant.transactionId.length - 1,
-                    )}`,
-                    expires: variant.expiry > Date.now() / 1000 ? `${((variant.expiry - Date.now() / 1000) / 3600).toFixed(2)} hours` : 'Expired',
-                    action: tx,
-                  };
-                })}
-              />
-            </Col>
-            <Col span={3}></Col>
-          </Row>
-        </>
-              )*/}
-
               <Form
                 form={form}
                 name="basic"
@@ -515,40 +455,8 @@ const App: React.FC = () => {
               >
                 <Form.Item name="sendingChain">
                   <Row gutter={18}>
-                    <Col span={16}>
-                      {/* <Form.Item name="sendingChain">
-                        <Select
-                          variant="outlined"
-                          onChange={async (val) => {
-                            if (!signer) {
-                              console.error('No signer available');
-                              return;
-                            }
-                            const _balance = await getUserBalance(val as unknown as number, signer);
-                            setUserBalance(_balance);
-                          }}
-                        >
-                          {Object.keys(selectedPool.assets).map((chainId) => (
-                            <MenuItem key={chainId} value={chainId}>
-                              {getChainName(parseInt(chainId))}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </Form.Item> */}
-                    </Col>
-                    <Col span={8}>
-                      {/* <Form.Item dependencies={['sendingChain']}>
-                        {() => (
-                          <Button
-                            size="md"
-                            onClick={() => switchChains(parseInt(form.getFieldValue('sendingChain')))}
-                            disabled={!web3Provider || injectedProviderChainId === parseInt(form.getFieldValue('sendingChain'))}
-                          >
-                            Switch
-                          </Button>
-                        )}
-                      </Form.Item> */}
-                    </Col>
+                    <Col span={16}></Col>
+                    <Col span={8}></Col>
                   </Row>
                 </Form.Item>
 
@@ -695,10 +603,6 @@ const App: React.FC = () => {
                     </a>
                   </Typography>
                 </ListItem>
-
-                {/* <ListItemLink href="#simple-list">
-          <ListItemText primary="Spam" />
-        </ListItemLink> */}
               </List>
             </Card>
           </Grid>
