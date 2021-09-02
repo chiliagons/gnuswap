@@ -1,40 +1,29 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable require-jsdoc */
 import React, { useEffect, useState } from 'react';
+import '../App.css';
+import useStyles from './styles';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Card, Divider, TextField, Button } from '@gnosis.pm/safe-react-components';
-
-import { Col, Row, Input, Form, Table } from 'antd';
-import { BigNumber, providers, Signer, utils } from 'ethers';
-import useStyles from './styles';
-import pino from 'pino';
+import { MenuItem, Select, Grid, Container, Typography, List, ListItem, ListItemIcon } from '@material-ui/core';
 import HelpIcon from '@material-ui/icons/Help';
+import { Col, Row, Input, Form, Table } from 'antd';
+
+import { BigNumber, providers, Signer, utils } from 'ethers';
 //@ts-ignore
 import { ActiveTransaction, NxtpSdk, NxtpSdkEvents } from '@connext/nxtp-sdk';
 //@ts-ignore
 import { AuctionResponse, getRandomBytes32, TransactionPreparedEvent } from '@connext/nxtp-utils';
+import pino from 'pino';
 import { useSafeAppsSDK } from '@gnosis.pm/safe-apps-react-sdk';
 import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
-import '../App.css';
+import { connect } from 'tls';
+
 import { chainConfig, swapConfig } from '../constants';
 import { getBalance, mintTokens as _mintTokens } from '../utils';
 import { mockTokens } from '../Constants/Tokens';
-import { connect } from 'tls';
-import { MenuItem, Select, Grid, Container, Typography, List, ListItem, ListItemIcon } from '@material-ui/core';
-
-interface IToken {
-  name: string;
-  symbol: string;
-  decimals: number;
-  logoUri: string;
-}
-
-interface IBalance {
-  tokenAddress: string;
-  token: IToken;
-  balance: number;
-}
+import { IBalance } from '../Models/Shared.model';
 
 const chainProviders: Record<number, { provider: providers.FallbackProvider; subgraph?: string; transactionManagerAddress?: string }> = {};
 Object.entries(chainConfig).forEach(([chainId, { provider, subgraph, transactionManagerAddress }]) => {
