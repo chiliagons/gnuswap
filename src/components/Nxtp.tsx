@@ -52,7 +52,16 @@ const App: React.FC = () => {
       .then((res) => res.json())
       .then((response) => {
         response.forEach((_bal: IBalance) => {
+          console.log(_bal);
           if (_bal.token !== null) {
+            tokenArr.push(_bal);
+          } else if (_bal.token === null) {
+            _bal.token = {
+              decimals: 18,
+              logoUri: 'https://gnosis-safe-token-logos.s3.amazonaws.com/0xF5238462E7235c7B62811567E63Dd17d12C2EAA0.png',
+              name: 'Ethereum',
+              symbol: 'ETH',
+            };
             tokenArr.push(_bal);
           }
         });
