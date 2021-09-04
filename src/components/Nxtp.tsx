@@ -48,7 +48,7 @@ const App: React.FC = () => {
   const getTokensHandler = async (address) => {
     let tokenArr: Array<IBalance> = [];
 
-    await fetch(`https://safe-transaction.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`)
+    await fetch(`https://safe-transaction.rinkeby.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`)
       .then((res) => res.json())
       .then((response) => {
         response.forEach((_bal: IBalance) => {
@@ -132,21 +132,21 @@ const App: React.FC = () => {
 
       setActiveTransferTableColumns(activeTxs);
 
-      _sdk.attach(NxtpSdkEvents.SenderTransactionPrepared, (data) => {
-        const { amount, expiry, preparedBlockNumber, ...invariant } = data.txData;
-        const table = [...activeTransferTableColumns];
-        table.push({
-          crosschainTx: {
-            invariant,
-            sending: { amount, expiry, preparedBlockNumber },
-          },
-          bidSignature: data.bidSignature,
-          encodedBid: data.encodedBid,
-          encryptedCallData: data.encryptedCallData,
-          status: NxtpSdkEvents.SenderTransactionPrepared,
-        });
-        setActiveTransferTableColumns(table);
-      });
+      // _sdk.attach(NxtpSdkEvents.SenderTransactionPrepared, (data) => {
+      //   const { amount, expiry, preparedBlockNumber, ...invariant } = data.txData;
+      //   const table = [...activeTransferTableColumns];
+      //   // table.push({
+      //   //   crosschainTx: {
+      //   //     invariant,
+      //   //     sending: { amount, expiry, preparedBlockNumber },
+      //   //   },
+      //   //   bidSignature: data.bidSignature,
+      //   //   encodedBid: data.encodedBid,
+      //   //   encryptedCallData: data.encryptedCallData,
+      //   //   status: NxtpSdkEvents.SenderTransactionPrepared,
+      //   // });
+      //   setActiveTransferTableColumns(table);
+      // });
 
       _sdk.attach(NxtpSdkEvents.SenderTransactionFulfilled, (data) => {
         setActiveTransferTableColumns(activeTransferTableColumns.filter((t) => t.crosschainTx.invariant.transactionId !== data.txData.transactionId));
@@ -161,31 +161,31 @@ const App: React.FC = () => {
         const index = activeTransferTableColumns.findIndex((col) => col.crosschainTx.invariant.transactionId === invariant.transactionId);
 
         const table = [...activeTransferTableColumns];
-        if (index === -1) {
-          table.push({
-            crosschainTx: {
-              invariant,
-              sending: {} as any, // Find to do this, since it defaults to receiver side info
-              receiving: { amount, expiry, preparedBlockNumber },
-            },
-            bidSignature: data.bidSignature,
-            encodedBid: data.encodedBid,
-            encryptedCallData: data.encryptedCallData,
-            status: NxtpSdkEvents.ReceiverTransactionPrepared,
-          });
-          setActiveTransferTableColumns(table);
-        } else {
-          const item = { ...table[index] };
-          table[index] = {
-            ...item,
-            status: NxtpSdkEvents.ReceiverTransactionPrepared,
-            crosschainTx: {
-              ...item.crosschainTx,
-              receiving: { amount, expiry, preparedBlockNumber },
-            },
-          };
-          setActiveTransferTableColumns(table);
-        }
+        // if (index === -1) {
+        //   table.push({
+        //     crosschainTx: {
+        //       invariant,
+        //       sending: {} as any, // Find to do this, since it defaults to receiver side info
+        //       receiving: { amount, expiry, preparedBlockNumber },
+        //     },
+        //     bidSignature: data.bidSignature,
+        //     encodedBid: data.encodedBid,
+        //     encryptedCallData: data.encryptedCallData,
+        //     status: NxtpSdkEvents.ReceiverTransactionPrepared,
+        //   });
+        //   setActiveTransferTableColumns(table);
+        // } else {
+        //   const item = { ...table[index] };
+        //   table[index] = {
+        //     ...item,
+        //     status: NxtpSdkEvents.ReceiverTransactionPrepared,
+        //     crosschainTx: {
+        //       ...item.crosschainTx,
+        //       receiving: { amount, expiry, preparedBlockNumber },
+        //     },
+        //   };
+        //   setActiveTransferTableColumns(table);
+        // }
       });
 
       _sdk.attach(NxtpSdkEvents.ReceiverTransactionFulfilled, (data) => {
@@ -219,6 +219,7 @@ const App: React.FC = () => {
     if (!nsdk) {
       return;
     }
+    console.log(sendingChainId, sendingAssetId, receivingChainId, receivingAssetId, amount, receivingAddress);
     const provider = new providers.Web3Provider(ethereum);
     const _signer = provider.getSigner();
     setSigner(_signer);
@@ -364,7 +365,7 @@ const App: React.FC = () => {
                         disabled={!web3Provider || injectedProviderChainId !== parseInt(form.getFieldValue('sendingChain'))}
                         onClick={async () => {
                           const sendingAssetId = sendingAssetToken.tokenAddress; //from _bal -> set the tokenaddress
-                          const receivingAssetId = sendingAssetToken.tokenAddress; //from _bal -> set the tokenaddress
+                          const receivingAssetId = '0xcfDAD1B98bc62DACca93A92286479C997034337E'; //from _bal -> set the tokenaddress
                           if (!sendingAssetId || !receivingAssetId) {
                             throw new Error("Configuration doesn't support selected swap");
                           }
