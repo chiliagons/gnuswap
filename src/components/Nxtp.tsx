@@ -4,10 +4,10 @@ import '../App.css';
 import useStyles from './styles';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Card, Divider, TextField, Button } from '@gnosis.pm/safe-react-components';
+import { Button, Card, Divider, Icon, Loader, Text, TextField } from '@gnosis.pm/safe-react-components';
 import { MenuItem, Select, Grid, Container, Typography, List, ListItem, ListItemIcon } from '@material-ui/core';
 import HelpIcon from '@material-ui/icons/Help';
-import { Col, Row, Input, Form } from 'antd';
+import { Col, Row, Form } from 'antd';
 
 import { BigNumber, providers, Signer, utils } from 'ethers';
 //@ts-ignore
@@ -32,6 +32,8 @@ const App: React.FC = () => {
   const [gnosisChainId, setGnosisChainId] = useState<number>();
   const [signer, setSigner] = useState<Signer>();
   const [nsdk, setSdk] = useState<NxtpSdk>();
+  const [showLoading, setShowLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
   const [auctionResponse, setAuctionResponse] = useState<AuctionResponse>();
   const [activeTransferTableColumns, setActiveTransferTableColumns] = useState<ActiveTransaction[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -41,7 +43,10 @@ const App: React.FC = () => {
   const [userBalance, setUserBalance] = useState<BigNumber>();
   const [transferAmount, setTransferAmount] = useState('');
   const [sendingAssetToken, setSendingAssetToken] = useState<IBalance>();
-  var address_field = '';
+  const adornmentReceivingAddress = <Icon size="md" type="addressBook" />;
+  const adornSendingContractAddress = <Icon size="md" type="sent" />;
+
+  let address_field = '';
   const [form] = Form.useForm();
   const ethereum = (window as any).ethereum;
 
@@ -117,6 +122,7 @@ const App: React.FC = () => {
       if (!signer || !web3Provider) {
         return;
       }
+      console.log('Signeer was triggered');
       const { chainId } = await signer.provider!.getNetwork();
       setInjectedProviderChainId(chainId);
       const _sdk = new NxtpSdk(
@@ -216,14 +222,27 @@ const App: React.FC = () => {
     amount: string,
     receivingAddress: string,
   ): Promise<AuctionResponse | undefined> => {
+    let nsdk: NxtpSdk;
+
+    console.log(sendingChainId, sendingAssetId, receivingChainId, receivingAssetId, amount, receivingAddress);
+    setShowLoading(true);
+    const provider = new providers.Web3Provider(ethereum);
+    const _signer = await provider.getSigner();
+    console.log('Signer was set');
+    // setSigner(_signer);
+    // setProvider(provider);
+
+    nsdk = new NxtpSdk(
+      chainProviders,
+      _signer,
+      pino({ level: 'info' }),
+      (process.env.REACT_APP_NETWORK as 'mainnet') ?? 'mainnet',
+      process.env.REACT_APP_NATS_URL_OVERRIDE,
+      process.env.REACT_APP_AUTH_URL_OVERRIDE,
+    );
     if (!nsdk) {
       return;
     }
-    console.log(sendingChainId, sendingAssetId, receivingChainId, receivingAssetId, amount, receivingAddress);
-    const provider = new providers.Web3Provider(ethereum);
-    const _signer = provider.getSigner();
-    setSigner(_signer);
-    setProvider(provider);
 
     if (injectedProviderChainId !== sendingChainId) {
       alert('Please switch chains to the sending chain!');
@@ -232,30 +251,43 @@ const App: React.FC = () => {
 
     // Create txid
     const transactionId = getRandomBytes32();
-
-    const response = await nsdk.getTransferQuote({
-      sendingAssetId,
-      sendingChainId,
-      receivingChainId,
-      receivingAssetId,
-      receivingAddress,
-      amount,
-      transactionId,
-      expiry: Math.floor(Date.now() / 1000) + 3600 * 24 * 3, // 3 days
-    });
-
-    setAuctionResponse(response);
-    return response;
+    try {
+      const response = await nsdk.getTransferQuote({
+        sendingAssetId,
+        sendingChainId,
+        receivingChainId,
+        receivingAssetId,
+        receivingAddress,
+        amount,
+        transactionId,
+        expiry: Math.floor(Date.now() / 1000) + 3600 * 24 * 3, // 3 days
+      });
+      setShowLoading(false);
+      setAuctionResponse(response);
+      return response;
+    } catch (e) {
+      setShowLoading(false);
+      setErrorMsg(e.message);
+      return null;
+    }
   };
 
   const transfer = async () => {
+    let nsdk: NxtpSdk;
+
+    const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
+    const _signerG = gnosisProvider.getSigner();
+    nsdk = new NxtpSdk(
+      chainProviders,
+      _signerG,
+      pino({ level: 'info' }),
+      (process.env.REACT_APP_NETWORK as 'mainnet') ?? 'mainnet',
+      process.env.REACT_APP_NATS_URL_OVERRIDE,
+      process.env.REACT_APP_AUTH_URL_OVERRIDE,
+    );
     if (!nsdk) {
       return;
     }
-    const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
-    const _signerG = gnosisProvider.getSigner();
-    setSigner(_signerG);
-    setProvider(gnosisProvider);
     if (!auctionResponse) {
       alert('Please request quote first');
       throw new Error('Please request quote first');
@@ -350,41 +382,56 @@ const App: React.FC = () => {
                 </Form.Item>
 
                 <Form.Item name="receivingAddress">
-                  <TextField label="Receiving Address" name="receivingAddress" aria-describedby="receivingAddress" value={address_field} type="text" required />
+                  <TextField
+                    label="Receiving Address"
+                    name="receivingAddress"
+                    aria-describedby="receivingAddress"
+                    value={address_field}
+                    type="text"
+                    startAdornment={adornmentReceivingAddress}
+                    required
+                  />
+                </Form.Item>
+
+                <Form.Item name="sendingContractAddress">
+                  <TextField
+                    label="Sending Token Contract Address"
+                    name="sendingAssetTokenContract"
+                    value=""
+                    type="text"
+                    startAdornment={adornSendingContractAddress}
+                    required
+                  />
                 </Form.Item>
 
                 <Form.Item name="receivedAmount">
-                  <Input
-                    disabled
-                    placeholder="..."
-                    addonAfter={
-                      //Need to select sendingChainId
-                      //need to select the asset from the drop down
-                      <Button
-                        size="md"
-                        disabled={!web3Provider || injectedProviderChainId !== parseInt(form.getFieldValue('sendingChain'))}
-                        onClick={async () => {
-                          const sendingAssetId = sendingAssetToken.tokenAddress; //from _bal -> set the tokenaddress
-                          const receivingAssetId = '0xcfDAD1B98bc62DACca93A92286479C997034337E'; //from _bal -> set the tokenaddress
-                          if (!sendingAssetId || !receivingAssetId) {
-                            throw new Error("Configuration doesn't support selected swap");
-                          }
+                  <TextField name="receivedAmount" type="text" value="" label="" disabled placeholder="..." />
+                  <br />
+                  <Button
+                    size="md"
+                    disabled={!web3Provider || injectedProviderChainId !== parseInt(form.getFieldValue('sendingChain'))}
+                    onClick={async () => {
+                      const sendingAssetId = sendingAssetToken.tokenAddress; //from _bal -> set the tokenaddress
+                      const receivingAssetId = form.getFieldValue('sendingContractAddress'); //from _bal -> set the tokenaddress
+                      if (!sendingAssetId || !receivingAssetId) {
+                        throw new Error("Configuration doesn't support selected swap");
+                      }
 
-                          const response = await getTransferQuote(
-                            gnosisChainId,
-                            sendingAssetId,
-                            parseInt(form.getFieldValue('receivingChain')),
-                            receivingAssetId,
-                            utils.parseEther(transferAmount).toString(),
-                            form.getFieldValue('receivingAddress'),
-                          );
-                          form.setFieldsValue({ receivedAmount: utils.formatEther(response!.bid.amountReceived) });
-                        }}
-                      >
-                        Get Quote
-                      </Button>
-                    }
-                  />
+                      const response = await getTransferQuote(
+                        gnosisChainId,
+                        sendingAssetId,
+                        parseInt(form.getFieldValue('receivingChain')),
+                        receivingAssetId,
+                        utils.parseEther(transferAmount).toString(),
+                        form.getFieldValue('receivingAddress'),
+                      );
+                      if (response) form.setFieldsValue({ receivedAmount: utils.formatEther(response!.bid.amountReceived) });
+                    }}
+                  >
+                    Get Quote
+                  </Button>
+                  {showLoading && <Loader size="xs" />}
+                  {errorMsg.length !== 0 && <Text size="sm">{errorMsg}</Text>}
                 </Form.Item>
 
                 <Form.Item wrapperCol={{ offset: 0, span: 15 }} dependencies={['sendingChain', 'receivingChain']}>
