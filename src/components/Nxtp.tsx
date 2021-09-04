@@ -29,6 +29,7 @@ const App: React.FC = () => {
   const [chainData, setChainData] = useState<any[]>([]);
   const [web3Provider, setProvider] = useState<providers.Web3Provider>();
   const [injectedProviderChainId, setInjectedProviderChainId] = useState<number>();
+  const [gnosisChainId, setGnosisChainId] = useState<number>();
   const [signer, setSigner] = useState<Signer>();
   const [nsdk, setSdk] = useState<NxtpSdk>();
   const [auctionResponse, setAuctionResponse] = useState<AuctionResponse>();
@@ -69,17 +70,18 @@ const App: React.FC = () => {
     setUserBalance(BigNumber.from(tokenAsBal.balance));
   };
 
-  const connectMetamask = async () => {
+  const connectProvider = async () => {
     try {
-      const provider2 = new providers.Web3Provider(gnosisWeb3Provider);
-      const _signerG = await provider2.getSigner();
+      const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
+      const _signerG = await gnosisProvider.getSigner();
       if (_signerG) {
         const address = await _signerG.getAddress();
         getTokensHandler(address);
         const sendingChain = await _signerG.getChainId();
         console.log('sendingChain: ', sendingChain);
+        setGnosisChainId(sendingChain);
         setSigner(_signerG);
-        setProvider(provider2);
+        setProvider(gnosisProvider);
         form.setFieldsValue({ receivingAddress: address });
         address_field = address;
       }
@@ -91,7 +93,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     async function testFunc() {
-      const flag: boolean = await connectMetamask();
+      const flag: boolean = await connectProvider();
       if (!flag) {
         setErrorFetchedChecker((c) => !c);
       }
@@ -241,10 +243,10 @@ const App: React.FC = () => {
     if (!nsdk) {
       return;
     }
-    const provider2 = new providers.Web3Provider(gnosisWeb3Provider);
-    const _signerG = provider2.getSigner();
+    const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
+    const _signerG = gnosisProvider.getSigner();
     setSigner(_signerG);
-    setProvider(provider2);
+    setProvider(gnosisProvider);
     if (!auctionResponse) {
       alert('Please request quote first');
       throw new Error('Please request quote first');
@@ -353,14 +355,14 @@ const App: React.FC = () => {
                         size="md"
                         disabled={!web3Provider || injectedProviderChainId !== parseInt(form.getFieldValue('sendingChain'))}
                         onClick={async () => {
-                          const sendingAssetId = sendingAssetToken.tokenAddress;
-                          const receivingAssetId = sendingAssetToken.tokenAddress;
+                          const sendingAssetId = sendingAssetToken.tokenAddress; //from _bal -> set the tokenaddress
+                          const receivingAssetId = sendingAssetToken.tokenAddress; //from _bal -> set the tokenaddress
                           if (!sendingAssetId || !receivingAssetId) {
                             throw new Error("Configuration doesn't support selected swap");
                           }
 
                           const response = await getTransferQuote(
-                            injectedProviderChainId,
+                            gnosisChainId,
                             sendingAssetId,
                             parseInt(form.getFieldValue('receivingChain')),
                             receivingAssetId,
