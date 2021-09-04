@@ -45,11 +45,10 @@ const App: React.FC = () => {
   const [form] = Form.useForm();
   const ethereum = (window as any).ethereum;
 
-  const getTokensHandler = async (inputAddress) => {
-    const address = inputAddress;
+  const getTokensHandler = async (address) => {
     let tokenArr: Array<IBalance> = [];
 
-    fetch(`https://safe-transaction.rinkeby.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`)
+    await fetch(`https://safe-transaction.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`)
       .then((res) => res.json())
       .then((response) => {
         response.forEach((_bal: IBalance) => {
@@ -76,7 +75,7 @@ const App: React.FC = () => {
       const _signerG = await gnosisProvider.getSigner();
       if (_signerG) {
         const address = await _signerG.getAddress();
-        getTokensHandler(address);
+        await getTokensHandler(address);
         const sendingChain = await _signerG.getChainId();
         console.log('sendingChain: ', sendingChain);
         setGnosisChainId(sendingChain);
