@@ -57,7 +57,7 @@ const MainPage: React.FC = () => {
           centered
         >
           <Tab label="Swap Cross Chain" {...a11yProps(0)} value={0} />
-          <Tab label="Past Records" {...a11yProps(1)} />
+          <Tab label="Transactions" {...a11yProps(1)} />
         </Tabs>
       </AppBar>
       {/* <SwipeableViews axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'} index={value} onChangeIndex={handleChangeIndex}> */}

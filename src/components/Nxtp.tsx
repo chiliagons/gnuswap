@@ -34,6 +34,7 @@ const App: React.FC = () => {
   const [signer, setSigner] = useState<Signer>();
   const [nsdk, setSdk] = useState<NxtpSdk>();
   const [showLoading, setShowLoading] = useState(false);
+  const [showLoadingTransfer, setShowLoadingTransfer] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [auctionResponse, setAuctionResponse] = useState<AuctionResponse>();
   const [activeTransferTableColumns, setActiveTransferTableColumns] = useState<ActiveTransaction[]>([]);
@@ -52,6 +53,7 @@ const App: React.FC = () => {
   const adornSendingContractAddress = <Icon size="md" type="sent" />;
 
   let address_field = '';
+  let finishDisabled = true;
   let receivingTokenAdrress = '0x8a1Cad3703E0beAe0e0237369B4fcD04228d1682';
   const [form] = Form.useForm();
   const ethereum = (window as any).ethereum;
@@ -187,6 +189,8 @@ const App: React.FC = () => {
       });
 
       _sdk.attach(NxtpSdkEvents.ReceiverTransactionPrepared, (data) => {
+        setShowLoadingTransfer(false);
+        finishDisabled = false;
         console.log('ReceiverTransactionPrepared:', data);
         const { amount, expiry, preparedBlockNumber, ...invariant } = data.txData;
         const index = activeTransferTableColumns.findIndex((col) => col.crosschainTx.invariant.transactionId === invariant.transactionId);
@@ -245,7 +249,7 @@ const App: React.FC = () => {
     };
     init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transferStateStarted]);
+  }, [transferStateStarted, showLoadingTransfer]);
 
   const getTransferQuote = async (
     sendingChainId: number,
@@ -308,6 +312,7 @@ const App: React.FC = () => {
     const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
     const _signerG = gnosisProvider.getSigner();
     setTransferStateStarted(true);
+    setShowLoadingTransfer(true);
     nsdk = new NxtpSdk(
       chainProviders,
       _signerG,
@@ -329,6 +334,7 @@ const App: React.FC = () => {
       throw new Error('Wrong chain');
     }
     await nsdk.prepareTransfer(auctionResponse, true);
+
     // setTransferStateStarted(false);
   };
 
@@ -458,19 +464,17 @@ const App: React.FC = () => {
                   />
                 </Form.Item>
 
-                <Form.Item name="sendingContractAddress">
-                  <TextField
-                    label="Sending Token Contract Address"
-                    name="sendingAssetTokenContract"
-                    value={receivingTokenAdrress}
-                    type="text"
-                    onChange={(e) => setreceiveTokenAddress(e.target.value)}
-                    startAdornment={adornSendingContractAddress}
-                  />
-                </Form.Item>
+                <TextField
+                  label="Sending Token Contract Address"
+                  name="sendingAssetTokenContract"
+                  value={receivingTokenAdrress}
+                  type="text"
+                  onChange={(e) => setreceiveTokenAddress(e.target.value)}
+                  startAdornment={adornSendingContractAddress}
+                />
 
                 <Form.Item name="receivedAmount">
-                  <Row gutter={22}>
+                  <Row style={{ paddingTop: 20 }} gutter={22}>
                     <Col span={12}>
                       <TextField
                         name="receivedAmount"
@@ -529,6 +533,7 @@ const App: React.FC = () => {
                           type="submit"
                         >
                           Start Transfer
+                          <Row style={{ paddingLeft: 10 }}>{showLoadingTransfer && <Loader size="xs" />}</Row>
                         </Button>
                       )}
                     </Form.Item>
@@ -538,7 +543,7 @@ const App: React.FC = () => {
                       {() => (
                         <Button
                           iconType="rocket"
-                          disabled={form.getFieldValue('sendingChain') === form.getFieldValue('receivingChain') || !auctionResponse}
+                          disabled={!showLoadingTransfer && !auctionResponse}
                           size="lg"
                           variant="bordered"
                           onClick={async () => {
