@@ -11,7 +11,7 @@ import { Col, Row, Form } from 'antd';
 
 import { BigNumber, providers, Signer, utils } from 'ethers';
 //@ts-ignore
-import { ActiveTransaction, NxtpSdk, NxtpSdkEvents, HistoricalTransaction } from '@connext/nxtp-sdk';
+import { ActiveTransaction, NxtpSdk, NxtpSdkEvents, HistoricalTransaction, TransactionPreparedEvent } from '@connext/nxtp-sdk';
 //@ts-ignore
 import { AuctionResponse, getRandomBytes32 } from '@connext/nxtp-utils';
 import pino from 'pino';
@@ -26,6 +26,7 @@ const App: React.FC = () => {
   const classes = useStyles();
   const { sdk, safe } = useSafeAppsSDK();
   const gnosisWeb3Provider = new SafeAppProvider(safe, sdk);
+  const [transferStateStarted, setTransferStateStarted] = useState<boolean>(false);
   const [chainData, setChainData] = useState<any[]>([]);
   const [web3Provider, setProvider] = useState<providers.Web3Provider>();
   const [injectedProviderChainId, setInjectedProviderChainId] = useState<number>();
@@ -44,6 +45,8 @@ const App: React.FC = () => {
   const [transferAmount, setTransferAmount] = useState('');
   const [sendingAssetToken, setSendingAssetToken] = useState<IBalance>();
   const [historicalTransferTableColumns, setHistoricalTransferTableColumns] = useState<HistoricalTransaction[]>([]);
+
+  const [latestActiveTx, setLatestActiveTx] = useState<ActiveTransaction>();
 
   const adornmentReceivingAddress = <Icon size="md" type="addressBook" />;
   const adornSendingContractAddress = <Icon size="md" type="sent" />;
@@ -127,9 +130,11 @@ const App: React.FC = () => {
     const init = async () => {
       const json = await utils.fetchJson('https://raw.githubusercontent.com/connext/chaindata/main/crossChain.json');
       setChainData(json);
-      if (!signer || !web3Provider) {
-        return;
-      }
+      // if (!signer || !web3Provider) {
+      //   return;
+      // }
+      const provider = new providers.Web3Provider(ethereum);
+      const signer = await provider.getSigner();
       console.log('Signeer was triggered');
       const { chainId } = await signer.provider!.getNetwork();
       setInjectedProviderChainId(chainId);
@@ -146,6 +151,9 @@ const App: React.FC = () => {
 
       setActiveTransferTableColumns(activeTxs);
       console.log('activeTxs: ', activeTxs);
+      if (activeTxs[activeTxs.length - 1]) {
+        setLatestActiveTx(activeTxs[activeTxs.length - 1]);
+      }
 
       const historicalTxs = await _sdk.getHistoricalTransactions();
       setHistoricalTransferTableColumns(historicalTxs);
@@ -237,7 +245,7 @@ const App: React.FC = () => {
     };
     init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [web3Provider, signer]);
+  }, [transferStateStarted]);
 
   const getTransferQuote = async (
     sendingChainId: number,
@@ -299,6 +307,7 @@ const App: React.FC = () => {
 
     const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
     const _signerG = gnosisProvider.getSigner();
+    setTransferStateStarted(true);
     nsdk = new NxtpSdk(
       chainProviders,
       _signerG,
@@ -320,6 +329,33 @@ const App: React.FC = () => {
       throw new Error('Wrong chain');
     }
     await nsdk.prepareTransfer(auctionResponse, true);
+    // setTransferStateStarted(false);
+  };
+
+  const finishTransfer = async ({ bidSignature, encodedBid, encryptedCallData, txData }: Omit<TransactionPreparedEvent, 'caller'>) => {
+    console.log('finishTransfer', txData);
+
+    const provider = new providers.Web3Provider(ethereum);
+    const signer = await provider.getSigner();
+    console.log('finishTransfer');
+    const sdk = new NxtpSdk(
+      chainProviders,
+      signer,
+      pino({ level: 'info' }),
+      (process.env.REACT_APP_NETWORK as 'mainnet') ?? 'mainnet',
+      process.env.REACT_APP_NATS_URL_OVERRIDE,
+      process.env.REACT_APP_AUTH_URL_OVERRIDE,
+    );
+
+    if (!sdk) {
+      return;
+    }
+
+    const finish = await sdk.fulfillTransfer({ bidSignature, encodedBid, encryptedCallData, txData });
+    console.log('finish: ', finish);
+    if (finish.metaTxResponse?.transactionHash || finish.metaTxResponse?.transactionHash === '') {
+      setActiveTransferTableColumns(activeTransferTableColumns.filter((t) => t.crosschainTx.invariant.transactionId !== txData.transactionId));
+    }
   };
 
   const getChainName = (chainId: number): string => {
@@ -434,7 +470,7 @@ const App: React.FC = () => {
                 </Form.Item>
 
                 <Form.Item name="receivedAmount">
-                  <Row gutter={18}>
+                  <Row gutter={22}>
                     <Col span={12}>
                       <TextField
                         name="receivedAmount"
@@ -449,7 +485,7 @@ const App: React.FC = () => {
                       <Button
                         variant="bordered"
                         size="lg"
-                        disabled={!web3Provider || injectedProviderChainId !== parseInt(form.getFieldValue('sendingChain'))}
+                        // disabled={!web3Provider || injectedProviderChainId !== parseInt(form.getFieldValue('sendingChain'))}
                         onClick={async () => {
                           const sendingAssetId = sendingAssetToken.tokenAddress; //from _bal -> set the tokenaddress
                           const receivingAssetId = receivingTokenAdrress; //from _bal -> set the tokenaddress
@@ -481,20 +517,50 @@ const App: React.FC = () => {
                     )}
                   </Row>
                 </Form.Item>
-
-                <Form.Item wrapperCol={{ offset: 5, span: 15 }} dependencies={['sendingChain', 'receivingChain']}>
-                  {() => (
-                    <Button
-                      iconType="chain"
-                      disabled={form.getFieldValue('sendingChain') === form.getFieldValue('receivingChain') || !auctionResponse}
-                      size="lg"
-                      variant="bordered"
-                      type="submit"
-                    >
-                      Start Transfer
-                    </Button>
-                  )}
-                </Form.Item>
+                <Row gutter={25}>
+                  <Col span={12}>
+                    <Form.Item dependencies={['sendingChain', 'receivingChain']}>
+                      {() => (
+                        <Button
+                          iconType="chain"
+                          disabled={form.getFieldValue('sendingChain') === form.getFieldValue('receivingChain') || !auctionResponse}
+                          size="lg"
+                          variant="bordered"
+                          type="submit"
+                        >
+                          Start Transfer
+                        </Button>
+                      )}
+                    </Form.Item>
+                  </Col>
+                  <Col span={10}>
+                    <Form.Item dependencies={['sendingChain', 'receivingChain']}>
+                      {() => (
+                        <Button
+                          iconType="rocket"
+                          disabled={form.getFieldValue('sendingChain') === form.getFieldValue('receivingChain') || !auctionResponse}
+                          size="lg"
+                          variant="bordered"
+                          onClick={async () => {
+                            console.log('Clicked finish');
+                            if (latestActiveTx)
+                              await finishTransfer({
+                                bidSignature: latestActiveTx.bidSignature,
+                                encodedBid: latestActiveTx.encodedBid,
+                                encryptedCallData: latestActiveTx.encryptedCallData,
+                                txData: {
+                                  ...latestActiveTx.crosschainTx.invariant,
+                                  ...latestActiveTx.crosschainTx.receiving,
+                                },
+                              });
+                          }}
+                        >
+                          Finish Transfer
+                        </Button>
+                      )}
+                    </Form.Item>
+                  </Col>
+                </Row>
               </Form>
             </Card>
           </Grid>
@@ -529,7 +595,7 @@ const App: React.FC = () => {
                   <Typography className={classes.text}>4. Get a quotation!</Typography>
                 </ListItem>
                 <ListItem>
-                  <Typography className={classes.text}>5. Once quote is received request for Cross Chain Swap</Typography>
+                  <Typography className={classes.text}>5. Once quote is received request for Starting a Swap and then Finish it!!</Typography>
                 </ListItem>
                 <ListItem>
                   <Typography className={classes.text}>6. Confirm and wait for the transfer to take place</Typography>
