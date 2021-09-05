@@ -104,7 +104,7 @@ export default function Modal() {
     // const address = '0x73551b69314de75364fb5B58e766e40cB2c2973f';
     const address = inputAddress;
     let tokenArr = [];
-    await Axios.get(`https://safe-transaction.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`)
+    await Axios.get(`https://safe-transaction.rinkeby.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`)
       .then((response) => {
         response.data.forEach((token) => {
           if (token.token !== null) {

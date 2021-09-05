@@ -11,7 +11,7 @@ import { Col, Row, Form } from 'antd';
 
 import { BigNumber, providers, Signer, utils } from 'ethers';
 //@ts-ignore
-import { ActiveTransaction, NxtpSdk, NxtpSdkEvents } from '@connext/nxtp-sdk';
+import { ActiveTransaction, NxtpSdk, NxtpSdkEvents, HistoricalTransaction } from '@connext/nxtp-sdk';
 //@ts-ignore
 import { AuctionResponse, getRandomBytes32 } from '@connext/nxtp-utils';
 import pino from 'pino';
@@ -43,6 +43,8 @@ const App: React.FC = () => {
   const [userBalance, setUserBalance] = useState<BigNumber>();
   const [transferAmount, setTransferAmount] = useState('');
   const [sendingAssetToken, setSendingAssetToken] = useState<IBalance>();
+  const [historicalTransferTableColumns, setHistoricalTransferTableColumns] = useState<HistoricalTransaction[]>([]);
+
   const adornmentReceivingAddress = <Icon size="md" type="addressBook" />;
   const adornSendingContractAddress = <Icon size="md" type="sent" />;
 
@@ -137,68 +139,85 @@ const App: React.FC = () => {
       const activeTxs = await _sdk.getActiveTransactions();
 
       setActiveTransferTableColumns(activeTxs);
+      console.log('activeTxs: ', activeTxs);
 
-      // _sdk.attach(NxtpSdkEvents.SenderTransactionPrepared, (data) => {
-      //   const { amount, expiry, preparedBlockNumber, ...invariant } = data.txData;
-      //   const table = [...activeTransferTableColumns];
-      //   // table.push({
-      //   //   crosschainTx: {
-      //   //     invariant,
-      //   //     sending: { amount, expiry, preparedBlockNumber },
-      //   //   },
-      //   //   bidSignature: data.bidSignature,
-      //   //   encodedBid: data.encodedBid,
-      //   //   encryptedCallData: data.encryptedCallData,
-      //   //   status: NxtpSdkEvents.SenderTransactionPrepared,
-      //   // });
-      //   setActiveTransferTableColumns(table);
-      // });
+      const historicalTxs = await _sdk.getHistoricalTransactions();
+      setHistoricalTransferTableColumns(historicalTxs);
+      console.log('historicalTxs: ', historicalTxs);
+
+      _sdk.attach(NxtpSdkEvents.SenderTransactionPrepared, (data) => {
+        const { amount, expiry, preparedBlockNumber, ...invariant } = data.txData;
+        const table = [...activeTransferTableColumns];
+        table.push({
+          crosschainTx: {
+            invariant,
+            sending: { amount, expiry, preparedBlockNumber },
+          },
+          bidSignature: data.bidSignature,
+          encodedBid: data.encodedBid,
+          encryptedCallData: data.encryptedCallData,
+          status: NxtpSdkEvents.SenderTransactionPrepared,
+          preparedTimestamp: Math.floor(Date.now() / 1000),
+        });
+        setActiveTransferTableColumns(table);
+      });
 
       _sdk.attach(NxtpSdkEvents.SenderTransactionFulfilled, (data) => {
+        console.log('SenderTransactionFulfilled:', data);
         setActiveTransferTableColumns(activeTransferTableColumns.filter((t) => t.crosschainTx.invariant.transactionId !== data.txData.transactionId));
       });
 
       _sdk.attach(NxtpSdkEvents.SenderTransactionCancelled, (data) => {
+        console.log('SenderTransactionCancelled:', data);
         setActiveTransferTableColumns(activeTransferTableColumns.filter((t) => t.crosschainTx.invariant.transactionId !== data.txData.transactionId));
       });
 
       _sdk.attach(NxtpSdkEvents.ReceiverTransactionPrepared, (data) => {
+        console.log('ReceiverTransactionPrepared:', data);
         const { amount, expiry, preparedBlockNumber, ...invariant } = data.txData;
         const index = activeTransferTableColumns.findIndex((col) => col.crosschainTx.invariant.transactionId === invariant.transactionId);
-
         const table = [...activeTransferTableColumns];
-        // if (index === -1) {
-        //   table.push({
-        //     crosschainTx: {
-        //       invariant,
-        //       sending: {} as any, // Find to do this, since it defaults to receiver side info
-        //       receiving: { amount, expiry, preparedBlockNumber },
-        //     },
-        //     bidSignature: data.bidSignature,
-        //     encodedBid: data.encodedBid,
-        //     encryptedCallData: data.encryptedCallData,
-        //     status: NxtpSdkEvents.ReceiverTransactionPrepared,
-        //   });
-        //   setActiveTransferTableColumns(table);
-        // } else {
-        //   const item = { ...table[index] };
-        //   table[index] = {
-        //     ...item,
-        //     status: NxtpSdkEvents.ReceiverTransactionPrepared,
-        //     crosschainTx: {
-        //       ...item.crosschainTx,
-        //       receiving: { amount, expiry, preparedBlockNumber },
-        //     },
-        //   };
-        //   setActiveTransferTableColumns(table);
-        // }
+        if (index === -1) {
+          // TODO: is there a better way to
+          // get the info here?
+          table.push({
+            preparedTimestamp: Math.floor(Date.now() / 1000),
+            crosschainTx: {
+              invariant,
+              sending: {} as any, // Find to do this, since it defaults to receiver side info
+              receiving: { amount, expiry, preparedBlockNumber },
+            },
+            bidSignature: data.bidSignature,
+            encodedBid: data.encodedBid,
+            encryptedCallData: data.encryptedCallData,
+            status: NxtpSdkEvents.ReceiverTransactionPrepared,
+          });
+          setActiveTransferTableColumns(table);
+        } else {
+          const item = { ...table[index] };
+          table[index] = {
+            ...item,
+            status: NxtpSdkEvents.ReceiverTransactionPrepared,
+            crosschainTx: {
+              ...item.crosschainTx,
+              receiving: { amount, expiry, preparedBlockNumber },
+            },
+          };
+          setActiveTransferTableColumns(table);
+        }
       });
 
-      _sdk.attach(NxtpSdkEvents.ReceiverTransactionFulfilled, (data) => {
+      _sdk.attach(NxtpSdkEvents.ReceiverTransactionFulfilled, async (data) => {
+        console.log('ReceiverTransactionFulfilled:', data);
         setActiveTransferTableColumns(activeTransferTableColumns.filter((t) => t.crosschainTx.invariant.transactionId !== data.txData.transactionId));
+
+        const historicalTxs = await _sdk.getHistoricalTransactions();
+        setHistoricalTransferTableColumns(historicalTxs);
+        console.log('historicalTxs: ', historicalTxs);
       });
 
       _sdk.attach(NxtpSdkEvents.ReceiverTransactionCancelled, (data) => {
+        console.log('ReceiverTransactionCancelled:', data);
         setActiveTransferTableColumns(activeTransferTableColumns.filter((t) => t.crosschainTx.invariant.transactionId !== data.txData.transactionId));
       });
 
@@ -393,7 +412,7 @@ const App: React.FC = () => {
                   />
                 </Form.Item>
 
-                <Form.Item name="sendingContractAddress">
+                {/* <Form.Item name="sendingContractAddress">
                   <TextField
                     label="Sending Token Contract Address"
                     name="sendingAssetTokenContract"
@@ -402,47 +421,60 @@ const App: React.FC = () => {
                     startAdornment={adornSendingContractAddress}
                     required
                   />
-                </Form.Item>
+                </Form.Item> */}
 
                 <Form.Item name="receivedAmount">
-                  <TextField name="receivedAmount" type="text" value="" label="" disabled placeholder="..." />
-                  <br />
-                  <Button
-                    size="md"
-                    disabled={!web3Provider || injectedProviderChainId !== parseInt(form.getFieldValue('sendingChain'))}
-                    onClick={async () => {
-                      const sendingAssetId = sendingAssetToken.tokenAddress; //from _bal -> set the tokenaddress
-                      const receivingAssetId = form.getFieldValue('sendingContractAddress'); //from _bal -> set the tokenaddress
-                      if (!sendingAssetId || !receivingAssetId) {
-                        throw new Error("Configuration doesn't support selected swap");
-                      }
+                  <Row gutter={18}>
+                    <Col span={16}>
+                      <TextField
+                        name="receivedAmount"
+                        type="text"
+                        value={auctionResponse && utils.formatEther(auctionResponse?.bid.amountReceived)}
+                        label=""
+                        disabled
+                        placeholder="..."
+                      />
+                    </Col>
+                    <Col span={8}>
+                      {showLoading && <Loader size="xs" />}
+                      {errorMsg.length !== 0 && <Text size="sm">{errorMsg}</Text>}
+                      <Button
+                        variant="bordered"
+                        size="md"
+                        disabled={!web3Provider || injectedProviderChainId !== parseInt(form.getFieldValue('sendingChain'))}
+                        onClick={async () => {
+                          const sendingAssetId = sendingAssetToken.tokenAddress; //from _bal -> set the tokenaddress
+                          const receivingAssetId = '0x8a1Cad3703E0beAe0e0237369B4fcD04228d1682'; //from _bal -> set the tokenaddress
+                          if (!sendingAssetId || !receivingAssetId) {
+                            throw new Error("Configuration doesn't support selected swap");
+                          }
 
-                      const response = await getTransferQuote(
-                        gnosisChainId,
-                        sendingAssetId,
-                        parseInt(form.getFieldValue('receivingChain')),
-                        receivingAssetId,
-                        utils.parseEther(transferAmount).toString(),
-                        form.getFieldValue('receivingAddress'),
-                      );
-                      if (response) form.setFieldsValue({ receivedAmount: utils.formatEther(response!.bid.amountReceived) });
-                    }}
-                  >
-                    Get Quote
-                  </Button>
-                  {showLoading && <Loader size="xs" />}
-                  {errorMsg.length !== 0 && <Text size="sm">{errorMsg}</Text>}
+                          await getTransferQuote(
+                            gnosisChainId,
+                            sendingAssetId,
+                            parseInt(form.getFieldValue('receivingChain')),
+                            receivingAssetId,
+                            utils.parseEther(transferAmount).toString(),
+                            form.getFieldValue('receivingAddress'),
+                          );
+                        }}
+                      >
+                        Get Quote
+                      </Button>
+                    </Col>
+                  </Row>
                 </Form.Item>
 
-                <Form.Item wrapperCol={{ offset: 0, span: 15 }} dependencies={['sendingChain', 'receivingChain']}>
+                <Form.Item wrapperCol={{ offset: 5, span: 15 }} dependencies={['sendingChain', 'receivingChain']}>
                   {() => (
                     <Button
                       iconType="chain"
                       disabled={form.getFieldValue('sendingChain') === form.getFieldValue('receivingChain') || !auctionResponse}
-                      size="md"
+                      size="lg"
+                      variant="bordered"
                       type="submit"
                     >
-                      Cross Chain Transfer
+                      Start Transfer
                     </Button>
                   )}
                 </Form.Item>
