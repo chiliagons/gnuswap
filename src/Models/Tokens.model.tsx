@@ -1,4 +1,4 @@
-export interface TOKEN {
+export interface MOCKTOKEN {
   name: string;
   depositAssetId: string;
   withdrawAssetId: string;
