@@ -44,6 +44,7 @@ const App: React.FC = () => {
   const [errorFetchedChecker, setErrorFetchedChecker] = useState(false);
   const [userBalance, setUserBalance] = useState<BigNumber>();
   const [transferAmount, setTransferAmount] = useState('');
+  const [receivingTokenAdrress, setReceiveTokenAddress] = useState('0x8a1Cad3703E0beAe0e0237369B4fcD04228d1682');
   const [sendingAssetToken, setSendingAssetToken] = useState<IBalance>();
   const [historicalTransferTableColumns, setHistoricalTransferTableColumns] = useState<HistoricalTransaction[]>([]);
 
@@ -53,8 +54,6 @@ const App: React.FC = () => {
   const adornSendingContractAddress = <Icon size="md" type="sent" />;
 
   let address_field = '';
-  let finishDisabled = true;
-  let receivingTokenAdrress = '0x8a1Cad3703E0beAe0e0237369B4fcD04228d1682';
   const [form] = Form.useForm();
   const ethereum = (window as any).ethereum;
 
@@ -88,12 +87,8 @@ const App: React.FC = () => {
   const setTokenWithBalance = (bal) => {
     const tokenAsBal: IBalance = JSON.parse(bal);
     setSendingAssetToken(tokenAsBal);
-    receivingTokenAdrress = tokenAsBal.tokenAddress;
+    setReceiveTokenAddress(tokenAsBal.tokenAddress);
     setUserBalance(BigNumber.from(tokenAsBal.balance));
-  };
-
-  const setreceiveTokenAddress = (address) => {
-    receivingTokenAdrress = address;
   };
 
   const connectProvider = async () => {
@@ -190,8 +185,6 @@ const App: React.FC = () => {
 
       _sdk.attach(NxtpSdkEvents.ReceiverTransactionPrepared, (data) => {
         setShowLoadingTransfer(false);
-        finishDisabled = false;
-        console.log('ReceiverTransactionPrepared:', data);
         const { amount, expiry, preparedBlockNumber, ...invariant } = data.txData;
         const index = activeTransferTableColumns.findIndex((col) => col.crosschainTx.invariant.transactionId === invariant.transactionId);
         const table = [...activeTransferTableColumns];
@@ -464,14 +457,20 @@ const App: React.FC = () => {
                   />
                 </Form.Item>
 
-                <TextField
-                  label="Sending Token Contract Address"
-                  name="sendingAssetTokenContract"
-                  value={receivingTokenAdrress}
-                  type="text"
-                  onChange={(e) => setreceiveTokenAddress(e.target.value)}
-                  startAdornment={adornSendingContractAddress}
-                />
+                <Form.Item name="receiveTokenAdrress">
+                  <TextField
+                    label="Sending Token Contract Address"
+                    name="sendingAssetTokenContract"
+                    value={receivingTokenAdrress}
+                    placeholder={receivingTokenAdrress}
+                    type="text"
+                    onChange={(re) => {
+                      console.log('Change receivingTokenAdrress', re.target.value);
+                      setReceiveTokenAddress(re.target.value);
+                    }}
+                    startAdornment={adornSendingContractAddress}
+                  />
+                </Form.Item>
 
                 <Form.Item name="receivedAmount">
                   <Row style={{ paddingTop: 20 }} gutter={22}>
