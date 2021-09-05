@@ -49,6 +49,7 @@ const App: React.FC = () => {
   const adornSendingContractAddress = <Icon size="md" type="sent" />;
 
   let address_field = '';
+  let receivingTokenAdrress = '0x8a1Cad3703E0beAe0e0237369B4fcD04228d1682';
   const [form] = Form.useForm();
   const ethereum = (window as any).ethereum;
 
@@ -82,7 +83,12 @@ const App: React.FC = () => {
   const setTokenWithBalance = (bal) => {
     const tokenAsBal: IBalance = JSON.parse(bal);
     setSendingAssetToken(tokenAsBal);
+    receivingTokenAdrress = tokenAsBal.tokenAddress;
     setUserBalance(BigNumber.from(tokenAsBal.balance));
+  };
+
+  const setreceiveTokenAddress = (address) => {
+    receivingTokenAdrress = address;
   };
 
   const connectProvider = async () => {
@@ -386,7 +392,14 @@ const App: React.FC = () => {
                 <Form.Item>
                   <Row gutter={18}>
                     <Col span={16}>
-                      <TextField label="Transfer Amount" name="amount" value={transferAmount} type="text" onChange={(e) => setTransferAmount(e.target.value)} />
+                      <TextField
+                        label="Transfer Amount"
+                        name="amount"
+                        value={transferAmount}
+                        type="text"
+                        onChange={(e) => setTransferAmount(e.target.value)}
+                        required
+                      />
                     </Col>
                     <Col span={8}>
                       Balance:{' '}
@@ -409,16 +422,16 @@ const App: React.FC = () => {
                   />
                 </Form.Item>
 
-                {/* <Form.Item name="sendingContractAddress">
+                <Form.Item name="sendingContractAddress">
                   <TextField
                     label="Sending Token Contract Address"
                     name="sendingAssetTokenContract"
-                    value=""
+                    value={receivingTokenAdrress}
                     type="text"
+                    onChange={(e) => setreceiveTokenAddress(e.target.value)}
                     startAdornment={adornSendingContractAddress}
-                    required
                   />
-                </Form.Item> */}
+                </Form.Item>
 
                 <Form.Item name="receivedAmount">
                   <Row gutter={18}>
@@ -439,7 +452,7 @@ const App: React.FC = () => {
                         disabled={!web3Provider || injectedProviderChainId !== parseInt(form.getFieldValue('sendingChain'))}
                         onClick={async () => {
                           const sendingAssetId = sendingAssetToken.tokenAddress; //from _bal -> set the tokenaddress
-                          const receivingAssetId = '0x8a1Cad3703E0beAe0e0237369B4fcD04228d1682'; //from _bal -> set the tokenaddress
+                          const receivingAssetId = receivingTokenAdrress; //from _bal -> set the tokenaddress
                           if (!sendingAssetId || !receivingAssetId) {
                             throw new Error("Configuration doesn't support selected swap");
                           }
@@ -454,13 +467,10 @@ const App: React.FC = () => {
                           );
                         }}
                       >
-                        Get Quote
+                        <Row>Get Quote</Row>
+
+                        <Row style={{ paddingLeft: 10 }}>{showLoading && <Loader size="xs" />}</Row>
                       </Button>
-                    </Col>
-                    <br />
-                    <Col style={{ paddingTop: 10 }} span={16}>
-                      {' '}
-                      {showLoading && <Loader size="xs" />}
                     </Col>
                   </Row>
                   <Row>
