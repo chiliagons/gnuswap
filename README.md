@@ -22,7 +22,7 @@ gnuswap is an Gnosis Safe App to exchange token across multiple chains. Gnosis s
 
 ## App screen
 
-![Screenshot (481)](https://user-images.githubusercontent.com/55238388/126329570-70ef5120-3882-4a3d-be2c-2119e3869294.png)
+![App screen](https://i.imgur.com/pnAf1ea.png)
 
 ## Features
 
@@ -32,7 +32,7 @@ gnuswap is an Gnosis Safe App to exchange token across multiple chains. Gnosis s
 
 ## Why a Gnosis application
 
-![Gnosis Safe Logo](https://i.imgur.com/owKjhMi.png)
+![Gnosis Safe Logo](https://i.imgur.com/AakfZs8.png)
 
 - We chose gnosis as it is widely used by many crypto projects to manage assets
 - Multi sig features
@@ -43,9 +43,9 @@ gnuswap is an Gnosis Safe App to exchange token across multiple chains. Gnosis s
 
 ## How we Built it
 
-We integrated Gnosis Safe using the gnosis safe sdk with connext nxtp.
+We integrated Gnosis Safe using the gnosis safe sdk with connext network nxtp sdk.
 We utilized the Gnosis UI SDK to keep the elements as native as possible.
 
 ## Future Scope
 
-- Show liquidity in routers
+- Show Liquidity across different networks
