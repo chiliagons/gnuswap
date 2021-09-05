@@ -141,9 +141,9 @@ const App: React.FC = () => {
       setActiveTransferTableColumns(activeTxs);
       console.log('activeTxs: ', activeTxs);
 
-      // const historicalTxs = await _sdk.getHistoricalTransactions();
-      // setHistoricalTransferTableColumns(historicalTxs);
-      // console.log('historicalTxs: ', historicalTxs);
+      const historicalTxs = await _sdk.getHistoricalTransactions();
+      setHistoricalTransferTableColumns(historicalTxs);
+      console.log('historicalTxs: ', historicalTxs);
 
       _sdk.attach(NxtpSdkEvents.SenderTransactionPrepared, (data) => {
         const { amount, expiry, preparedBlockNumber, ...invariant } = data.txData;
@@ -157,7 +157,7 @@ const App: React.FC = () => {
           encodedBid: data.encodedBid,
           encryptedCallData: data.encryptedCallData,
           status: NxtpSdkEvents.SenderTransactionPrepared,
-          //preparedTimestamp: Math.floor(Date.now() / 1000),
+          preparedTimestamp: Math.floor(Date.now() / 1000),
         });
         setActiveTransferTableColumns(table);
       });
@@ -181,7 +181,7 @@ const App: React.FC = () => {
           // TODO: is there a better way to
           // get the info here?
           table.push({
-            //preparedTimestamp: Math.floor(Date.now() / 1000),
+            preparedTimestamp: Math.floor(Date.now() / 1000),
             crosschainTx: {
               invariant,
               sending: {} as any, // Find to do this, since it defaults to receiver side info
@@ -211,9 +211,9 @@ const App: React.FC = () => {
         console.log('ReceiverTransactionFulfilled:', data);
         setActiveTransferTableColumns(activeTransferTableColumns.filter((t) => t.crosschainTx.invariant.transactionId !== data.txData.transactionId));
 
-        //const historicalTxs = await _sdk.getHistoricalTransactions();
-        //setHistoricalTransferTableColumns(historicalTxs);
-        //console.log('historicalTxs: ', historicalTxs);
+        const historicalTxs = await _sdk.getHistoricalTransactions();
+        setHistoricalTransferTableColumns(historicalTxs);
+        console.log('historicalTxs: ', historicalTxs);
       });
 
       _sdk.attach(NxtpSdkEvents.ReceiverTransactionCancelled, (data) => {
@@ -247,9 +247,6 @@ const App: React.FC = () => {
     setShowLoading(true);
     const provider = new providers.Web3Provider(ethereum);
     const _signer = await provider.getSigner();
-    console.log('Signer was set');
-    // setSigner(_signer);
-    // setProvider(provider);
 
     nsdk = new NxtpSdk(
       chainProviders,
