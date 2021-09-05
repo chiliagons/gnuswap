@@ -425,7 +425,7 @@ const App: React.FC = () => {
 
                 <Form.Item name="receivedAmount">
                   <Row gutter={18}>
-                    <Col span={16}>
+                    <Col span={12}>
                       <TextField
                         name="receivedAmount"
                         type="text"
@@ -435,12 +435,10 @@ const App: React.FC = () => {
                         placeholder="..."
                       />
                     </Col>
-                    <Col span={8}>
-                      {showLoading && <Loader size="xs" />}
-                      {errorMsg.length !== 0 && <Text size="sm">{errorMsg}</Text>}
+                    <Col span={6}>
                       <Button
                         variant="bordered"
-                        size="md"
+                        size="lg"
                         disabled={!web3Provider || injectedProviderChainId !== parseInt(form.getFieldValue('sendingChain'))}
                         onClick={async () => {
                           const sendingAssetId = sendingAssetToken.tokenAddress; //from _bal -> set the tokenaddress
@@ -462,7 +460,9 @@ const App: React.FC = () => {
                         Get Quote
                       </Button>
                     </Col>
+                    <Col span={16}> {showLoading && <Loader size="xs" />}</Col>
                   </Row>
+                  <Row>{errorMsg.length !== 0 && <Text size="sm">{errorMsg}</Text>}</Row>
                 </Form.Item>
 
                 <Form.Item wrapperCol={{ offset: 5, span: 15 }} dependencies={['sendingChain', 'receivingChain']}>
