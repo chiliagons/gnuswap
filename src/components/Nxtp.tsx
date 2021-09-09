@@ -4,7 +4,7 @@ import '../App.css';
 import useStyles from './styles';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Button, Card, Divider, Icon, Loader, Text, TextField } from '@gnosis.pm/safe-react-components';
+import { Button, Card, Divider, Icon, Loader, Text, TextField, FixedDialog, GenericModal } from '@gnosis.pm/safe-react-components';
 import { MenuItem, Select, Grid, Container, Typography, List, ListItem, ListItemIcon } from '@material-ui/core';
 import HelpIcon from '@material-ui/icons/Help';
 import { Col, Row, Form } from 'antd';
@@ -35,6 +35,7 @@ const App: React.FC = () => {
   const [nsdk, setSdk] = useState<NxtpSdk>();
   const [showLoading, setShowLoading] = useState(false);
   const [showLoadingTransfer, setShowLoadingTransfer] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [auctionResponse, setAuctionResponse] = useState<AuctionResponse>();
   const [activeTransferTableColumns, setActiveTransferTableColumns] = useState<ActiveTransaction[]>([]);
@@ -337,6 +338,7 @@ const App: React.FC = () => {
     const provider = new providers.Web3Provider(ethereum);
     const signer = await provider.getSigner();
     console.log('finishTransfer');
+
     const sdk = new NxtpSdk(
       chainProviders,
       signer,
@@ -352,9 +354,12 @@ const App: React.FC = () => {
 
     const finish = await sdk.fulfillTransfer({ bidSignature, encodedBid, encryptedCallData, txData });
     console.log('finish: ', finish);
+    setShowConfirmation(true);
+    console.log(showConfirmation);
     if (finish.metaTxResponse?.transactionHash || finish.metaTxResponse?.transactionHash === '') {
       setActiveTransferTableColumns(activeTransferTableColumns.filter((t) => t.crosschainTx.invariant.transactionId !== txData.transactionId));
     }
+    setShowConfirmation(false);
   };
 
   const getChainName = (chainId: number): string => {
@@ -531,7 +536,7 @@ const App: React.FC = () => {
                           variant="bordered"
                           type="submit"
                         >
-                          Start Transfer
+                          {showLoadingTransfer ? 'Transferring...' : 'Start Transfer'}
                           <Row style={{ paddingLeft: 10 }}>{showLoadingTransfer && <Loader size="xs" />}</Row>
                         </Button>
                       )}
@@ -617,6 +622,19 @@ const App: React.FC = () => {
           </Grid>
         </Grid>
       </Container>
+      {showConfirmation && (
+        <GenericModal
+          onClose={() => setShowConfirmation(false)}
+          title="Success!"
+          body={
+            <div>
+              <Typography className={classes.text} align="center" variant="h6">
+                Your transaction has been succesfully executed!
+              </Typography>{' '}
+            </div>
+          }
+        />
+      )}
     </>
   );
 };
