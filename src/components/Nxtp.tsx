@@ -2,8 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import '../App.css';
 import useStyles from './styles';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Button, Card, Divider, Icon, Loader, Text, TextField, FixedDialog, GenericModal } from '@gnosis.pm/safe-react-components';
+import { Button, Card, Divider, Icon, Loader, Text, TextField, GenericModal } from '@gnosis.pm/safe-react-components';
 import { MenuItem, Select, Grid, Container, Typography, List, ListItem, ListItemIcon } from '@material-ui/core';
 import HelpIcon from '@material-ui/icons/Help';
 import { Col, Row, Form } from 'antd';
@@ -16,10 +15,9 @@ import pino from 'pino';
 import { useSafeAppsSDK } from '@gnosis.pm/safe-apps-react-sdk';
 import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
 import { chainProviders } from '../Utils/Shared';
-import { swapConfig } from '../constants';
+import { swapConfig } from '../Constants/constants';
 import { IBalance } from '../Models/Shared.model';
 import { TableContextProvider } from './Txprovider';
-import TransactionPage from './TransactionPage';
 
 const App: React.FC = () => {
   const classes = useStyles();
@@ -47,9 +45,7 @@ const App: React.FC = () => {
   const [receivingTokenAdrress, setReceiveTokenAddress] = useState('0x8a1Cad3703E0beAe0e0237369B4fcD04228d1682');
   const [sendingAssetToken, setSendingAssetToken] = useState<IBalance>();
   const [historicalTransferTableColumns, setHistoricalTransferTableColumns] = useState<HistoricalTransaction[]>([]);
-
   const [latestActiveTx, setLatestActiveTx] = useState<ActiveTransaction>();
-
   const adornmentReceivingAddress = <Icon size="md" type="addressBook" />;
   const adornSendingContractAddress = <Icon size="md" type="sent" />;
 
@@ -127,9 +123,6 @@ const App: React.FC = () => {
     const init = async () => {
       const json = await utils.fetchJson('https://raw.githubusercontent.com/connext/chaindata/main/crossChain.json');
       setChainData(json);
-      // if (!signer || !web3Provider) {
-      //   return;
-      // }
       const provider = new providers.Web3Provider(ethereum);
       const signer = await provider.getSigner();
       console.log('Signeer was triggered');

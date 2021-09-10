@@ -1,6 +1,6 @@
 /* eslint-disable require-jsdoc */
 import { BigNumber, constants, Contract, providers, Signer, utils } from 'ethers';
-import { chainConfig } from '../constants';
+import { chainConfig } from '../Constants/constants';
 
 const TestTokenABI = [
   // Read-Only Functions
