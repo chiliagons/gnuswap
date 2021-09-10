@@ -5,6 +5,8 @@ import Nxtp from '../components/Nxtp';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 //import SwipeableViews from 'react-swipeable-views';
 import TransactionPage from '../components/TransactionPage';
+import { TableContextProvider } from '../components/Txprovider';
+import { HistoricalTransaction } from '@connext/nxtp-sdk';
 
 const useStyles = makeStyles({
   tabs: {
@@ -35,6 +37,7 @@ function a11yProps(index) {
 const MainPage: React.FC = () => {
   const classes = useStyles();
   const [value, setValue] = React.useState(0);
+  const [transactions, setTransactions] = React.useState(null);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -42,29 +45,31 @@ const MainPage: React.FC = () => {
 
   return (
     <div>
-      <AppBar position="static" color="default">
-        <Tabs
-          className={classes.tabs}
-          TabIndicatorProps={{ className: classes.tab__indicator }}
-          value={value}
-          onChange={handleChange}
-          variant="fullWidth"
-          centered
-        >
-          <Tab label="Swap Cross Chain" {...a11yProps(0)} value={0} />
-          <Tab label="Transactions" {...a11yProps(1)} />
-        </Tabs>
-      </AppBar>
-      {/* <SwipeableViews axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'} index={value} onChangeIndex={handleChangeIndex}> */}
-      <TabPanel value={value} index={0}>
-        <Nxtp />
-      </TabPanel>
-      <TabPanel value={value} index={1}>
-        <Container>
-          <TransactionPage />
-        </Container>
-      </TabPanel>
-      {/* </SwipeableViews> */}
+      <TableContextProvider value={{ transactions, setTransactions }}>
+        <AppBar position="static" color="default">
+          <Tabs
+            className={classes.tabs}
+            TabIndicatorProps={{ className: classes.tab__indicator }}
+            value={value}
+            onChange={handleChange}
+            variant="fullWidth"
+            centered
+          >
+            <Tab label="Swap Cross Chain" {...a11yProps(0)} value={0} />
+            <Tab label="Transactions" {...a11yProps(1)} />
+          </Tabs>
+        </AppBar>
+        {/* <SwipeableViews axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'} index={value} onChangeIndex={handleChangeIndex}> */}
+        <TabPanel value={value} index={0}>
+          <Nxtp />
+        </TabPanel>
+        <TabPanel value={value} index={1}>
+          <Container>
+            <TransactionPage />
+          </Container>
+        </TabPanel>
+        {/* </SwipeableViews> */}
+      </TableContextProvider>
     </div>
   );
 };

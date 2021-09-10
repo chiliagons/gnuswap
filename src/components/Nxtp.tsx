@@ -1,5 +1,5 @@
 /* eslint-disable require-jsdoc */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import '../App.css';
 import useStyles from './styles';
 import { Button, Card, Divider, Icon, Loader, Text, TextField, GenericModal } from '@gnosis.pm/safe-react-components';
@@ -17,9 +17,10 @@ import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
 import { chainProviders } from '../Utils/Shared';
 import { swapConfig } from '../Constants/constants';
 import { IBalance } from '../Models/Shared.model';
-import { TableContextProvider } from './Txprovider';
+import { TableContext } from './Txprovider';
 
 const App: React.FC = () => {
+  const { setTransactions } = useContext(TableContext);
   const classes = useStyles();
   const { sdk, safe } = useSafeAppsSDK();
   const gnosisWeb3Provider = new SafeAppProvider(safe, sdk);
@@ -148,6 +149,7 @@ const App: React.FC = () => {
       const historicalTxs = await _sdk.getHistoricalTransactions();
       setHistoricalTransferTableColumns(historicalTxs);
       console.log('historicalTxs: ', historicalTxs);
+      setTransactions(historicalTxs);
 
       _sdk.attach(NxtpSdkEvents.SenderTransactionPrepared, (data) => {
         const { amount, expiry, preparedBlockNumber, ...invariant } = data.txData;
@@ -362,7 +364,6 @@ const App: React.FC = () => {
   //UI HERE
   return (
     <>
-      <TableContextProvider value={historicalTransferTableColumns}></TableContextProvider>
       <Divider />
       <Container>
         <Grid className={classes.grid} container spacing={8}>
