@@ -2,13 +2,11 @@
 import React, { useEffect, useState } from 'react';
 import '../App.css';
 import useStyles from './styles';
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Button, Card, Divider, Icon, Loader, Text, TextField, FixedDialog, GenericModal } from '@gnosis.pm/safe-react-components';
 import { MenuItem, Select, Grid, Container, Typography, List, ListItem, ListItemIcon } from '@material-ui/core';
 import HelpIcon from '@material-ui/icons/Help';
 import { Col, Row, Form } from 'antd';
-
 import { BigNumber, providers, Signer, utils } from 'ethers';
 //@ts-ignore
 import { ActiveTransaction, NxtpSdk, NxtpSdkEvents, HistoricalTransaction, TransactionPreparedEvent } from '@connext/nxtp-sdk';
@@ -17,10 +15,11 @@ import { AuctionResponse, getRandomBytes32 } from '@connext/nxtp-utils';
 import pino from 'pino';
 import { useSafeAppsSDK } from '@gnosis.pm/safe-apps-react-sdk';
 import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
-
 import { chainProviders } from '../Utils/Shared';
 import { swapConfig } from '../constants';
 import { IBalance } from '../Models/Shared.model';
+import { TableContextProvider } from './Txprovider';
+import TransactionPage from './TransactionPage';
 
 const App: React.FC = () => {
   const classes = useStyles();
@@ -370,6 +369,7 @@ const App: React.FC = () => {
   //UI HERE
   return (
     <>
+      <TableContextProvider value={historicalTransferTableColumns}></TableContextProvider>
       <Divider />
       <Container>
         <Grid className={classes.grid} container spacing={8}>
