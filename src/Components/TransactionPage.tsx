@@ -1,11 +1,11 @@
 import React, { useContext, useState } from 'react';
 import { Table, Title, TableHeader, TableRow, Text, Divider, IconText, EthHashInfo, Loader, TableAlignment } from '@gnosis.pm/safe-react-components';
 import { TableContext } from '../Providers/Txprovider';
-import { ActiveTransaction, HistoricalTransaction } from '@connext/nxtp-sdk';
-import { ethers, BigNumber } from 'ethers';
+import { HistoricalTransaction } from '@connext/nxtp-sdk';
+import { ethers } from 'ethers';
 
 const TransactionPage: React.FC = () => {
-  const [Loading, setLoading] = useState(false);
+  //const [Loading, setLoading] = useState(false);
   const { value, value2 } = useContext(TableContext);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -79,12 +79,12 @@ const TransactionPage: React.FC = () => {
       {
         <div>
           <div style={{ paddingTop: '20px' }}>
-            <Title size="md">Active Transactions : {noOfActiveTransactions == -1 ? <Loader size="sm"></Loader> : noOfActiveTransactions}</Title>
+            <Title size="md">Active Transactions : {noOfActiveTransactions === -1 ? <Loader size="sm"></Loader> : noOfActiveTransactions}</Title>
             <Divider />
             <Table headers={activeHeaderCells} rows={activeRows} />
           </div>
           <div style={{ paddingTop: '20px' }}>
-            <Title size="md">Historical Transactions: {noOfHistoricalTransactions == -1 ? <Loader size="sm"></Loader> : noOfHistoricalTransactions}</Title>
+            <Title size="md">Historical Transactions: {noOfHistoricalTransactions === -1 ? <Loader size="sm"></Loader> : noOfHistoricalTransactions}</Title>
             <Divider />
             <Table headers={headerCells} rows={rows} />
           </div>
