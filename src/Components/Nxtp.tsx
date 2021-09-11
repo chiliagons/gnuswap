@@ -17,7 +17,7 @@ import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
 import { chainProviders } from '../Utils/Shared';
 import { swapConfig } from '../Constants/constants';
 import { IBalance } from '../Models/Shared.model';
-import { TableContext } from './Txprovider';
+import { TableContext } from '../Providers/Txprovider';
 
 const App: React.FC = () => {
   const { value, value2 } = useContext(TableContext);

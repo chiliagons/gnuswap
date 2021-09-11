@@ -1,14 +1,11 @@
 import React, { useContext, useState } from 'react';
-// import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core';
-import { Table, Title, TableHeader, TableRow, Text, Divider, IconText, EthHashInfo, Loader } from '@gnosis.pm/safe-react-components';
-// import Transaction from '../components/Transaction';
-// import { MockTransactions } from '../Constants/MockTransactions';
-import { TableContext } from './Txprovider';
+import { Table, Title, TableHeader, TableRow, Text, Divider, IconText, EthHashInfo, Loader, TableAlignment } from '@gnosis.pm/safe-react-components';
+import { TableContext } from '../Providers/Txprovider';
 import { ActiveTransaction, HistoricalTransaction } from '@connext/nxtp-sdk';
 import { ethers, BigNumber } from 'ethers';
 
 const TransactionPage: React.FC = () => {
-  const [Loading, setLoading] = useState(true);
+  const [Loading, setLoading] = useState(false);
   const { value, value2 } = useContext(TableContext);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -32,12 +29,17 @@ const TransactionPage: React.FC = () => {
 
   const rows: TableRow[] = [];
   const activeRows: TableRow[] = [];
+  let noOfActiveTransactions = -1;
+  let noOfHistoricalTransactions = -1;
   function convertToDate(timestamp: number) {
     var date = new Date(timestamp * 1000);
     var result = date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
     return result;
   }
-  if (value.transactions) {
+  if (value.transactions && value2.activeTransactions) {
+    noOfActiveTransactions = value2.activeTransactions.length;
+    noOfHistoricalTransactions = value.transactions.length;
+
     value.transactions.forEach((element: HistoricalTransaction, index: any) => {
       rows.push({
         id: index,
@@ -55,8 +57,7 @@ const TransactionPage: React.FC = () => {
         ],
       });
     });
-  }
-  if (value2.activeTransactions) {
+
     value2.activeTransactions.forEach((element: any, index: any) => {
       activeRows.push({
         id: index,
@@ -72,18 +73,23 @@ const TransactionPage: React.FC = () => {
       });
     });
   }
+
   return (
     <>
-      <div style={{ paddingTop: '20px' }}>
-        <Title size="md">Active Transactions ({value2.activeTransactions.length})</Title>
-        <Divider />
-        <Table headers={activeHeaderCells} rows={activeRows} />
-      </div>
-      <div style={{ paddingTop: '20px' }}>
-        <Title size="md">Historical Transactions ({value.transactions.length})</Title>
-        <Divider />
-        <Table headers={headerCells} rows={rows} />
-      </div>
+      {
+        <div>
+          <div style={{ paddingTop: '20px' }}>
+            <Title size="md">Active Transactions : {noOfActiveTransactions == -1 ? <Loader size="sm"></Loader> : noOfActiveTransactions}</Title>
+            <Divider />
+            <Table headers={activeHeaderCells} rows={activeRows} />
+          </div>
+          <div style={{ paddingTop: '20px' }}>
+            <Title size="md">Historical Transactions: {noOfHistoricalTransactions == -1 ? <Loader size="sm"></Loader> : noOfHistoricalTransactions}</Title>
+            <Divider />
+            <Table headers={headerCells} rows={rows} />
+          </div>
+        </div>
+      }
     </>
   );
 };

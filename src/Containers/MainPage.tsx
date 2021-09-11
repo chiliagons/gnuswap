@@ -1,11 +1,9 @@
 import React from 'react';
 import { Container, Tabs, Tab, AppBar } from '@material-ui/core';
-import Nxtp from '../components/Nxtp';
-// import { useStyles } from '../components/styles';
+import Nxtp from '../Components/Nxtp';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-//import SwipeableViews from 'react-swipeable-views';
-import TransactionPage from '../components/TransactionPage';
-import { TableContextProvider } from '../components/Txprovider';
+import TransactionPage from '../Components/TransactionPage';
+import { TableContextProvider } from '../Providers/Txprovider';
 
 const useStyles = makeStyles({
   tabs: {
@@ -59,7 +57,6 @@ const MainPage: React.FC = () => {
             <Tab label="Transactions" {...a11yProps(1)} />
           </Tabs>
         </AppBar>
-        {/* <SwipeableViews axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'} index={value} onChangeIndex={handleChangeIndex}> */}
         <TabPanel value={value} index={0}>
           <Nxtp />
         </TabPanel>
