@@ -1,7 +1,7 @@
 import React from 'react';
 import { Container, Tabs, Tab, AppBar } from '@material-ui/core';
 import Nxtp from '../Components/Nxtp';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import TransactionPage from '../Components/TransactionPage';
 import { TableContextProvider } from '../Providers/Txprovider';
 

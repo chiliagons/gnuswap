@@ -1,5 +1,5 @@
-import React, { useContext, useState } from 'react';
-import { Table, Title, TableHeader, TableRow, Text, Divider, IconText, EthHashInfo, Loader, TableAlignment } from '@gnosis.pm/safe-react-components';
+import React, { useContext } from 'react';
+import { Table, Title, TableHeader, TableRow, Text, Divider, IconText, EthHashInfo, Loader } from '@gnosis.pm/safe-react-components';
 import { TableContext } from '../Providers/Txprovider';
 import { HistoricalTransaction } from '@connext/nxtp-sdk';
 import { ethers } from 'ethers';
