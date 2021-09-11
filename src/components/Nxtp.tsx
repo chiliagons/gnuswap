@@ -20,7 +20,7 @@ import { IBalance } from '../Models/Shared.model';
 import { TableContext } from './Txprovider';
 
 const App: React.FC = () => {
-  const { setTransactions } = useContext(TableContext);
+  const { value, value2 } = useContext(TableContext);
   const classes = useStyles();
   const { sdk, safe } = useSafeAppsSDK();
   const gnosisWeb3Provider = new SafeAppProvider(safe, sdk);
@@ -139,7 +139,7 @@ const App: React.FC = () => {
       );
       setSdk(_sdk);
       const activeTxs = await _sdk.getActiveTransactions();
-
+      value2.setActiveTransactions(activeTxs);
       setActiveTransferTableColumns(activeTxs);
       console.log('activeTxs: ', activeTxs);
       if (activeTxs[activeTxs.length - 1]) {
@@ -149,7 +149,7 @@ const App: React.FC = () => {
       const historicalTxs = await _sdk.getHistoricalTransactions();
       setHistoricalTransferTableColumns(historicalTxs);
       console.log('historicalTxs: ', historicalTxs);
-      setTransactions(historicalTxs);
+      value.setTransactions(historicalTxs);
 
       _sdk.attach(NxtpSdkEvents.SenderTransactionPrepared, (data) => {
         const { amount, expiry, preparedBlockNumber, ...invariant } = data.txData;
@@ -541,7 +541,7 @@ const App: React.FC = () => {
                       {() => (
                         <Button
                           iconType="rocket"
-                          disabled={!showLoadingTransfer && !auctionResponse}
+                          disabled={latestActiveTx?.status.length === 0}
                           size="lg"
                           variant="bordered"
                           onClick={async () => {

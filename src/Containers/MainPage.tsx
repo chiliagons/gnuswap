@@ -6,7 +6,6 @@ import { makeStyles, useTheme } from '@material-ui/core/styles';
 //import SwipeableViews from 'react-swipeable-views';
 import TransactionPage from '../components/TransactionPage';
 import { TableContextProvider } from '../components/Txprovider';
-import { HistoricalTransaction } from '@connext/nxtp-sdk';
 
 const useStyles = makeStyles({
   tabs: {
@@ -38,6 +37,7 @@ const MainPage: React.FC = () => {
   const classes = useStyles();
   const [value, setValue] = React.useState(0);
   const [transactions, setTransactions] = React.useState(null);
+  const [activeTransactions, setActiveTransactions] = React.useState(null);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -45,7 +45,7 @@ const MainPage: React.FC = () => {
 
   return (
     <div>
-      <TableContextProvider value={{ transactions, setTransactions }}>
+      <TableContextProvider value={{ value: { transactions, setTransactions }, value2: { activeTransactions, setActiveTransactions } }}>
         <AppBar position="static" color="default">
           <Tabs
             className={classes.tabs}
