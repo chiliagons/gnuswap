@@ -1,14 +1,11 @@
 /* eslint-disable require-jsdoc */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import '../App.css';
 import useStyles from './styles';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Button, Card, Divider, Icon, Loader, Text, TextField } from '@gnosis.pm/safe-react-components';
+import { Button, Card, Divider, Icon, Loader, Text, TextField, GenericModal } from '@gnosis.pm/safe-react-components';
 import { MenuItem, Select, Grid, Container, Typography, List, ListItem, ListItemIcon } from '@material-ui/core';
 import HelpIcon from '@material-ui/icons/Help';
 import { Col, Row, Form } from 'antd';
-
 import { BigNumber, providers, Signer, utils } from 'ethers';
 //@ts-ignore
 import { ActiveTransaction, NxtpSdk, NxtpSdkEvents, HistoricalTransaction, TransactionPreparedEvent } from '@connext/nxtp-sdk';
@@ -17,12 +14,13 @@ import { AuctionResponse, getRandomBytes32 } from '@connext/nxtp-utils';
 import pino from 'pino';
 import { useSafeAppsSDK } from '@gnosis.pm/safe-apps-react-sdk';
 import { SafeAppProvider } from '@gnosis.pm/safe-apps-provider';
-
 import { chainProviders } from '../Utils/Shared';
-import { swapConfig } from '../constants';
+import { swapConfig } from '../Constants/constants';
 import { IBalance } from '../Models/Shared.model';
+import { TableContext } from '../Providers/Txprovider';
 
 const App: React.FC = () => {
+  const { value, value2 } = useContext(TableContext);
   const classes = useStyles();
   const { sdk, safe } = useSafeAppsSDK();
   const gnosisWeb3Provider = new SafeAppProvider(safe, sdk);
@@ -35,6 +33,7 @@ const App: React.FC = () => {
   const [nsdk, setSdk] = useState<NxtpSdk>();
   const [showLoading, setShowLoading] = useState(false);
   const [showLoadingTransfer, setShowLoadingTransfer] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [auctionResponse, setAuctionResponse] = useState<AuctionResponse>();
   const [activeTransferTableColumns, setActiveTransferTableColumns] = useState<ActiveTransaction[]>([]);
@@ -47,9 +46,7 @@ const App: React.FC = () => {
   const [receivingTokenAdrress, setReceiveTokenAddress] = useState('0x8a1Cad3703E0beAe0e0237369B4fcD04228d1682');
   const [sendingAssetToken, setSendingAssetToken] = useState<IBalance>();
   const [historicalTransferTableColumns, setHistoricalTransferTableColumns] = useState<HistoricalTransaction[]>([]);
-
   const [latestActiveTx, setLatestActiveTx] = useState<ActiveTransaction>();
-
   const adornmentReceivingAddress = <Icon size="md" type="addressBook" />;
   const adornSendingContractAddress = <Icon size="md" type="sent" />;
 
@@ -127,9 +124,6 @@ const App: React.FC = () => {
     const init = async () => {
       const json = await utils.fetchJson('https://raw.githubusercontent.com/connext/chaindata/main/crossChain.json');
       setChainData(json);
-      // if (!signer || !web3Provider) {
-      //   return;
-      // }
       const provider = new providers.Web3Provider(ethereum);
       const signer = await provider.getSigner();
       console.log('Signeer was triggered');
@@ -145,7 +139,7 @@ const App: React.FC = () => {
       );
       setSdk(_sdk);
       const activeTxs = await _sdk.getActiveTransactions();
-
+      value2.setActiveTransactions(activeTxs);
       setActiveTransferTableColumns(activeTxs);
       console.log('activeTxs: ', activeTxs);
       if (activeTxs[activeTxs.length - 1]) {
@@ -155,6 +149,7 @@ const App: React.FC = () => {
       const historicalTxs = await _sdk.getHistoricalTransactions();
       setHistoricalTransferTableColumns(historicalTxs);
       console.log('historicalTxs: ', historicalTxs);
+      value.setTransactions(historicalTxs);
 
       _sdk.attach(NxtpSdkEvents.SenderTransactionPrepared, (data) => {
         const { amount, expiry, preparedBlockNumber, ...invariant } = data.txData;
@@ -337,6 +332,7 @@ const App: React.FC = () => {
     const provider = new providers.Web3Provider(ethereum);
     const signer = await provider.getSigner();
     console.log('finishTransfer');
+
     const sdk = new NxtpSdk(
       chainProviders,
       signer,
@@ -352,9 +348,12 @@ const App: React.FC = () => {
 
     const finish = await sdk.fulfillTransfer({ bidSignature, encodedBid, encryptedCallData, txData });
     console.log('finish: ', finish);
+    setShowConfirmation(true);
+    console.log(showConfirmation);
     if (finish.metaTxResponse?.transactionHash || finish.metaTxResponse?.transactionHash === '') {
       setActiveTransferTableColumns(activeTransferTableColumns.filter((t) => t.crosschainTx.invariant.transactionId !== txData.transactionId));
     }
+    setShowConfirmation(false);
   };
 
   const getChainName = (chainId: number): string => {
@@ -531,7 +530,7 @@ const App: React.FC = () => {
                           variant="bordered"
                           type="submit"
                         >
-                          Start Transfer
+                          {showLoadingTransfer ? 'Transferring...' : 'Start Transfer'}
                           <Row style={{ paddingLeft: 10 }}>{showLoadingTransfer && <Loader size="xs" />}</Row>
                         </Button>
                       )}
@@ -542,7 +541,7 @@ const App: React.FC = () => {
                       {() => (
                         <Button
                           iconType="rocket"
-                          disabled={!showLoadingTransfer && !auctionResponse}
+                          disabled={latestActiveTx?.status.length === 0}
                           size="lg"
                           variant="bordered"
                           onClick={async () => {
@@ -617,6 +616,19 @@ const App: React.FC = () => {
           </Grid>
         </Grid>
       </Container>
+      {showConfirmation && (
+        <GenericModal
+          onClose={() => setShowConfirmation(false)}
+          title="Success!"
+          body={
+            <div>
+              <Typography className={classes.text} align="center" variant="h6">
+                Your transaction has been succesfully executed!
+              </Typography>{' '}
+            </div>
+          }
+        />
+      )}
     </>
   );
 };

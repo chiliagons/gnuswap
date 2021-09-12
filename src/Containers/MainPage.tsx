@@ -1,10 +1,9 @@
 import React from 'react';
 import { Container, Tabs, Tab, AppBar } from '@material-ui/core';
-import Nxtp from '../components/Nxtp';
-// import { useStyles } from '../components/styles';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-//import SwipeableViews from 'react-swipeable-views';
-import TransactionPage from '../components/TransactionPage';
+import Nxtp from '../Components/Nxtp';
+import { makeStyles } from '@material-ui/core/styles';
+import TransactionPage from '../Components/TransactionPage';
+import { TableContextProvider } from '../Providers/Txprovider';
 
 const useStyles = makeStyles({
   tabs: {
@@ -34,42 +33,40 @@ function a11yProps(index) {
 }
 const MainPage: React.FC = () => {
   const classes = useStyles();
-  const theme = useTheme();
   const [value, setValue] = React.useState(0);
+  const [transactions, setTransactions] = React.useState(null);
+  const [activeTransactions, setActiveTransactions] = React.useState(null);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
-  const handleChangeIndex = (index) => {
-    setValue(index);
-  };
-
   return (
     <div>
-      <AppBar position="static" color="default">
-        <Tabs
-          className={classes.tabs}
-          TabIndicatorProps={{ className: classes.tab__indicator }}
-          value={value}
-          onChange={handleChange}
-          variant="fullWidth"
-          centered
-        >
-          <Tab label="Swap Cross Chain" {...a11yProps(0)} value={0} />
-          <Tab label="Transactions" {...a11yProps(1)} />
-        </Tabs>
-      </AppBar>
-      {/* <SwipeableViews axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'} index={value} onChangeIndex={handleChangeIndex}> */}
-      <TabPanel value={value} index={0}>
-        <Nxtp />
-      </TabPanel>
-      <TabPanel value={value} index={1}>
-        <Container>
-          <TransactionPage />
-        </Container>
-      </TabPanel>
-      {/* </SwipeableViews> */}
+      <TableContextProvider value={{ value: { transactions, setTransactions }, value2: { activeTransactions, setActiveTransactions } }}>
+        <AppBar position="static" color="default">
+          <Tabs
+            className={classes.tabs}
+            TabIndicatorProps={{ className: classes.tab__indicator }}
+            value={value}
+            onChange={handleChange}
+            variant="fullWidth"
+            centered
+          >
+            <Tab label="Swap Cross Chain" {...a11yProps(0)} value={0} />
+            <Tab label="Transactions" {...a11yProps(1)} />
+          </Tabs>
+        </AppBar>
+        <TabPanel value={value} index={0}>
+          <Nxtp />
+        </TabPanel>
+        <TabPanel value={value} index={1}>
+          <Container>
+            <TransactionPage />
+          </Container>
+        </TabPanel>
+        {/* </SwipeableViews> */}
+      </TableContextProvider>
     </div>
   );
 };
