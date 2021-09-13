@@ -67,7 +67,7 @@ const TransactionPage: React.FC = () => {
           { content: <EthHashInfo textSize="xl" hash={element.crosschainTx.invariant.receivingAddress.toString()} showCopyBtn shortenHash={4} /> },
           { content: <Text size="xl">{ethers.utils.formatEther(element.crosschainTx.sending.amount)} TEST</Text> },
           {
-            content: <IconText iconSize="md" iconColor="primary" textSize="xl" iconType="alert" text={element.status} />,
+            content: <IconText iconSize="md" iconColor="primary" textSize="xl" iconType="allowances" text={element.status} />,
           },
         ],
       });
@@ -79,12 +79,12 @@ const TransactionPage: React.FC = () => {
       {
         <div>
           <div style={{ paddingTop: '20px' }}>
-            <Title size="md">Active Transactions : {noOfActiveTransactions === -1 ? <Loader size="sm"></Loader> : noOfActiveTransactions}</Title>
+            <Title size="md">Active Transactions {noOfActiveTransactions === -1 ? <Loader size="sm"></Loader> : noOfActiveTransactions}</Title>
             <Divider />
             <Table headers={activeHeaderCells} rows={activeRows} />
           </div>
           <div style={{ paddingTop: '20px' }}>
-            <Title size="md">Historical Transactions: {noOfHistoricalTransactions === -1 ? <Loader size="sm"></Loader> : noOfHistoricalTransactions}</Title>
+            <Title size="md">Historical Transactions {noOfHistoricalTransactions === -1 ? <Loader size="sm"></Loader> : noOfHistoricalTransactions}</Title>
             <Divider />
             <Table headers={headerCells} rows={rows} />
           </div>
