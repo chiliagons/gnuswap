@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import '../App.css';
 import useStyles from './styles';
-import { Button, Card, Divider, Icon, Loader, Text, TextField, GenericModal } from '@gnosis.pm/safe-react-components';
+import { Button, Card, Divider, Icon, Loader, Text, TextField, GenericModal, FixedIcon } from '@gnosis.pm/safe-react-components';
 import { MenuItem, Select, Grid, Container, Typography, List, ListItem, ListItemIcon } from '@material-ui/core';
 import HelpIcon from '@material-ui/icons/Help';
 import { Col, Row, Form } from 'antd';
@@ -18,6 +18,42 @@ import { chainProviders } from '../Utils/Shared';
 import { swapConfig } from '../Constants/constants';
 import { IBalance } from '../Models/Shared.model';
 import { TableContext } from '../Providers/Txprovider';
+
+class ErrorBoundary extends React.Component<{}, { hasError: Boolean }> {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  componentDidCatch(error, info) {
+    // Display fallback UI
+    this.setState({ hasError: true });
+    // You can also log the error to an error reporting service
+    //logErrorToMyService(error, info);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <GenericModal
+          onClose={() => undefined}
+          title="Something Went Wrong"
+          body={
+            <div>
+              <h3>Something went wrong. Make sure gnuswap is connected to the gnosis vault. Please try again!</h3>
+            </div>
+          }
+          footer={
+            <Button onClick={() => window.location.reload()} size="md">
+              Refresh
+            </Button>
+          }
+        />
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const App: React.FC = () => {
   const { value, value2 } = useContext(TableContext);
@@ -364,271 +400,273 @@ const App: React.FC = () => {
   //UI HERE
   return (
     <>
-      <Divider />
-      <Container>
-        <Grid className={classes.grid} container spacing={8}>
-          <Grid item xs={12} sm={8}>
-            <Card className={classes.card}>
-              <Form
-                form={form}
-                name="basic"
-                labelCol={{ span: 10 }}
-                wrapperCol={{ span: 100 }}
-                onFinish={() => {
-                  transfer();
-                }}
-                initialValues={{
-                  sendingChain: getChainName(parseInt(Object.keys(selectedPool.assets)[0])),
-                  receivingChain: getChainName(parseInt(Object.keys(selectedPool.assets)[1])),
-                  asset: selectedPool.name,
-                  amount: '1',
-                }}
-              >
-                <Form.Item name="sendingChain">
-                  <Row gutter={18}>
-                    <Col span={16}></Col>
-                    <Col span={8}></Col>
-                  </Row>
-                </Form.Item>
+      <ErrorBoundary>
+        <Divider />
+        <Container>
+          <Grid className={classes.grid} container spacing={8}>
+            <Grid item xs={12} sm={8}>
+              <Card className={classes.card}>
+                <Form
+                  form={form}
+                  name="basic"
+                  labelCol={{ span: 10 }}
+                  wrapperCol={{ span: 100 }}
+                  onFinish={() => {
+                    transfer();
+                  }}
+                  initialValues={{
+                    sendingChain: getChainName(parseInt(Object.keys(selectedPool.assets)[0])),
+                    receivingChain: getChainName(parseInt(Object.keys(selectedPool.assets)[1])),
+                    asset: selectedPool.name,
+                    amount: '1',
+                  }}
+                >
+                  <Form.Item name="sendingChain">
+                    <Row gutter={18}>
+                      <Col span={16}></Col>
+                      <Col span={8}></Col>
+                    </Row>
+                  </Form.Item>
 
-                <Form.Item>
-                  <Row gutter={16}>
-                    <Col span={16}>
-                      <Form.Item name="receivingChain">
-                        <Select variant="outlined">
-                          {Object.keys(selectedPool.assets).map((chainId) => (
-                            <MenuItem key={chainId} value={chainId}>
-                              {getChainName(parseInt(chainId))}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                </Form.Item>
+                  <Form.Item>
+                    <Row gutter={16}>
+                      <Col span={16}>
+                        <Form.Item name="receivingChain">
+                          <Select variant="outlined">
+                            {Object.keys(selectedPool.assets).map((chainId) => (
+                              <MenuItem key={chainId} value={chainId}>
+                                {getChainName(parseInt(chainId))}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                  </Form.Item>
 
-                <Form.Item name="asset">
-                  <Row gutter={16}>
-                    <Col span={16}>
-                      <Form.Item name="asset">
-                        <Select variant="outlined" onChange={(e) => setTokenWithBalance(e.target.value)}>
-                          {tokenList.map((_bal) => (
-                            <MenuItem key={_bal.token.symbol} value={JSON.stringify(_bal)}>
-                              {_bal.token.symbol}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                </Form.Item>
+                  <Form.Item name="asset">
+                    <Row gutter={16}>
+                      <Col span={16}>
+                        <Form.Item name="asset">
+                          <Select variant="outlined" onChange={(e) => setTokenWithBalance(e.target.value)}>
+                            {tokenList.map((_bal) => (
+                              <MenuItem key={_bal.token.symbol} value={JSON.stringify(_bal)}>
+                                {_bal.token.symbol}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                  </Form.Item>
 
-                <Form.Item>
-                  <Row gutter={18}>
-                    <Col span={16}>
-                      <TextField
-                        label="Transfer Amount"
-                        name="amount"
-                        value={transferAmount}
-                        type="text"
-                        onChange={(e) => setTransferAmount(e.target.value)}
-                        required
-                      />
-                    </Col>
-                    <Col span={8}>
-                      Balance:{' '}
-                      <Button onClick={() => setTransferAmount(utils.formatEther(userBalance ?? 0))} size="md">
-                        {utils.formatEther(userBalance ?? 0)}
-                      </Button>
-                    </Col>
-                  </Row>
-                </Form.Item>
-
-                <Form.Item name="receivingAddress">
-                  <TextField
-                    label="Receiving Address"
-                    name="receivingAddress"
-                    aria-describedby="receivingAddress"
-                    value={address_field}
-                    type="text"
-                    startAdornment={adornmentReceivingAddress}
-                    required
-                  />
-                </Form.Item>
-
-                <Form.Item name="receiveTokenAdrress">
-                  <TextField
-                    label="Sending Token Contract Address"
-                    name="sendingAssetTokenContract"
-                    value={receivingTokenAdrress}
-                    placeholder={receivingTokenAdrress}
-                    type="text"
-                    onChange={(re) => {
-                      console.log('Change receivingTokenAdrress', re.target.value);
-                      setReceiveTokenAddress(re.target.value);
-                    }}
-                    startAdornment={adornSendingContractAddress}
-                  />
-                </Form.Item>
-
-                <Form.Item name="receivedAmount">
-                  <Row style={{ paddingTop: 20 }} gutter={22}>
-                    <Col span={12}>
-                      <TextField
-                        name="receivedAmount"
-                        type="text"
-                        value={auctionResponse && utils.formatEther(auctionResponse?.bid.amountReceived)}
-                        label=""
-                        disabled
-                        placeholder="..."
-                      />
-                    </Col>
-                    <Col span={6}>
-                      <Button
-                        variant="bordered"
-                        size="lg"
-                        // disabled={!web3Provider || injectedProviderChainId !== parseInt(form.getFieldValue('sendingChain'))}
-                        onClick={async () => {
-                          const sendingAssetId = sendingAssetToken.tokenAddress; //from _bal -> set the tokenaddress
-                          const receivingAssetId = receivingTokenAdrress; //from _bal -> set the tokenaddress
-                          if (!sendingAssetId || !receivingAssetId) {
-                            throw new Error("Configuration doesn't support selected swap");
-                          }
-
-                          await getTransferQuote(
-                            gnosisChainId,
-                            sendingAssetId,
-                            parseInt(form.getFieldValue('receivingChain')),
-                            receivingAssetId,
-                            utils.parseEther(transferAmount).toString(),
-                            form.getFieldValue('receivingAddress'),
-                          );
-                        }}
-                      >
-                        <Row>Get Quote</Row>
-
-                        <Row style={{ paddingLeft: 10 }}>{showLoading && <Loader size="xs" />}</Row>
-                      </Button>
-                    </Col>
-                  </Row>
-                  <Row>
-                    {errorMsg.length !== 0 && (
-                      <Text color="error" size="sm">
-                        {errorMsg}
-                      </Text>
-                    )}
-                  </Row>
-                </Form.Item>
-                <Row gutter={25}>
-                  <Col span={12}>
-                    <Form.Item dependencies={['sendingChain', 'receivingChain']}>
-                      {() => (
-                        <Button
-                          iconType="chain"
-                          disabled={form.getFieldValue('sendingChain') === form.getFieldValue('receivingChain') || !auctionResponse}
-                          size="lg"
-                          variant="bordered"
-                          type="submit"
-                        >
-                          {showLoadingTransfer ? 'Transferring...' : 'Start Transfer'}
-                          <Row style={{ paddingLeft: 10 }}>{showLoadingTransfer && <Loader size="xs" />}</Row>
+                  <Form.Item>
+                    <Row gutter={18}>
+                      <Col span={16}>
+                        <TextField
+                          label="Transfer Amount"
+                          name="amount"
+                          value={transferAmount}
+                          type="text"
+                          onChange={(e) => setTransferAmount(e.target.value)}
+                          required
+                        />
+                      </Col>
+                      <Col span={8}>
+                        Balance:{' '}
+                        <Button onClick={() => setTransferAmount(utils.formatEther(userBalance ?? 0))} size="md">
+                          {utils.formatEther(userBalance ?? 0)}
                         </Button>
-                      )}
-                    </Form.Item>
-                  </Col>
-                  <Col span={10}>
-                    <Form.Item dependencies={['sendingChain', 'receivingChain']}>
-                      {() => (
+                      </Col>
+                    </Row>
+                  </Form.Item>
+
+                  <Form.Item name="receivingAddress">
+                    <TextField
+                      label="Receiving Address"
+                      name="receivingAddress"
+                      aria-describedby="receivingAddress"
+                      value={address_field}
+                      type="text"
+                      startAdornment={adornmentReceivingAddress}
+                      required
+                    />
+                  </Form.Item>
+
+                  <Form.Item name="receiveTokenAdrress">
+                    <TextField
+                      label="Sending Token Contract Address"
+                      name="sendingAssetTokenContract"
+                      value={receivingTokenAdrress}
+                      placeholder={receivingTokenAdrress}
+                      type="text"
+                      onChange={(re) => {
+                        console.log('Change receivingTokenAdrress', re.target.value);
+                        setReceiveTokenAddress(re.target.value);
+                      }}
+                      startAdornment={adornSendingContractAddress}
+                    />
+                  </Form.Item>
+
+                  <Form.Item name="receivedAmount">
+                    <Row style={{ paddingTop: 20 }} gutter={22}>
+                      <Col span={12}>
+                        <TextField
+                          name="receivedAmount"
+                          type="text"
+                          value={auctionResponse && utils.formatEther(auctionResponse?.bid.amountReceived)}
+                          label=""
+                          disabled
+                          placeholder="..."
+                        />
+                      </Col>
+                      <Col span={6}>
                         <Button
-                          iconType="rocket"
-                          disabled={latestActiveTx?.status.length === 0}
-                          size="lg"
                           variant="bordered"
+                          size="lg"
+                          // disabled={!web3Provider || injectedProviderChainId !== parseInt(form.getFieldValue('sendingChain'))}
                           onClick={async () => {
-                            console.log('Clicked finish');
-                            if (latestActiveTx)
-                              await finishTransfer({
-                                bidSignature: latestActiveTx.bidSignature,
-                                encodedBid: latestActiveTx.encodedBid,
-                                encryptedCallData: latestActiveTx.encryptedCallData,
-                                txData: {
-                                  ...latestActiveTx.crosschainTx.invariant,
-                                  ...latestActiveTx.crosschainTx.receiving,
-                                },
-                              });
+                            const sendingAssetId = sendingAssetToken.tokenAddress; //from _bal -> set the tokenaddress
+                            const receivingAssetId = receivingTokenAdrress; //from _bal -> set the tokenaddress
+                            if (!sendingAssetId || !receivingAssetId) {
+                              throw new Error("Configuration doesn't support selected swap");
+                            }
+
+                            await getTransferQuote(
+                              gnosisChainId,
+                              sendingAssetId,
+                              parseInt(form.getFieldValue('receivingChain')),
+                              receivingAssetId,
+                              utils.parseEther(transferAmount).toString(),
+                              form.getFieldValue('receivingAddress'),
+                            );
                           }}
                         >
-                          Finish Transfer
+                          <Row>Get Quote</Row>
+
+                          <Row style={{ paddingLeft: 10 }}>{showLoading && <Loader size="xs" />}</Row>
                         </Button>
+                      </Col>
+                    </Row>
+                    <Row>
+                      {errorMsg.length !== 0 && (
+                        <Text color="error" size="sm">
+                          {errorMsg}
+                        </Text>
                       )}
-                    </Form.Item>
-                  </Col>
-                </Row>
-              </Form>
-            </Card>
+                    </Row>
+                  </Form.Item>
+                  <Row gutter={25}>
+                    <Col span={12}>
+                      <Form.Item dependencies={['sendingChain', 'receivingChain']}>
+                        {() => (
+                          <Button
+                            iconType="chain"
+                            disabled={form.getFieldValue('sendingChain') === form.getFieldValue('receivingChain') || !auctionResponse}
+                            size="lg"
+                            variant="bordered"
+                            type="submit"
+                          >
+                            {showLoadingTransfer ? 'Transferring...' : 'Start Transfer'}
+                            <Row style={{ paddingLeft: 10 }}>{showLoadingTransfer && <Loader size="xs" />}</Row>
+                          </Button>
+                        )}
+                      </Form.Item>
+                    </Col>
+                    <Col span={10}>
+                      <Form.Item dependencies={['sendingChain', 'receivingChain']}>
+                        {() => (
+                          <Button
+                            iconType="rocket"
+                            disabled={latestActiveTx?.status.length === 0}
+                            size="lg"
+                            variant="bordered"
+                            onClick={async () => {
+                              console.log('Clicked finish');
+                              if (latestActiveTx)
+                                await finishTransfer({
+                                  bidSignature: latestActiveTx.bidSignature,
+                                  encodedBid: latestActiveTx.encodedBid,
+                                  encryptedCallData: latestActiveTx.encryptedCallData,
+                                  txData: {
+                                    ...latestActiveTx.crosschainTx.invariant,
+                                    ...latestActiveTx.crosschainTx.receiving,
+                                  },
+                                });
+                            }}
+                          >
+                            Finish Transfer
+                          </Button>
+                        )}
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                </Form>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <Card className={classes.supportcard}>
+                <Typography className={classes.text} align="center" variant="h6">
+                  Support
+                </Typography>
+                <List component="nav" aria-label="main mailbox folders">
+                  <ListItem>
+                    <ListItemIcon>
+                      <HelpIcon />
+                    </ListItemIcon>
+                    <Typography className={classes.text}>How it works</Typography>
+                  </ListItem>
+                </List>
+                <Divider />
+                <List component="nav" aria-label="secondary mailbox folders">
+                  <ListItem>
+                    <Typography className={classes.text}>1. Choose the receiving network</Typography>
+                  </ListItem>
+                  <ListItem>
+                    <Typography className={classes.text}>2. Set the asset that you want to swap</Typography>
+                  </ListItem>
+                  <ListItem>
+                    <Typography className={classes.text}>3. Enter the amount you want to swap</Typography>
+                  </ListItem>
+                  <ListItem>
+                    <Typography className={classes.text}>2. Enter the reciever address</Typography>
+                  </ListItem>
+                  <ListItem>
+                    <Typography className={classes.text}>4. Get a quotation!</Typography>
+                  </ListItem>
+                  <ListItem>
+                    <Typography className={classes.text}>5. Once quote is received request for Starting a Swap and then Finish it!!</Typography>
+                  </ListItem>
+                  <ListItem>
+                    <Typography className={classes.text}>6. Confirm and wait for the transfer to take place</Typography>
+                  </ListItem>
+                  <ListItem>
+                    <Typography className={classes.text}>
+                      7. In case of any issues you can create a support ticket{' '}
+                      <a target="blank" className={classes.a} href="https://support.connext.network/hc/en-us">
+                        here
+                      </a>
+                    </Typography>
+                  </ListItem>
+                </List>
+              </Card>
+            </Grid>
           </Grid>
-          <Grid item xs={12} sm={4}>
-            <Card className={classes.supportcard}>
-              <Typography className={classes.text} align="center" variant="h6">
-                Support
-              </Typography>
-              <List component="nav" aria-label="main mailbox folders">
-                <ListItem>
-                  <ListItemIcon>
-                    <HelpIcon />
-                  </ListItemIcon>
-                  <Typography className={classes.text}>How it works</Typography>
-                </ListItem>
-              </List>
-              <Divider />
-              <List component="nav" aria-label="secondary mailbox folders">
-                <ListItem>
-                  <Typography className={classes.text}>1. Choose the receiving network</Typography>
-                </ListItem>
-                <ListItem>
-                  <Typography className={classes.text}>2. Set the asset that you want to swap</Typography>
-                </ListItem>
-                <ListItem>
-                  <Typography className={classes.text}>3. Enter the amount you want to swap</Typography>
-                </ListItem>
-                <ListItem>
-                  <Typography className={classes.text}>2. Enter the reciever address</Typography>
-                </ListItem>
-                <ListItem>
-                  <Typography className={classes.text}>4. Get a quotation!</Typography>
-                </ListItem>
-                <ListItem>
-                  <Typography className={classes.text}>5. Once quote is received request for Starting a Swap and then Finish it!!</Typography>
-                </ListItem>
-                <ListItem>
-                  <Typography className={classes.text}>6. Confirm and wait for the transfer to take place</Typography>
-                </ListItem>
-                <ListItem>
-                  <Typography className={classes.text}>
-                    7. In case of any issues you can create a support ticket{' '}
-                    <a target="blank" className={classes.a} href="https://support.connext.network/hc/en-us">
-                      here
-                    </a>
-                  </Typography>
-                </ListItem>
-              </List>
-            </Card>
-          </Grid>
-        </Grid>
-      </Container>
-      {showConfirmation && (
-        <GenericModal
-          onClose={() => setShowConfirmation(false)}
-          title="Success!"
-          body={
-            <div>
-              <Typography className={classes.text} align="center" variant="h6">
-                Your transaction has been succesfully executed!
-              </Typography>{' '}
-            </div>
-          }
-        />
-      )}
+        </Container>
+        {showConfirmation && (
+          <GenericModal
+            onClose={() => setShowConfirmation(false)}
+            title="Success!"
+            body={
+              <div>
+                <Typography className={classes.text} align="center" variant="h6">
+                  Your transaction has been succesfully executed!
+                </Typography>{' '}
+              </div>
+            }
+          />
+        )}
+      </ErrorBoundary>
     </>
   );
 };
