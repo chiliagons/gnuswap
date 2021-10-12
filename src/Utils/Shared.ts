@@ -1,26 +1,40 @@
 /* eslint-disable require-jsdoc */
-import { BigNumber, constants, Contract, providers, Signer, utils } from 'ethers';
-import { chainConfig } from '../Constants/constants';
+import {
+  BigNumber,
+  constants,
+  Contract,
+  providers,
+  Signer,
+  utils,
+} from "ethers";
+import { chainConfig } from "../Constants/constants";
 
 const TestTokenABI = [
   // Read-Only Functions
-  'function balanceOf(address owner) view returns (uint256)',
-  'function decimals() view returns (uint8)',
-  'function symbol() view returns (string)',
+  "function balanceOf(address owner) view returns (uint256)",
+  "function decimals() view returns (uint8)",
+  "function symbol() view returns (string)",
 
   // Authenticated Functions
-  'function transfer(address to, uint amount) returns (boolean)',
-  'function mint(address account, uint256 amount)',
+  "function transfer(address to, uint amount) returns (boolean)",
+  "function mint(address account, uint256 amount)",
 ];
 
-export const mintTokens = async (signer: Signer, assetId: string): Promise<providers.TransactionResponse> => {
+export const mintTokens = async (
+  signer: Signer,
+  assetId: string
+): Promise<providers.TransactionResponse> => {
   const signerAddress = await signer.getAddress();
   const contract = new Contract(assetId, TestTokenABI, signer);
-  const response = await contract.mint(signerAddress, utils.parseEther('1000'));
+  const response = await contract.mint(signerAddress, utils.parseEther("1000"));
   return response;
 };
 
-export const getBalance = async (address: string, assetId: string, provider: providers.Provider): Promise<BigNumber> => {
+export const getBalance = async (
+  address: string,
+  assetId: string,
+  provider: providers.Provider
+): Promise<BigNumber> => {
   let balance;
   if (assetId === constants.AddressZero) {
     balance = await provider.getBalance(address);
@@ -31,11 +45,22 @@ export const getBalance = async (address: string, assetId: string, provider: pro
   return balance;
 };
 
-export const chainProviders: Record<number, { provider: providers.FallbackProvider; subgraph?: string; transactionManagerAddress?: string }> = {};
-Object.entries(chainConfig).forEach(([chainId, { provider, subgraph, transactionManagerAddress }]) => {
-  chainProviders[parseInt(chainId)] = {
-    provider: new providers.FallbackProvider(provider.map((p) => new providers.JsonRpcProvider(p, parseInt(chainId)))),
-    subgraph,
-    transactionManagerAddress,
-  };
-});
+export const chainProviders: Record<
+  number,
+  {
+    provider: providers.FallbackProvider;
+    subgraph?: string;
+    transactionManagerAddress?: string;
+  }
+> = {};
+Object.entries(chainConfig).forEach(
+  ([chainId, { provider, subgraph, transactionManagerAddress }]) => {
+    chainProviders[parseInt(chainId)] = {
+      provider: new providers.FallbackProvider(
+        provider.map((p) => new providers.JsonRpcProvider(p, parseInt(chainId)))
+      ),
+      subgraph,
+      transactionManagerAddress,
+    };
+  }
+);

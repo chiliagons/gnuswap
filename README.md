@@ -43,7 +43,6 @@ gnuswap is an Gnosis Safe App to exchange token across multiple chains. Gnosis s
 
 ## How we Built it
 
-
 We integrated Gnosis Safe using the gnosis safe sdk with connext network nxtp sdk.
 We utilized the Gnosis UI SDK to keep the elements as native as possible.
 

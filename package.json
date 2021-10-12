@@ -19,6 +19,8 @@
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "@types/styled-components": "^5.1.2",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
     "antd": "^4.16.9",
     "axios": "^0.21.1",
     "ethers": "^5.4.2",
@@ -38,24 +40,14 @@
   "scripts": {
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
-    "lint": "eslint src",
     "test": "react-app-rewired test",
-    "eject": "react-scripts eject"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged",
-      "pre-push": "npm run lint"
-    }
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "plugin:jsx-a11y/recommended"
-    ],
-    "plugins": [
-      "jsx-a11y"
-    ]
+    "eject": "react-scripts eject",
+    "check-types": "tsc --pretty --noEmit",
+    "check-format": "prettier --check .",
+    "check-lint": "eslint . --ext ts --ext tsx --ext js",
+    "format": "prettier --write .",
+    "test-all": "npm run check-format && npm run check-lint && npm run check-types && npm run build",
+    "prepare": "husky install"
   },
   "browserslist": {
     "production": [
@@ -83,8 +75,11 @@
     "url": "https://github.com/Aman-zishan/gnuswap/issues"
   },
   "devDependencies": {
-    "eslint": "^7.31.0",
-    "husky": "^4.3.0",
+    "eslint": "^7.11.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-react": "^7.26.1",
+    "husky": "^7.0.0",
     "prettier": "^2.1.1",
     "pretty-quick": "^3.1.0"
   }
