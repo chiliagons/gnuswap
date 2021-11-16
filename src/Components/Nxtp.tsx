@@ -25,7 +25,7 @@ import {
 
 import HelpIcon from "@material-ui/icons/Help";
 
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 
 import { BigNumber, providers, Signer, utils } from "ethers";
 // @ts-ignore
@@ -89,9 +89,11 @@ const App: React.FC = () => {
 
   interface ICrossChain {
     transferAmount: any;
+    chain: any;
+    token: any;
   }
 
-  const { register, handleSubmit } = useForm<ICrossChain>();
+  const { register, handleSubmit, control} = useForm<ICrossChain>();
 
   const onSubmit = (data: ICrossChain) => {
     alert(JSON.stringify(data));
@@ -99,35 +101,35 @@ const App: React.FC = () => {
 
   const ethereum = (window as any).ethereum;
 
-  // const getTokensHandler = async (address) => {
-  //   const tokenArr: Array<IBalance> = [];
+  const getTokensHandler = async (address) => {
+    const tokenArr: Array<IBalance> = [];
 
-  //   await fetch(
-  //     `https://safe-transaction.rinkeby.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`
-  //   )
-  //     .then((res) => res.json())
-  //     .then((response) => {
-  //       response.forEach((_bal: IBalance) => {
-  //         console.log(_bal);
-  //         if (_bal.token !== null) {
-  //           tokenArr.push(_bal);
-  //         } else if (_bal.token === null) {
-  //           _bal.token = {
-  //             decimals: 18,
-  //             logoUri:
-  //               "https://gnosis-safe-token-logos.s3.amazonaws.com/0xF5238462E7235c7B62811567E63Dd17d12C2EAA0.png",
-  //             name: "Ethereum",
-  //             symbol: "ETH",
-  //           };
-  //           tokenArr.push(_bal);
-  //         }
-  //       });
-  //       setTokenList(tokenArr);
-  //     })
-  //     .catch((error) => {
-  //       console.log(error);
-  //     });
-  // };
+    await fetch(
+      `https://safe-transaction.rinkeby.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`
+    )
+      .then((res) => res.json())
+      .then((response) => {
+        response.forEach((_bal: IBalance) => {
+          console.log(_bal);
+          if (_bal.token !== null) {
+            tokenArr.push(_bal);
+          } else if (_bal.token === null) {
+            _bal.token = {
+              decimals: 18,
+              logoUri:
+                "https://gnosis-safe-token-logos.s3.amazonaws.com/0xF5238462E7235c7B62811567E63Dd17d12C2EAA0.png",
+              name: "Ethereum",
+              symbol: "ETH",
+            };
+            tokenArr.push(_bal);
+          }
+        });
+        setTokenList(tokenArr);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   const setTokenWithBalance = (bal) => {
     const tokenAsBal: IBalance = JSON.parse(bal);
@@ -142,7 +144,7 @@ const App: React.FC = () => {
       const _signerG = await gnosisProvider.getSigner();
       if (_signerG) {
         const address = await _signerG.getAddress();
-        // await getTokensHandler(address);
+        await getTokensHandler(address);
         const sendingChain = await _signerG.getChainId();
         console.log("sendingChain: ", sendingChain);
         setGnosisChainId(sendingChain);
@@ -458,6 +460,25 @@ const App: React.FC = () => {
     return chain?.name ?? chainId.toString();
   };
 
+    const generateSelectedPoolOptions = () => {
+      return Object.keys(selectedPool.assets).map((chainId) => {
+        return (
+          <MenuItem key={chainId} value={chainId}>
+            {chainId}
+          </MenuItem>
+        );
+      });
+    };
+    const generateSelectTokenOptions = () => {
+      return tokenList.map((_bal) => {
+        return (
+          <MenuItem key={_bal.token.symbol} value={JSON.stringify(_bal)}>
+            {_bal.token.symbol}
+          </MenuItem>
+        );
+      });
+    };
+    
   // UI HERE
   return (
     <>
@@ -487,28 +508,44 @@ const App: React.FC = () => {
                     amount: "1",
                   }}
                 > */}
-                  {/* <Select variant="outlined">
-                            {Object.keys(selectedPool.assets).map((chainId) => (
-                              <MenuItem key={chainId} value={chainId}>
-                                {getChainName(parseInt(chainId))}
-                              </MenuItem>
-                            ))}
-                          </Select> */}
+                  <Controller
+                    control={control}
+                    name="chain"
+                    render={({ field: { onChange, value } }) => (
+                      <Select
+                        variant="outlined"
+                        onChange={onChange}
+                        value={value}
+                      >
+                        {generateSelectedPoolOptions()}
+                      </Select>
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name="token"
+                    render={({ field: { onChange, value } }) => (
+                      <Select
+                        variant="outlined"
+                        onChange={onChange}
+                        value={value}
+                      >
+                        {generateSelectTokenOptions()}
+                      </Select>
+                    )}
+                  />
                   {/* <Select
-                            variant="outlined"
-                            onChange={(e) =>
-                              setTokenWithBalance(e.target.value)
-                            }
-                          >
-                            {tokenList.map((_bal) => (
-                              <MenuItem
-                                key={_bal.token.symbol}
-                                value={JSON.stringify(_bal)}
-                              >
-                                {_bal.token.symbol}
-                              </MenuItem>
-                            ))}
-                          </Select> */}
+                    onChange={(e) => setTokenWithBalance(e.target.value)}
+                  >
+                    {tokenList.map((_bal) => (
+                      <option
+                        key={_bal.token.symbol}
+                        value={JSON.stringify(_bal)}
+                      >
+                        {_bal.token.symbol}
+                      </option>
+                    ))}
+                  </Select> */}
                   <Input
                     value={register}
                     {...register("transferAmount")}
