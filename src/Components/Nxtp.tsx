@@ -93,7 +93,7 @@ const App: React.FC = () => {
     token: any;
   }
 
-  const { register, handleSubmit, control} = useForm<ICrossChain>();
+  const { register, handleSubmit, control } = useForm<ICrossChain>();
 
   const onSubmit = (data: ICrossChain) => {
     alert(JSON.stringify(data));
@@ -460,25 +460,25 @@ const App: React.FC = () => {
     return chain?.name ?? chainId.toString();
   };
 
-    const generateSelectedPoolOptions = () => {
-      return Object.keys(selectedPool.assets).map((chainId) => {
-        return (
-          <MenuItem key={chainId} value={chainId}>
-            {chainId}
-          </MenuItem>
-        );
-      });
-    };
-    const generateSelectTokenOptions = () => {
-      return tokenList.map((_bal) => {
-        return (
-          <MenuItem key={_bal.token.symbol} value={JSON.stringify(_bal)}>
-            {_bal.token.symbol}
-          </MenuItem>
-        );
-      });
-    };
-    
+  const generateSelectedPoolOptions = () => {
+    return Object.keys(selectedPool.assets).map((chainId) => {
+      return (
+        <MenuItem key={chainId} value={chainId}>
+          {chainId}
+        </MenuItem>
+      );
+    });
+  };
+  const generateSelectTokenOptions = () => {
+    return tokenList.map((_bal) => {
+      return (
+        <MenuItem key={_bal.token.symbol} value={JSON.stringify(_bal)}>
+          {_bal.token.symbol}
+        </MenuItem>
+      );
+    });
+  };
+
   // UI HERE
   return (
     <>
