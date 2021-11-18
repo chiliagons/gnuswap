@@ -38,8 +38,8 @@ export default makeStyles((theme) => ({
     color: "#008c73",
     border: "1px solid #ced4da",
     fontSize: 16,
-    marginTop: 10, 
-    marginBottom: 10, 
+    marginTop: 10,
+    marginBottom: 10,
     transition: theme.transitions.create(["border-color", "box-shadow"]),
     // Use the system font instead of the default Roboto font.
     fontFamily: [
@@ -97,9 +97,9 @@ export default makeStyles((theme) => ({
     paddingTop: "2%",
     paddingBottom: "2%",
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
   },
-  
+
   formContentRow: {
     display: "flex",
     flexDirection: "row",
@@ -111,6 +111,6 @@ export default makeStyles((theme) => ({
   formContentColumn: {
     display: "flex",
     flexDirection: "column",
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
 }));

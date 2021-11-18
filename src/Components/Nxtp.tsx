@@ -10,7 +10,7 @@ import {
   Loader,
   Text,
   GenericModal,
-  TextField
+  TextField,
 } from "@gnosis.pm/safe-react-components";
 import {
   MenuItem,
@@ -578,28 +578,28 @@ const App: React.FC = () => {
                     </Button>
                   </div>
                   <div className={classes.formContentColumn}>
-                  <Controller
-                    name={"receivingAddress"}
-                    control={control}
-                    render={({ field: { onChange, value } }) => (
-                      <TextField
-                        onChange={onChange}
-                        value={value}
-                        label={"Receiving Address"}
-                      />
-                    )}
-                  />
-                  <Controller
-                    name={"sendingAssetTokenContract"}
-                    control={control}
-                    render={({ field: { onChange, value } }) => (
-                      <TextField
-                        onChange={onChange}
-                        value={value}
-                        label={"Sending Asset Token Contract"}
-                      />
-                    )}
-                  />
+                    <Controller
+                      name={"receivingAddress"}
+                      control={control}
+                      render={({ field: { onChange, value } }) => (
+                        <TextField
+                          onChange={onChange}
+                          value={value}
+                          label={"Receiving Address"}
+                        />
+                      )}
+                    />
+                    <Controller
+                      name={"sendingAssetTokenContract"}
+                      control={control}
+                      render={({ field: { onChange, value } }) => (
+                        <TextField
+                          onChange={onChange}
+                          value={value}
+                          label={"Sending Asset Token Contract"}
+                        />
+                      )}
+                    />
                   </div>
                   {/* Need for reference to know what to pass. */}
                   {/* <Input
@@ -668,24 +668,24 @@ const App: React.FC = () => {
                   </div>
                   <div>
                     {/* {() => ( */}
-                      <Button
-                        iconType="chain"
-                        // disabled={
-                        //   form.getFieldValue("sendingChain") ===
-                        //     form.getFieldValue("receivingChain") ||
-                        //   !auctionResponse
-                        // }
-                        size="lg"
-                        variant="bordered"
-                        type="submit"
-                      >
-                        {showLoadingTransfer
-                          ? "Transferring..."
-                          : "Start Transfer"}
-                        <span style={{ paddingLeft: 10 }}>
-                          {showLoadingTransfer && <Loader size="xs" />}
-                        </span>
-                      </Button>
+                    <Button
+                      iconType="chain"
+                      // disabled={
+                      //   form.getFieldValue("sendingChain") ===
+                      //     form.getFieldValue("receivingChain") ||
+                      //   !auctionResponse
+                      // }
+                      size="lg"
+                      variant="bordered"
+                      type="submit"
+                    >
+                      {showLoadingTransfer
+                        ? "Transferring..."
+                        : "Start Transfer"}
+                      <span style={{ paddingLeft: 10 }}>
+                        {showLoadingTransfer && <Loader size="xs" />}
+                      </span>
+                    </Button>
                     {/* )} */}
                     <Button
                       iconType="rocket"
