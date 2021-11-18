@@ -10,6 +10,7 @@ import {
   Loader,
   Text,
   GenericModal,
+  TextField
 } from "@gnosis.pm/safe-react-components";
 import {
   MenuItem,
@@ -89,6 +90,9 @@ const App: React.FC = () => {
 
   interface ICrossChain {
     transferAmount: any;
+    receivingAddress: any;
+    sendingAssetTokenContract: any;
+    receivedAmount: any;
     chain: any;
     token: any;
   }
@@ -488,7 +492,10 @@ const App: React.FC = () => {
           <Grid className={classes.grid} container spacing={8}>
             <Grid item xs={12} sm={8}>
               <Card className={classes.card}>
-                <form onSubmit={handleSubmit(onSubmit)}>
+                <form
+                  className={classes.form}
+                  onSubmit={handleSubmit(onSubmit)}
+                >
                   {/* <Form
                   form={form}
                   name="basic"
@@ -513,6 +520,7 @@ const App: React.FC = () => {
                     name="chain"
                     render={({ field: { onChange, value } }) => (
                       <Select
+                        className={classes.input}
                         variant="outlined"
                         onChange={onChange}
                         value={value}
@@ -526,6 +534,7 @@ const App: React.FC = () => {
                     name="token"
                     render={({ field: { onChange, value } }) => (
                       <Select
+                        className={classes.input}
                         variant="outlined"
                         onChange={onChange}
                         value={value}
@@ -546,128 +555,160 @@ const App: React.FC = () => {
                       </option>
                     ))}
                   </Select> */}
-                  <Input
-                    value={register}
-                    {...register("transferAmount")}
-                    name="transferAmount"
-                    placeholder="Add in your transfer amount"
-                    type="text"
-                    required
+                  <div className={classes.formContentRow}>
+                    <Controller
+                      name={"transferAmount"}
+                      control={control}
+                      render={({ field: { onChange, value } }) => (
+                        <TextField
+                          onChange={onChange}
+                          value={value}
+                          label={"Transfer Amount"}
+                        />
+                      )}
+                    />
+                    Balance:
+                    <Button
+                      onClick={() =>
+                        setTransferAmount(utils.formatEther(userBalance ?? 0))
+                      }
+                      size="md"
+                    >
+                      {utils.formatEther(userBalance ?? 0)}
+                    </Button>
+                  </div>
+                  <div className={classes.formContentColumn}>
+                  <Controller
+                    name={"receivingAddress"}
+                    control={control}
+                    render={({ field: { onChange, value } }) => (
+                      <TextField
+                        onChange={onChange}
+                        value={value}
+                        label={"Receiving Address"}
+                      />
+                    )}
                   />
-                  Balance:{" "}
-                  <Button
-                    onClick={() =>
-                      setTransferAmount(utils.formatEther(userBalance ?? 0))
-                    }
-                    size="md"
-                  >
-                    {utils.formatEther(userBalance ?? 0)}
-                  </Button>
-                  <Input
-                    aria-describedby="receivingAddress"
-                    value={addressField}
-                    type="text"
-                    startAdornment={adornmentReceivingAddress}
-                    required
+                  <Controller
+                    name={"sendingAssetTokenContract"}
+                    control={control}
+                    render={({ field: { onChange, value } }) => (
+                      <TextField
+                        onChange={onChange}
+                        value={value}
+                        label={"Sending Asset Token Contract"}
+                      />
+                    )}
                   />
-                  <Input
-                    // label="Sending Token Contract Address"
+                  </div>
+                  {/* Need for reference to know what to pass. */}
+                  {/* <Input
+                    label="Sending Token Contract Address"
                     name="sendingAssetTokenContract"
                     value={receivingTokenAdrress}
                     placeholder={receivingTokenAdrress}
                     type="text"
-                    // onChange={(re) => {
-                    //   console.log(
-                    //     "Change receivingTokenAdrress",
-                    //     re.target.value
-                    //   );
-                    //   setReceiveTokenAddress(re.target.value);
-                    // }}
-                    startAdornment={adornSendingContractAddress}
-                  />
-                  <Input
-                    name="receivedAmount"
-                    type="text"
-                    value={
-                      auctionResponse &&
-                      utils.formatEther(auctionResponse?.bid.amountReceived)
-                    }
-                    disabled
-                    placeholder="..."
-                  />
-                  <Button
-                    variant="bordered"
-                    size="lg"
-                    // disabled={!web3Provider || injectedProviderChainId !== parseInt(form.getFieldValue('sendingChain'))}
-                    onClick={async () => {
-                      const sendingAssetId = sendingAssetToken.tokenAddress; // from _bal -> set the tokenaddress
-                      const receivingAssetId = receivingTokenAdrress; // from _bal -> set the tokenaddress
-                      if (!sendingAssetId || !receivingAssetId) {
-                        throw new Error(
-                          "Configuration doesn't support selected swap"
-                        );
-                      }
-
-                      // await getTransferQuote(
-                      //   gnosisChainId,
-                      //   sendingAssetId,
-                      //   parseInt(.formgetFieldValue("receivingChain")),
-                      //   receivingAssetId,
-                      //   utils.parseEther(transferAmount).toString(),
-                      //   form.getFieldValue("receivingAddress")
-                      // );
+                    onChange={(re) => {
+                      console.log(
+                        "Change receivingTokenAdrress",
+                        re.target.value
+                      );
+                      setReceiveTokenAddress(re.target.value);
                     }}
-                  >
-                    <p>Get Quote</p>
-
-                    {showLoading && <Loader size="xs" />}
-                  </Button>
-                  {errorMsg.length !== 0 && (
-                    <Text color="error" size="sm">
-                      {errorMsg}
-                    </Text>
-                  )}
-                  {() => (
+                    startAdornment={adornSendingContractAddress}
+                  /> */}
+                  <div className={classes.formContentRow}>
+                    <Controller
+                      name={"receivedAmount"}
+                      control={control}
+                      render={({ field: { onChange } }) => (
+                        <TextField
+                          onChange={onChange}
+                          value={
+                            auctionResponse &&
+                            utils.formatEther(
+                              auctionResponse?.bid.amountReceived
+                            )
+                          }
+                          label="..."
+                          disabled={true}
+                        />
+                      )}
+                    />
                     <Button
-                      iconType="chain"
-                      // disabled={
-                      //   form.getFieldValue("sendingChain") ===
-                      //     form.getFieldValue("receivingChain") ||
-                      //   !auctionResponse
-                      // }
+                      variant="bordered"
+                      size="lg"
+                      // disabled={!web3Provider || injectedProviderChainId !== parseInt(form.getFieldValue('sendingChain'))}
+                      onClick={async () => {
+                        const sendingAssetId = sendingAssetToken.tokenAddress; // from _bal -> set the tokenaddress
+                        const receivingAssetId = receivingTokenAdrress; // from _bal -> set the tokenaddress
+                        if (!sendingAssetId || !receivingAssetId) {
+                          throw new Error(
+                            "Configuration doesn't support selected swap"
+                          );
+                        }
+                        // await getTransferQuote(
+                        //   gnosisChainId,
+                        //   sendingAssetId,
+                        //   parseInt(.formgetFieldValue("receivingChain")),
+                        //   receivingAssetId,
+                        //   utils.parseEther(transferAmount).toString(),
+                        //   form.getFieldValue("receivingAddress")
+                        // );
+                      }}
+                    >
+                      <p>Get Quote</p>
+                      {showLoading && <Loader size="xs" />}
+                    </Button>
+                    {errorMsg.length !== 0 && (
+                      <Text color="error" size="sm">
+                        {errorMsg}
+                      </Text>
+                    )}
+                  </div>
+                  <div>
+                    {/* {() => ( */}
+                      <Button
+                        iconType="chain"
+                        // disabled={
+                        //   form.getFieldValue("sendingChain") ===
+                        //     form.getFieldValue("receivingChain") ||
+                        //   !auctionResponse
+                        // }
+                        size="lg"
+                        variant="bordered"
+                        type="submit"
+                      >
+                        {showLoadingTransfer
+                          ? "Transferring..."
+                          : "Start Transfer"}
+                        <span style={{ paddingLeft: 10 }}>
+                          {showLoadingTransfer && <Loader size="xs" />}
+                        </span>
+                      </Button>
+                    {/* )} */}
+                    <Button
+                      iconType="rocket"
+                      disabled={latestActiveTx?.status.length === 0}
                       size="lg"
                       variant="bordered"
-                      type="submit"
+                      onClick={async () => {
+                        console.log("Clicked finish");
+                        if (latestActiveTx)
+                          await finishTransfer({
+                            bidSignature: latestActiveTx.bidSignature,
+                            encodedBid: latestActiveTx.encodedBid,
+                            encryptedCallData: latestActiveTx.encryptedCallData,
+                            txData: {
+                              ...latestActiveTx.crosschainTx.invariant,
+                              ...latestActiveTx.crosschainTx.receiving,
+                            },
+                          });
+                      }}
                     >
-                      {showLoadingTransfer
-                        ? "Transferring..."
-                        : "Start Transfer"}
-                      <span style={{ paddingLeft: 10 }}>
-                        {showLoadingTransfer && <Loader size="xs" />}
-                      </span>
+                      Finish Transfer
                     </Button>
-                  )}
-                  <Button
-                    iconType="rocket"
-                    disabled={latestActiveTx?.status.length === 0}
-                    size="lg"
-                    variant="bordered"
-                    onClick={async () => {
-                      console.log("Clicked finish");
-                      if (latestActiveTx)
-                        await finishTransfer({
-                          bidSignature: latestActiveTx.bidSignature,
-                          encodedBid: latestActiveTx.encodedBid,
-                          encryptedCallData: latestActiveTx.encryptedCallData,
-                          txData: {
-                            ...latestActiveTx.crosschainTx.invariant,
-                            ...latestActiveTx.crosschainTx.receiving,
-                          },
-                        });
-                    }}
-                  >
-                    Finish Transfer
-                  </Button>
+                  </div>
                 </form>
               </Card>
             </Grid>

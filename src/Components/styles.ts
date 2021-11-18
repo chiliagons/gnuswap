@@ -38,7 +38,8 @@ export default makeStyles((theme) => ({
     color: "#008c73",
     border: "1px solid #ced4da",
     fontSize: 16,
-    padding: "10px 26px 10px 12px",
+    marginTop: 10, 
+    marginBottom: 10, 
     transition: theme.transitions.create(["border-color", "box-shadow"]),
     // Use the system font instead of the default Roboto font.
     fontFamily: [
@@ -59,6 +60,7 @@ export default makeStyles((theme) => ({
       boxShadow: "0 0 0 0.2rem rgba(0,123,255,.25)",
     },
   },
+
   card: {
     fontFamily: "Poppins",
     display: "flex",
@@ -77,8 +79,6 @@ export default makeStyles((theme) => ({
     flexDirection: "row",
     justifyContent: "center",
     height: "auto",
-    marginTop: 10,
-    marginBottom: 10,
   },
 
   gridWithSpace: {
@@ -97,7 +97,20 @@ export default makeStyles((theme) => ({
     paddingTop: "2%",
     paddingBottom: "2%",
     display: "flex",
-    flexWrap: "wrap",
-    justifyContent: "center",
+    flexDirection: "column"
+  },
+  
+  formContentRow: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  formContentColumn: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: 'space-between',
   },
 }));
