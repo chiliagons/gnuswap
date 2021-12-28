@@ -99,8 +99,16 @@ const App: React.FC = () => {
 
   const { register, handleSubmit, control } = useForm<ICrossChain>();
 
-  const onSubmit = (data: ICrossChain) => {
-    alert(JSON.stringify(data));
+  const onSubmit = async (crossChainData: ICrossChain) => {
+    console.log(JSON.stringify(crossChainData));
+    await getTransferQuote(
+      5,
+      crossChainData.sendingAssetTokenContract,
+      3,
+      "0xe71678794fff8846bff855f716b0ce9d9a78e844",
+      utils.parseEther(crossChainData.transferAmount).toString(),
+      crossChainData.receivingAddress
+    );
   };
 
   const ethereum = (window as any).ethereum;
@@ -109,7 +117,7 @@ const App: React.FC = () => {
     const tokenArr: Array<IBalance> = [];
 
     await fetch(
-      `https://safe-transaction.rinkeby.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`
+      `https://safe-transaction.goerli.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`
     )
       .then((res) => res.json())
       .then((response) => {
@@ -341,22 +349,14 @@ const App: React.FC = () => {
     setShowLoading(true);
     const provider = new providers.Web3Provider(ethereum);
     const _signer = await provider.getSigner();
+    const nsdk = await NxtpSdk.create({
+      chainConfig: chainProviders,
+      signer: _signer,
+      logger: pino({ level: "info" }),
+    });
 
-    const nsdk = new NxtpSdk(
-      chainProviders,
-      _signer,
-      pino({ level: "info" }),
-      (process.env.REACT_APP_NETWORK as "mainnet") ?? "mainnet",
-      process.env.REACT_APP_NATS_URL_OVERRIDE,
-      process.env.REACT_APP_AUTH_URL_OVERRIDE
-    );
     if (!nsdk) {
       return;
-    }
-
-    if (injectedProviderChainId !== sendingChainId) {
-      alert("Please switch chains to the sending chain!");
-      throw new Error("Wrong chain");
     }
 
     // Create txid
@@ -387,14 +387,11 @@ const App: React.FC = () => {
     const _signerG = gnosisProvider.getSigner();
     setTransferStateStarted(true);
     setShowLoadingTransfer(true);
-    const nsdk = new NxtpSdk(
-      chainProviders,
-      _signerG,
-      pino({ level: "info" }),
-      (process.env.REACT_APP_NETWORK as "mainnet") ?? "mainnet",
-      process.env.REACT_APP_NATS_URL_OVERRIDE,
-      process.env.REACT_APP_AUTH_URL_OVERRIDE
-    );
+    const nsdk = new NxtpSdk({
+      chainConfig: chainProviders,
+      signer: _signerG,
+      logger: pino({ level: "info" }),
+    });
     if (!nsdk) {
       return;
     }
@@ -424,14 +421,11 @@ const App: React.FC = () => {
     const signer = await provider.getSigner();
     console.log("finishTransfer");
 
-    const sdk = new NxtpSdk(
-      chainProviders,
-      signer,
-      pino({ level: "info" }),
-      (process.env.REACT_APP_NETWORK as "mainnet") ?? "mainnet",
-      process.env.REACT_APP_NATS_URL_OVERRIDE,
-      process.env.REACT_APP_AUTH_URL_OVERRIDE
-    );
+    const sdk = new NxtpSdk({
+      chainConfig: chainProviders,
+      signer: signer,
+      logger: pino({ level: "info" }),
+    });
 
     if (!sdk) {
       return;
@@ -446,16 +440,16 @@ const App: React.FC = () => {
     console.log("finish: ", finish);
     setShowConfirmation(true);
     console.log(showConfirmation);
-    if (
-      finish.metaTxResponse?.transactionHash ||
-      finish.metaTxResponse?.transactionHash === ""
-    ) {
-      setActiveTransferTableColumns(
-        activeTransferTableColumns.filter(
-          (t) => t.crosschainTx.invariant.transactionId !== txData.transactionId
-        )
-      );
-    }
+    // if (
+    //   finish.metaTxResponse?.transactionHash ||
+    //   finish.metaTxResponse?.transactionHash === ""
+    // ) {
+    //   setActiveTransferTableColumns(
+    //     activeTransferTableColumns.filter(
+    //       (t) => t.crosschainTx.invariant.transactionId !== txData.transactionId
+    //     )
+    //   );
+    // }
     setShowConfirmation(false);
   };
 
@@ -496,25 +490,7 @@ const App: React.FC = () => {
                   className={classes.form}
                   onSubmit={handleSubmit(onSubmit)}
                 >
-                  {/* <Form
-                  form={form}
-                  name="basic"
-                  labelCol={{ span: 10 }}
-                  wrapperCol={{ span: 100 }}
-                  onFinish={() => {
-                    transfer();
-                  }}
-                  initialValues={{
-                    sendingChain: getChainName(
-                      parseInt(Object.keys(selectedPool.assets)[0])
-                    ),
-                    receivingChain: getChainName(
-                      parseInt(Object.keys(selectedPool.assets)[1])
-                    ),
-                    asset: selectedPool.name,
-                    amount: "1",
-                  }}
-                > */}
+        
                   <Controller
                     control={control}
                     name="chain"
@@ -543,18 +519,6 @@ const App: React.FC = () => {
                       </Select>
                     )}
                   />
-                  {/* <Select
-                    onChange={(e) => setTokenWithBalance(e.target.value)}
-                  >
-                    {tokenList.map((_bal) => (
-                      <option
-                        key={_bal.token.symbol}
-                        value={JSON.stringify(_bal)}
-                      >
-                        {_bal.token.symbol}
-                      </option>
-                    ))}
-                  </Select> */}
                   <div className={classes.formContentRow}>
                     <Controller
                       name={"transferAmount"}
@@ -601,22 +565,6 @@ const App: React.FC = () => {
                       )}
                     />
                   </div>
-                  {/* Need for reference to know what to pass. */}
-                  {/* <Input
-                    label="Sending Token Contract Address"
-                    name="sendingAssetTokenContract"
-                    value={receivingTokenAdrress}
-                    placeholder={receivingTokenAdrress}
-                    type="text"
-                    onChange={(re) => {
-                      console.log(
-                        "Change receivingTokenAdrress",
-                        re.target.value
-                      );
-                      setReceiveTokenAddress(re.target.value);
-                    }}
-                    startAdornment={adornSendingContractAddress}
-                  /> */}
                   <div className={classes.formContentRow}>
                     <Controller
                       name={"receivedAmount"}
@@ -638,24 +586,8 @@ const App: React.FC = () => {
                     <Button
                       variant="bordered"
                       size="lg"
-                      // disabled={!web3Provider || injectedProviderChainId !== parseInt(form.getFieldValue('sendingChain'))}
-                      onClick={async () => {
-                        const sendingAssetId = sendingAssetToken.tokenAddress; // from _bal -> set the tokenaddress
-                        const receivingAssetId = receivingTokenAdrress; // from _bal -> set the tokenaddress
-                        if (!sendingAssetId || !receivingAssetId) {
-                          throw new Error(
-                            "Configuration doesn't support selected swap"
-                          );
-                        }
-                        // await getTransferQuote(
-                        //   gnosisChainId,
-                        //   sendingAssetId,
-                        //   parseInt(.formgetFieldValue("receivingChain")),
-                        //   receivingAssetId,
-                        //   utils.parseEther(transferAmount).toString(),
-                        //   form.getFieldValue("receivingAddress")
-                        // );
-                      }}
+                      type="submit"
+                      
                     >
                       <p>Get Quote</p>
                       {showLoading && <Loader size="xs" />}
@@ -667,7 +599,6 @@ const App: React.FC = () => {
                     )}
                   </div>
                   <div>
-                    {/* {() => ( */}
                     <Button
                       iconType="chain"
                       // disabled={
@@ -677,7 +608,6 @@ const App: React.FC = () => {
                       // }
                       size="lg"
                       variant="bordered"
-                      type="submit"
                     >
                       {showLoadingTransfer
                         ? "Transferring..."
@@ -693,7 +623,6 @@ const App: React.FC = () => {
                       size="lg"
                       variant="bordered"
                       onClick={async () => {
-                        console.log("Clicked finish");
                         if (latestActiveTx)
                           await finishTransfer({
                             bidSignature: latestActiveTx.bidSignature,

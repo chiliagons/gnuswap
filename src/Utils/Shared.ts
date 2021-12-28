@@ -48,7 +48,7 @@ export const getBalance = async (
 export const chainProviders: Record<
   number,
   {
-    provider: providers.FallbackProvider;
+    providers: string[];
     subgraph?: string;
     transactionManagerAddress?: string;
   }
@@ -56,9 +56,7 @@ export const chainProviders: Record<
 Object.entries(chainConfig).forEach(
   ([chainId, { provider, subgraph, transactionManagerAddress }]) => {
     chainProviders[parseInt(chainId)] = {
-      provider: new providers.FallbackProvider(
-        provider.map((p) => new providers.JsonRpcProvider(p, parseInt(chainId)))
-      ),
+      providers: provider.map((p) => p),
       subgraph,
       transactionManagerAddress,
     };
