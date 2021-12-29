@@ -33,7 +33,8 @@ export default makeStyles((theme) => ({
     fontSize: 16,
     marginTop: 10,
     marginBottom: 10,
-    minWidth: "350px",
+    minWidth: "300px",
+    maxWidth: "600px",
     transition: theme.transitions.create(["border-color", "box-shadow"]),
     // Use the system font instead of the default Roboto font.
     fontFamily: [
@@ -58,7 +59,8 @@ export default makeStyles((theme) => ({
   card: {
     borderRadius: "15px",
     maxHeight: "600px",
-    width: "650px",
+    width: "50vw",
+    minWidth: "550px",
     display: "flex",
     flexDirection: "column",
   },
