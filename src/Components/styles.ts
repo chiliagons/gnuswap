@@ -78,6 +78,12 @@ export default makeStyles((theme) => ({
     alignItems: "center",
   },
 
+  formContentRowSpaceAround: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    alignItems: "center",
+  },
   formContentColumn: {
     display: "flex",
     flexDirection: "column",

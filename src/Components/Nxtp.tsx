@@ -431,10 +431,8 @@ const App: React.FC = () => {
                     )}
                   />
                 </span>
-
                 <Button
-                  textSize="md"
-                  size="md"
+                  size="lg"
                   type="submit"
                   variant="bordered"
                 >
@@ -442,14 +440,13 @@ const App: React.FC = () => {
                   {showLoading && <Loader size="xs" />}
                 </Button>
               </div>
+              <Divider />
               <div
-                className={classes.formContentRow}
-                style={{ paddingTop: "1.5vh" }}
+                className={classes.formContentRowSpaceAround}
+                style={{ paddingTop: "1vh" }}
               >
                 <Button
-                  textSize="md"
                   iconType="chain"
-                  iconSize="sm"
                   size="lg"
                   variant="bordered"
                 >
@@ -457,9 +454,7 @@ const App: React.FC = () => {
                   <span>{showLoadingTransfer && <Loader size="xs" />}</span>
                 </Button>
                 <Button
-                  textSize="md"
                   iconType="rocket"
-                  iconSize="sm"
                   disabled={latestActiveTx?.status.length === 0}
                   size="lg"
                   variant="bordered"
