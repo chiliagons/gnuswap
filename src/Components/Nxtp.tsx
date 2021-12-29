@@ -6,11 +6,11 @@ import {
   Button,
   Card,
   Divider,
-  Icon,
   Loader,
   Text,
   GenericModal,
-  TextField,
+  TextFieldInput,
+  AddressInput,
 } from "@gnosis.pm/safe-react-components";
 import {
   MenuItem,
@@ -21,7 +21,6 @@ import {
   List,
   ListItem,
   ListItemIcon,
-  Input,
 } from "@material-ui/core";
 
 import HelpIcon from "@material-ui/icons/Help";
@@ -83,8 +82,6 @@ const App: React.FC = () => {
   const [historicalTransferTableColumns, setHistoricalTransferTableColumns] =
     useState<HistoricalTransaction[]>([]);
   const [latestActiveTx, setLatestActiveTx] = useState<ActiveTransaction>();
-  const adornmentReceivingAddress = <Icon size="md" type="addressBook" />;
-  const adornSendingContractAddress = <Icon size="md" type="sent" />;
 
   let addressField = "";
 
@@ -180,155 +177,6 @@ const App: React.FC = () => {
     }
     testFunc();
   }, [errorFetchedChecker]);
-
-  // useEffect(() => {
-  //   const init = async () => {
-  //     const json = await utils.fetchJson(
-  //       "https://raw.githubusercontent.com/connext/chaindata/main/crossChain.json"
-  //     );
-  //     setChainData(json);
-  //     const provider = new providers.Web3Provider(ethereum);
-  //     const signer = await provider.getSigner();
-  //     console.log("Signeer was triggered");
-  //     const { chainId } = await signer.provider!.getNetwork();
-  //     setInjectedProviderChainId(chainId);
-  //     // const _sdk = new NxtpSdk(
-  //     //   chainProviders,
-  //     //   signer,
-  //     //   pino({ level: "info" }),
-  //     //   (process.env.REACT_APP_NETWORK as "mainnet") ?? "mainnet",
-  //     //   process.env.REACT_APP_NATS_URL_OVERRIDE,
-  //     //   process.env.REACT_APP_AUTH_URL_OVERRIDE
-  //     // );
-  //     // setSdk(_sdk);
-  //     // const activeTxs = await _sdk.getActiveTransactions();
-  //     // value2.setActiveTransactions(activeTxs);
-  //     // setActiveTransferTableColumns(activeTxs);
-  //     // console.log("activeTxs: ", activeTxs);
-  //     // if (activeTxs[activeTxs.length - 1]) {
-  //     //   setLatestActiveTx(activeTxs[activeTxs.length - 1]);
-  //     // }
-
-  //     // const historicalTxs = await _sdk.getHistoricalTransactions();
-  //     // setHistoricalTransferTableColumns(historicalTxs);
-  //     // console.log("historicalTxs: ", historicalTxs);
-  //     // value.setTransactions(historicalTxs);
-
-  //   //   _sdk.attach(NxtpSdkEvents.SenderTransactionPrepared, (data) => {
-  //   //     const { amount, expiry, preparedBlockNumber, ...invariant } =
-  //   //       data.txData;
-  //   //     const table = [...activeTransferTableColumns];
-  //   //     table.push({
-  //   //       crosschainTx: {
-  //   //         invariant,
-  //   //         sending: { amount, expiry, preparedBlockNumber },
-  //   //       },
-  //   //       bidSignature: data.bidSignature,
-  //   //       encodedBid: data.encodedBid,
-  //   //       encryptedCallData: data.encryptedCallData,
-  //   //       status: NxtpSdkEvents.SenderTransactionPrepared,
-  //   //       preparedTimestamp: Math.floor(Date.now() / 1000),
-  //   //     });
-  //   //     setActiveTransferTableColumns(table);
-  //   //   });
-
-  //   //   _sdk.attach(NxtpSdkEvents.SenderTransactionFulfilled, (data) => {
-  //   //     console.log("SenderTransactionFulfilled:", data);
-  //   //     setActiveTransferTableColumns(
-  //   //       activeTransferTableColumns.filter(
-  //   //         (t) =>
-  //   //           t.crosschainTx.invariant.transactionId !==
-  //   //           data.txData.transactionId
-  //   //       )
-  //   //     );
-  //   //   });
-
-  //   //   _sdk.attach(NxtpSdkEvents.SenderTransactionCancelled, (data) => {
-  //   //     console.log("SenderTransactionCancelled:", data);
-  //   //     setActiveTransferTableColumns(
-  //   //       activeTransferTableColumns.filter(
-  //   //         (t) =>
-  //   //           t.crosschainTx.invariant.transactionId !==
-  //   //           data.txData.transactionId
-  //   //       )
-  //   //     );
-  //   //   });
-
-  //   //   _sdk.attach(NxtpSdkEvents.ReceiverTransactionPrepared, (data) => {
-  //   //     setShowLoadingTransfer(false);
-  //   //     const { amount, expiry, preparedBlockNumber, ...invariant } =
-  //   //       data.txData;
-  //   //     const index = activeTransferTableColumns.findIndex(
-  //   //       (col) =>
-  //   //         col.crosschainTx.invariant.transactionId === invariant.transactionId
-  //   //     );
-  //   //     const table = [...activeTransferTableColumns];
-  //   //     if (index === -1) {
-  //   //       // TODO: is there a better way to
-  //   //       // get the info here?
-  //   //       table.push({
-  //   //         preparedTimestamp: Math.floor(Date.now() / 1000),
-  //   //         crosschainTx: {
-  //   //           invariant,
-  //   //           sending: {} as any, // Find to do this, since it defaults to receiver side info
-  //   //           receiving: { amount, expiry, preparedBlockNumber },
-  //   //         },
-  //   //         bidSignature: data.bidSignature,
-  //   //         encodedBid: data.encodedBid,
-  //   //         encryptedCallData: data.encryptedCallData,
-  //   //         status: NxtpSdkEvents.ReceiverTransactionPrepared,
-  //   //       });
-  //   //       setActiveTransferTableColumns(table);
-  //   //     } else {
-  //   //       const item = { ...table[index] };
-  //   //       table[index] = {
-  //   //         ...item,
-  //   //         status: NxtpSdkEvents.ReceiverTransactionPrepared,
-  //   //         crosschainTx: {
-  //   //           ...item.crosschainTx,
-  //   //           receiving: { amount, expiry, preparedBlockNumber },
-  //   //         },
-  //   //       };
-  //   //       setActiveTransferTableColumns(table);
-  //   //     }
-  //   //   });
-
-  //   //   _sdk.attach(NxtpSdkEvents.ReceiverTransactionFulfilled, async (data) => {
-  //   //     console.log("ReceiverTransactionFulfilled:", data);
-  //   //     setActiveTransferTableColumns(
-  //   //       activeTransferTableColumns.filter(
-  //   //         (t) =>
-  //   //           t.crosschainTx.invariant.transactionId !==
-  //   //           data.txData.transactionId
-  //   //       )
-  //   //     );
-
-  //   //     const historicalTxs = await _sdk.getHistoricalTransactions();
-  //   //     setHistoricalTransferTableColumns(historicalTxs);
-  //   //     console.log("historicalTxs: ", historicalTxs);
-  //   //   });
-
-  //   //   _sdk.attach(NxtpSdkEvents.ReceiverTransactionCancelled, (data) => {
-  //   //     console.log("ReceiverTransactionCancelled:", data);
-  //   //     setActiveTransferTableColumns(
-  //   //       activeTransferTableColumns.filter(
-  //   //         (t) =>
-  //   //           t.crosschainTx.invariant.transactionId !==
-  //   //           data.txData.transactionId
-  //   //       )
-  //   //     );
-  //   //   });
-
-  //   //   _sdk.attach(NxtpSdkEvents.SenderTokenApprovalMined, (data) => {
-  //   //     console.log("SenderTokenApprovalMined:", data);
-  //   //   });
-
-  //   //   _sdk.attach(NxtpSdkEvents.SenderTransactionPrepareSubmitted, (data) => {
-  //   //     console.log("SenderTransactionPrepareSubmitted:", data);
-  //   //   });
-  //   // };
-  //   init();
-  // }, [transferStateStarted, showLoadingTransfer]);
 
   const getTransferQuote = async (
     sendingChainId: number,
@@ -440,16 +288,6 @@ const App: React.FC = () => {
     console.log("finish: ", finish);
     setShowConfirmation(true);
     console.log(showConfirmation);
-    // if (
-    //   finish.metaTxResponse?.transactionHash ||
-    //   finish.metaTxResponse?.transactionHash === ""
-    // ) {
-    //   setActiveTransferTableColumns(
-    //     activeTransferTableColumns.filter(
-    //       (t) => t.crosschainTx.invariant.transactionId !== txData.transactionId
-    //     )
-    //   );
-    // }
     setShowConfirmation(false);
   };
 
@@ -461,9 +299,12 @@ const App: React.FC = () => {
   const generateSelectedPoolOptions = () => {
     return Object.keys(selectedPool.assets).map((chainId) => {
       return (
-        <MenuItem key={chainId} value={chainId}>
-          {chainId}
-        </MenuItem>
+        chainId && (
+          <MenuItem key={chainId} value={chainId}>
+            {" "}
+            {chainId}{" "}
+          </MenuItem>
+        )
       );
     });
   };
@@ -479,261 +320,246 @@ const App: React.FC = () => {
 
   // UI HERE
   return (
-    <>
-      <ErrorBoundary>
-        <Divider />
-        <Container>
-          <Grid className={classes.grid} container spacing={8}>
-            <Grid item xs={12} sm={8}>
-              <Card className={classes.card}>
-                <form
-                  className={classes.form}
-                  onSubmit={handleSubmit(onSubmit)}
-                >
-        
-                  <Controller
-                    control={control}
-                    name="chain"
-                    render={({ field: { onChange, value } }) => (
-                      <Select
-                        className={classes.input}
-                        variant="outlined"
-                        onChange={onChange}
-                        value={value}
-                      >
-                        {generateSelectedPoolOptions()}
-                      </Select>
-                    )}
-                  />
-                  <Controller
-                    control={control}
-                    name="token"
-                    render={({ field: { onChange, value } }) => (
-                      <Select
-                        className={classes.input}
-                        variant="outlined"
-                        onChange={onChange}
-                        value={value}
-                      >
-                        {generateSelectTokenOptions()}
-                      </Select>
-                    )}
-                  />
-                  <div className={classes.formContentRow}>
-                    <Controller
-                      name={"transferAmount"}
-                      control={control}
-                      render={({ field: { onChange, value } }) => (
-                        <TextField
-                          onChange={onChange}
-                          value={value}
-                          label={"Transfer Amount"}
-                        />
-                      )}
-                    />
-                    Balance:
-                    <Button
-                      onClick={() =>
-                        setTransferAmount(utils.formatEther(userBalance ?? 0))
-                      }
-                      size="md"
+    <ErrorBoundary>
+      <Divider />
+      <Container>
+        <div className={classes.grid}>
+          <Card className={classes.card}>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <div className={classes.input}>
+                <Controller
+                  control={control}
+                  name="chain"
+                  render={({ field: { onChange, value } }) => (
+                    <Select
+                      variant="outlined"
+                      onChange={onChange}
+                      value={value ? value : ""}
                     >
-                      {utils.formatEther(userBalance ?? 0)}
-                    </Button>
-                  </div>
-                  <div className={classes.formContentColumn}>
-                    <Controller
-                      name={"receivingAddress"}
-                      control={control}
-                      render={({ field: { onChange, value } }) => (
-                        <TextField
-                          onChange={onChange}
-                          value={value}
-                          label={"Receiving Address"}
-                        />
-                      )}
-                    />
-                    <Controller
-                      name={"sendingAssetTokenContract"}
-                      control={control}
-                      render={({ field: { onChange, value } }) => (
-                        <TextField
-                          onChange={onChange}
-                          value={value}
-                          label={"Sending Asset Token Contract"}
-                        />
-                      )}
-                    />
-                  </div>
-                  <div className={classes.formContentRow}>
-                    <Controller
-                      name={"receivedAmount"}
-                      control={control}
-                      render={({ field: { onChange } }) => (
-                        <TextField
-                          onChange={onChange}
-                          value={
-                            auctionResponse &&
-                            utils.formatEther(
-                              auctionResponse?.bid.amountReceived
-                            )
-                          }
-                          label="..."
-                          disabled={true}
-                        />
-                      )}
-                    />
-                    <Button
-                      variant="bordered"
-                      size="lg"
-                      type="submit"
-                      
-                    >
-                      <p>Get Quote</p>
-                      {showLoading && <Loader size="xs" />}
-                    </Button>
-                    {errorMsg.length !== 0 && (
-                      <Text color="error" size="sm">
-                        {errorMsg}
-                      </Text>
-                    )}
-                  </div>
-                  <div>
-                    <Button
-                      iconType="chain"
-                      // disabled={
-                      //   form.getFieldValue("sendingChain") ===
-                      //     form.getFieldValue("receivingChain") ||
-                      //   !auctionResponse
-                      // }
-                      size="lg"
-                      variant="bordered"
-                    >
-                      {showLoadingTransfer
-                        ? "Transferring..."
-                        : "Start Transfer"}
-                      <span style={{ paddingLeft: 10 }}>
-                        {showLoadingTransfer && <Loader size="xs" />}
-                      </span>
-                    </Button>
-                    {/* )} */}
-                    <Button
-                      iconType="rocket"
-                      disabled={latestActiveTx?.status.length === 0}
-                      size="lg"
-                      variant="bordered"
-                      onClick={async () => {
-                        if (latestActiveTx)
-                          await finishTransfer({
-                            bidSignature: latestActiveTx.bidSignature,
-                            encodedBid: latestActiveTx.encodedBid,
-                            encryptedCallData: latestActiveTx.encryptedCallData,
-                            txData: {
-                              ...latestActiveTx.crosschainTx.invariant,
-                              ...latestActiveTx.crosschainTx.receiving,
-                            },
-                          });
-                      }}
-                    >
-                      Finish Transfer
-                    </Button>
-                  </div>
-                </form>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <Card className={classes.supportcard}>
-                <Typography
-                  className={classes.text}
-                  align="center"
-                  variant="h6"
-                >
-                  Support
-                </Typography>
-                <List component="nav" aria-label="main mailbox folders">
-                  <ListItem>
-                    <ListItemIcon>
-                      <HelpIcon />
-                    </ListItemIcon>
-                    <Typography className={classes.text}>
-                      How it works
-                    </Typography>
-                  </ListItem>
-                </List>
-                <Divider />
-                <List component="nav" aria-label="secondary mailbox folders">
-                  <ListItem>
-                    <Typography className={classes.text}>
-                      1. Choose the receiving network
-                    </Typography>
-                  </ListItem>
-                  <ListItem>
-                    <Typography className={classes.text}>
-                      2. Set the asset that you want to swap
-                    </Typography>
-                  </ListItem>
-                  <ListItem>
-                    <Typography className={classes.text}>
-                      3. Enter the amount you want to swap
-                    </Typography>
-                  </ListItem>
-                  <ListItem>
-                    <Typography className={classes.text}>
-                      2. Enter the reciever address
-                    </Typography>
-                  </ListItem>
-                  <ListItem>
-                    <Typography className={classes.text}>
-                      4. Get a quotation!
-                    </Typography>
-                  </ListItem>
-                  <ListItem>
-                    <Typography className={classes.text}>
-                      5. Once quote is received request for Starting a Swap and
-                      then Finish it!!
-                    </Typography>
-                  </ListItem>
-                  <ListItem>
-                    <Typography className={classes.text}>
-                      6. Confirm and wait for the transfer to take place
-                    </Typography>
-                  </ListItem>
-                  <ListItem>
-                    <Typography className={classes.text}>
-                      7. In case of any issues you can create a support ticket{" "}
-                      <a
-                        target="blank"
-                        className={classes.a}
-                        href="https://support.connext.network/hc/en-us"
-                      >
-                        here
-                      </a>
-                    </Typography>
-                  </ListItem>
-                </List>
-              </Card>
-            </Grid>
-          </Grid>
-        </Container>
-        {showConfirmation && (
-          <GenericModal
-            onClose={() => setShowConfirmation(false)}
-            title="Success!"
-            body={
-              <div>
-                <Typography
-                  className={classes.text}
-                  align="center"
-                  variant="h6"
-                >
-                  Your transaction has been succesfully executed!
-                </Typography>{" "}
+                      {generateSelectedPoolOptions()}
+                    </Select>
+                  )}
+                />
               </div>
-            }
-          />
-        )}
-      </ErrorBoundary>
-    </>
+              <div className={classes.input}>
+                <Controller
+                  control={control}
+                  name="token"
+                  render={({ field: { onChange, value } }) => (
+                    <Select
+                      variant="outlined"
+                      onChange={onChange}
+                      value={value ? value : ""}
+                    >
+                      {generateSelectTokenOptions()}
+                    </Select>
+                  )}
+                />
+              </div>
+              <div className={classes.formContentRow}>
+                <span>
+                  <Controller
+                    name={"transferAmount"}
+                    control={control}
+                    render={({ field: { onChange, value } }) => (
+                      <TextFieldInput
+                        className={classes.input}
+                        onChange={onChange}
+                        value={value}
+                        label={"Transfer Amount"}
+                        name="transferAmount"
+                      />
+                    )}
+                  />
+                </span>
+                Balance:
+                <Button
+                  onClick={() =>
+                    setTransferAmount(utils.formatEther(userBalance ?? 0))
+                  }
+                  size="md"
+                >
+                  {utils.formatEther(userBalance ?? 0)}
+                </Button>
+              </div>
+              <div className={classes.formContentColumn}>
+                <Controller
+                  name={"receivingAddress"}
+                  control={control}
+                  render={({ field: { onChange, value } }) => (
+                    <AddressInput
+                      className={classes.input}
+                      address={value}
+                      defaultValue={value}
+                      label={"Receiving Address"}
+                      name="receivingAddress"
+                      onChangeAddress={onChange}
+                    />
+                  )}
+                />
+                <Controller
+                  name={"sendingAssetTokenContract"}
+                  control={control}
+                  render={({ field: { onChange, value } }) => (
+                    <TextFieldInput
+                      className={classes.input}
+                      onChange={onChange}
+                      value={value}
+                      label={"Sending Asset Token Contract"}
+                      name="sendingAssetTokenContract"
+                    />
+                  )}
+                />
+              </div>
+              <div className={classes.formContentRow}>
+                <span>
+                  <Controller
+                    name={"receivedAmount"}
+                    control={control}
+                    render={({ field: { onChange } }) => (
+                      <TextFieldInput
+                        className={classes.input}
+                        name="receivedAmount"
+                        onChange={onChange}
+                        value={
+                          auctionResponse &&
+                          utils.formatEther(auctionResponse?.bid.amountReceived)
+                        }
+                        label="..."
+                        disabled={true}
+                      />
+                    )}
+                  />
+                </span>
+
+                <Button
+                  textSize="md"
+                  size="md"
+                  type="submit"
+                  variant="bordered"
+                >
+                  Get Quote
+                  {showLoading && <Loader size="xs" />}
+                </Button>
+              </div>
+              <div className={classes.formContentRow}>
+                <Button
+                  textSize="md"
+                  iconType="chain"
+                  iconSize="sm"
+                  size="lg"
+                  variant="bordered"
+                >
+                  {showLoadingTransfer ? "Transferring..." : "Start Transfer"}
+                  <span>{showLoadingTransfer && <Loader size="xs" />}</span>
+                </Button>
+                <Button
+                  textSize="md"
+                  iconType="rocket"
+                  iconSize="sm"
+                  disabled={latestActiveTx?.status.length === 0}
+                  size="lg"
+                  variant="bordered"
+                  onClick={async () => {
+                    if (latestActiveTx)
+                      await finishTransfer({
+                        bidSignature: latestActiveTx.bidSignature,
+                        encodedBid: latestActiveTx.encodedBid,
+                        encryptedCallData: latestActiveTx.encryptedCallData,
+                        txData: {
+                          ...latestActiveTx.crosschainTx.invariant,
+                          ...latestActiveTx.crosschainTx.receiving,
+                        },
+                      });
+                  }}
+                >
+                  Finish Transfer
+                </Button>
+              </div>
+            </form>
+          </Card>
+          <Grid item xs={12} sm={4}>
+            <Card className={classes.supportcard}>
+              <Typography className={classes.text} align="center" variant="h6">
+                Support
+              </Typography>
+              <List component="nav" aria-label="main mailbox folders">
+                <ListItem>
+                  <ListItemIcon>
+                    <HelpIcon />
+                  </ListItemIcon>
+                  <Typography className={classes.text}>How it works</Typography>
+                </ListItem>
+              </List>
+              <Divider />
+              <List component="nav" aria-label="secondary mailbox folders">
+                <ListItem>
+                  <Typography className={classes.text}>
+                    1. Choose the receiving network
+                  </Typography>
+                </ListItem>
+                <ListItem>
+                  <Typography className={classes.text}>
+                    2. Set the asset that you want to swap
+                  </Typography>
+                </ListItem>
+                <ListItem>
+                  <Typography className={classes.text}>
+                    3. Enter the amount you want to swap
+                  </Typography>
+                </ListItem>
+                <ListItem>
+                  <Typography className={classes.text}>
+                    2. Enter the reciever address
+                  </Typography>
+                </ListItem>
+                <ListItem>
+                  <Typography className={classes.text}>
+                    4. Get a quotation!
+                  </Typography>
+                </ListItem>
+                <ListItem>
+                  <Typography className={classes.text}>
+                    5. Once quote is received request for Starting a Swap and
+                    then Finish it!!
+                  </Typography>
+                </ListItem>
+                <ListItem>
+                  <Typography className={classes.text}>
+                    6. Confirm and wait for the transfer to take place
+                  </Typography>
+                </ListItem>
+                <ListItem>
+                  <Typography className={classes.text}>
+                    7. In case of any issues you can create a support ticket{" "}
+                    <a
+                      target="blank"
+                      className={classes.a}
+                      href="https://support.connext.network/hc/en-us"
+                    >
+                      here
+                    </a>
+                  </Typography>
+                </ListItem>
+              </List>
+            </Card>
+          </Grid>
+        </div>
+      </Container>
+      {showConfirmation && (
+        <GenericModal
+          onClose={() => setShowConfirmation(false)}
+          title="Success!"
+          body={
+            <div>
+              <Typography className={classes.text} align="center" variant="h6">
+                Your transaction has been succesfully executed!
+              </Typography>{" "}
+            </div>
+          }
+        />
+      )}
+    </ErrorBoundary>
   );
 };
 

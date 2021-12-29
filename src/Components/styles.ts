@@ -21,25 +21,19 @@ export default makeStyles((theme) => ({
     paddingTop: "3px",
   },
   button: {
-    fontFamily: "Poppins",
-    backgroundColor: "#80c7b9",
-    display: "flex",
-    borderRadius: "8px",
     textTransform: "capitalize",
-    alignContent: "center",
-    flexDirection: "row",
-    justifyContent: "center",
+    width: "10px",
   },
 
   input: {
     borderRadius: 4,
-    position: "relative",
     backgroundColor: theme.palette.background.paper,
     color: "#008c73",
     border: "1px solid #ced4da",
     fontSize: 16,
     marginTop: 10,
     marginBottom: 10,
+    minWidth: "20vw",
     transition: theme.transitions.create(["border-color", "box-shadow"]),
     // Use the system font instead of the default Roboto font.
     fontFamily: [
@@ -62,55 +56,26 @@ export default makeStyles((theme) => ({
   },
 
   card: {
-    fontFamily: "Poppins",
-    display: "flex",
-    alignContent: "center",
-    flexDirection: "row",
-    justifyContent: "center",
-    height: "auto",
-    marginLeft: "2%",
     borderRadius: "15px",
+    height: "600px",
+    width: "45vw",
   },
 
   grid: {
-    fontFamily: "Poppins",
     display: "flex",
-    alignContent: "center",
-    flexDirection: "row",
-    justifyContent: "center",
-    height: "auto",
-  },
-
-  gridWithSpace: {
-    fontFamily: "Poppins",
-    display: "flex",
-    alignContent: "center",
-    flexDirection: "row",
-    justifyContent: "center",
-    height: "auto",
-    marginTop: 16,
-    marginBottom: 16,
-  },
-
-  form: {
-    fontFamily: "Poppins",
-    paddingTop: "2%",
-    paddingBottom: "2%",
-    display: "flex",
-    flexDirection: "column",
+    justifyContent: "space-evenly",
   },
 
   formContentRow: {
     display: "flex",
     flexDirection: "row",
+    justifyContent: "space-evenly",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 10,
-    marginBottom: 10,
+    padding: "1vh",
   },
+
   formContentColumn: {
     display: "flex",
     flexDirection: "column",
-    justifyContent: "space-between",
   },
 }));
