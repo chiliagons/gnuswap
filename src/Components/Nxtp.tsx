@@ -442,7 +442,7 @@ const App: React.FC = () => {
                   {showLoading && <Loader size="xs" />}
                 </Button>
               </div>
-              <div className={classes.formContentRow}>
+              <div className={classes.formContentRow} style={{paddingTop: "1.5vh"}}>
                 <Button
                   textSize="md"
                   iconType="chain"

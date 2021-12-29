@@ -31,9 +31,9 @@ export default makeStyles((theme) => ({
     color: "#008c73",
     border: "1px solid #ced4da",
     fontSize: 16,
-    marginTop: 10,
+    marginTop:10,
     marginBottom: 10,
-    minWidth: "20vw",
+    minWidth: "350px",
     transition: theme.transitions.create(["border-color", "box-shadow"]),
     // Use the system font instead of the default Roboto font.
     fontFamily: [
@@ -57,8 +57,10 @@ export default makeStyles((theme) => ({
 
   card: {
     borderRadius: "15px",
-    height: "600px",
-    width: "45vw",
+    maxHeight: "600px",
+    width: "650px",
+    display:"flex",
+    flexDirection: "column",
   },
 
   grid: {
@@ -69,11 +71,10 @@ export default makeStyles((theme) => ({
   formContentRow: {
     display: "flex",
     flexDirection: "row",
-    justifyContent: "space-evenly",
+    justifyContent: "space-between",
     alignItems: "center",
-    padding: "1vh",
   },
-
+  
   formContentColumn: {
     display: "flex",
     flexDirection: "column",
