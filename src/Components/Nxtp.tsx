@@ -431,11 +431,7 @@ const App: React.FC = () => {
                     )}
                   />
                 </span>
-                <Button
-                  size="lg"
-                  type="submit"
-                  variant="bordered"
-                >
+                <Button size="lg" type="submit" variant="bordered">
                   Get Quote
                   {showLoading && <Loader size="xs" />}
                 </Button>
@@ -445,11 +441,7 @@ const App: React.FC = () => {
                 className={classes.formContentRowSpaceAround}
                 style={{ paddingTop: "1vh" }}
               >
-                <Button
-                  iconType="chain"
-                  size="lg"
-                  variant="bordered"
-                >
+                <Button iconType="chain" size="lg" variant="bordered">
                   {showLoadingTransfer ? "Transferring..." : "Start Transfer"}
                   <span>{showLoadingTransfer && <Loader size="xs" />}</span>
                 </Button>
