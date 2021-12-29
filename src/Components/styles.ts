@@ -78,7 +78,7 @@ export default makeStyles((theme) => ({
     alignItems: "center",
   },
 
-  formContentRowSpaceAround: {
+  formContentSubmitRow: {
     display: "flex",
     flexDirection: "row",
     justifyContent: "space-evenly",

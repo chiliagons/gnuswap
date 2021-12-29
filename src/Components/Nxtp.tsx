@@ -438,7 +438,7 @@ const App: React.FC = () => {
               </div>
               <Divider />
               <div
-                className={classes.formContentRowSpaceAround}
+                className={classes.formContentSubmitRow}
                 style={{ paddingTop: "1vh" }}
               >
                 <Button iconType="chain" size="lg" variant="bordered">
