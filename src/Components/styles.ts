@@ -61,6 +61,7 @@ export default makeStyles((theme) => ({
     maxHeight: "600px",
     width: "50vw",
     minWidth: "550px",
+    maxWidth: "650px",
     display: "flex",
     flexDirection: "column",
   },
