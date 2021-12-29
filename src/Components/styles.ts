@@ -31,7 +31,7 @@ export default makeStyles((theme) => ({
     color: "#008c73",
     border: "1px solid #ced4da",
     fontSize: 16,
-    marginTop:10,
+    marginTop: 10,
     marginBottom: 10,
     minWidth: "350px",
     transition: theme.transitions.create(["border-color", "box-shadow"]),
@@ -59,7 +59,7 @@ export default makeStyles((theme) => ({
     borderRadius: "15px",
     maxHeight: "600px",
     width: "650px",
-    display:"flex",
+    display: "flex",
     flexDirection: "column",
   },
 
@@ -74,7 +74,7 @@ export default makeStyles((theme) => ({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  
+
   formContentColumn: {
     display: "flex",
     flexDirection: "column",
