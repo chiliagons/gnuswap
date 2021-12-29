@@ -33,7 +33,7 @@ export default makeStyles((theme) => ({
     fontSize: 16,
     marginTop: 10,
     marginBottom: 10,
-    minWidth: "300px",
+    minWidth: "270px",
     maxWidth: "600px",
     transition: theme.transitions.create(["border-color", "box-shadow"]),
     // Use the system font instead of the default Roboto font.
@@ -61,7 +61,7 @@ export default makeStyles((theme) => ({
     maxHeight: "600px",
     width: "50vw",
     minWidth: "550px",
-    maxWidth: "650px",
+    maxWidth: "600px",
     display: "flex",
     flexDirection: "column",
   },

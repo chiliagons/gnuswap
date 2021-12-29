@@ -372,15 +372,19 @@ const App: React.FC = () => {
                     )}
                   />
                 </span>
-                Balance:
-                <Button
-                  onClick={() =>
-                    setTransferAmount(utils.formatEther(userBalance ?? 0))
-                  }
-                  size="md"
-                >
-                  {utils.formatEther(userBalance ?? 0)}
-                </Button>
+                <span className={classes.formContentRow}>
+                  <h2 style={{ paddingRight: "10px", marginBottom: 0 }}>
+                    Balance:
+                  </h2>
+                  <Button
+                    onClick={() =>
+                      setTransferAmount(utils.formatEther(userBalance ?? 0))
+                    }
+                    size="md"
+                  >
+                    {utils.formatEther(userBalance ?? 0)}
+                  </Button>
+                </span>
               </div>
               <div className={classes.formContentColumn}>
                 <Controller
