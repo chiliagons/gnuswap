@@ -366,21 +366,26 @@ const App: React.FC = () => {
                 </FormControl>
               </div>
               <div className={classes.formContentRow}>
-                <span>
-                  <Controller
-                    name={"transferAmount"}
-                    control={control}
-                    render={({ field: { onChange, value } }) => (
-                      <TextFieldInput
-                        className={classes.input}
-                        onChange={onChange}
-                        value={value}
-                        label={"Transfer Amount"}
-                        name="transferAmount"
-                      />
-                    )}
-                  />
-                </span>
+                <FormControl>
+                  <span>
+                    <Controller
+                      name={"transferAmount"}
+                      control={control}
+                      render={({ field: { onChange, value } }) => (
+                        <TextFieldInput
+                          className={classes.input}
+                          id="transferAmountInput"
+                          label="transferAmount"
+                          name="transferAmount"
+                          placeholder="Transfer Amount"
+                          value={value}
+                          onChange={onChange}
+                          hiddenLabel={true}
+                        />
+                      )}
+                    />
+                  </span>
+                </FormControl>
                 <span className={classes.formContentRow}>
                   <h2 style={{ paddingRight: "10px", marginBottom: 0 }}>
                     Balance:
@@ -407,6 +412,8 @@ const App: React.FC = () => {
                       label={"Receiving Address"}
                       name="receivingAddress"
                       onChangeAddress={onChange}
+                      placeholder="Receiving Address"
+                      hiddenLabel={true}
                     />
                   )}
                 />
@@ -419,6 +426,7 @@ const App: React.FC = () => {
                       onChange={onChange}
                       value={value}
                       label={"Sending Asset Token Contract"}
+                      placeholder="Sending Asset Token Contract"
                       name="sendingAssetTokenContract"
                     />
                   )}
@@ -439,6 +447,7 @@ const App: React.FC = () => {
                           utils.formatEther(auctionResponse?.bid.amountReceived)
                         }
                         label="..."
+                        placeholder="Swap Amount"
                         disabled={true}
                       />
                     )}
