@@ -7,7 +7,6 @@ import {
   Card,
   Divider,
   Loader,
-  Text,
   GenericModal,
   TextFieldInput,
   AddressInput,
@@ -21,6 +20,8 @@ import {
   List,
   ListItem,
   ListItemIcon,
+  FormControl,
+  InputLabel,
 } from "@material-ui/core";
 
 import HelpIcon from "@material-ui/icons/Help";
@@ -112,17 +113,13 @@ const App: React.FC = () => {
 
   const getTokensHandler = async (address) => {
     const tokenArr: Array<IBalance> = [];
-
     await fetch(
       `https://safe-transaction.goerli.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`
     )
       .then((res) => res.json())
       .then((response) => {
         response.forEach((_bal: IBalance) => {
-          console.log(_bal);
-          if (_bal.token !== null) {
-            tokenArr.push(_bal);
-          } else if (_bal.token === null) {
+          if (_bal.token === null) {
             _bal.token = {
               decimals: 18,
               logoUri:
@@ -130,8 +127,8 @@ const App: React.FC = () => {
               name: "Ethereum",
               symbol: "ETH",
             };
-            tokenArr.push(_bal);
           }
+          tokenArr.push(_bal);
         });
         setTokenList(tokenArr);
       })
@@ -155,7 +152,6 @@ const App: React.FC = () => {
         const address = await _signerG.getAddress();
         await getTokensHandler(address);
         const sendingChain = await _signerG.getChainId();
-        console.log("sendingChain: ", sendingChain);
         setGnosisChainId(sendingChain);
         setSigner(_signerG);
         setProvider(gnosisProvider);
@@ -297,12 +293,11 @@ const App: React.FC = () => {
   };
 
   const generateSelectedPoolOptions = () => {
-    return Object.keys(selectedPool.assets).map((chainId) => {
+    return Object.entries(selectedPool.assets).map(([chainId, chainValue]) => {
       return (
         chainId && (
-          <MenuItem key={chainId} value={chainId}>
-            {" "}
-            {chainId}{" "}
+          <MenuItem key={chainId} value={chainValue}>
+            {chainValue}
           </MenuItem>
         )
       );
@@ -327,34 +322,48 @@ const App: React.FC = () => {
           <Card className={classes.card}>
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className={classes.input}>
-                <Controller
-                  control={control}
-                  name="chain"
-                  render={({ field: { onChange, value } }) => (
-                    <Select
-                      variant="outlined"
-                      onChange={onChange}
-                      value={value ? value : ""}
-                    >
-                      {generateSelectedPoolOptions()}
-                    </Select>
-                  )}
-                />
+                <FormControl>
+                  <InputLabel
+                    style={{ paddingLeft: "10px" }}
+                    htmlFor="chainAddress"
+                  >
+                    Select Chain Address
+                  </InputLabel>
+                  <Controller
+                    control={control}
+                    name="chain"
+                    render={({ field: { onChange, value } }) => (
+                      <Select
+                        variant="outlined"
+                        onChange={onChange}
+                        value={value ? value : ""}
+                        label="Chain address"
+                      >
+                        {generateSelectedPoolOptions()}
+                      </Select>
+                    )}
+                  />
+                </FormControl>
               </div>
               <div className={classes.input}>
-                <Controller
-                  control={control}
-                  name="token"
-                  render={({ field: { onChange, value } }) => (
-                    <Select
-                      variant="outlined"
-                      onChange={onChange}
-                      value={value ? value : ""}
-                    >
-                      {generateSelectTokenOptions()}
-                    </Select>
-                  )}
-                />
+                <FormControl>
+                  <InputLabel style={{ paddingLeft: "10px" }} htmlFor="token">
+                    Select Token
+                  </InputLabel>
+                  <Controller
+                    control={control}
+                    name="token"
+                    render={({ field: { onChange, value } }) => (
+                      <Select
+                        variant="outlined"
+                        onChange={onChange}
+                        value={value ? value : ""}
+                      >
+                        {generateSelectTokenOptions()}
+                      </Select>
+                    )}
+                  />
+                </FormControl>
               </div>
               <div className={classes.formContentRow}>
                 <span>
