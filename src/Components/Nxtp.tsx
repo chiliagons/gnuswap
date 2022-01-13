@@ -387,7 +387,13 @@ const App: React.FC = () => {
                   </span>
                 </FormControl>
                 <span className={classes.formContentRow}>
-                  <h2 style={{ paddingRight: "10px", marginBottom: 0 }}>
+                  <h2
+                    style={{
+                      paddingLeft: "10px",
+                      paddingRight: "10px",
+                      marginBottom: 0,
+                    }}
+                  >
                     Balance:
                   </h2>
                   <Button
