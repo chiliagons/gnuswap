@@ -49,42 +49,22 @@ import { TableContext } from "../Providers/Txprovider";
 import ErrorBoundary from "./ErrorBoundary";
 
 const App: React.FC = () => {
-  const { value, value2 } = useContext(TableContext);
   const classes = useStyles();
   const { sdk, safe } = useSafeAppsSDK();
   const gnosisWeb3Provider = new SafeAppProvider(safe, sdk);
-  const [transferStateStarted, setTransferStateStarted] =
-    useState<boolean>(false);
-  const [chainData, setChainData] = useState<any[]>([]);
+
   const [web3Provider, setProvider] = useState<providers.Web3Provider>();
-  const [injectedProviderChainId, setInjectedProviderChainId] =
-    useState<number>();
-  const [gnosisChainId, setGnosisChainId] = useState<number>();
   const [signer, setSigner] = useState<Signer>();
-  const [nsdk, setSdk] = useState<NxtpSdk>();
   const [showLoading, setShowLoading] = useState(false);
   const [showLoadingTransfer, setShowLoadingTransfer] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
   const [auctionResponse, setAuctionResponse] = useState<AuctionResponse>();
-  const [activeTransferTableColumns, setActiveTransferTableColumns] = useState<
-    ActiveTransaction[]
-  >([]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedPool, setSelectedPool] = useState(swapConfig[0]);
   const [tokenList, setTokenList] = useState<IBalance[]>([]);
   const [errorFetchedChecker, setErrorFetchedChecker] = useState(false);
   const [userBalance, setUserBalance] = useState<BigNumber>();
-  const [transferAmount, setTransferAmount] = useState("");
-  const [receivingTokenAdrress, setReceiveTokenAddress] = useState(
-    "0x8a1Cad3703E0beAe0e0237369B4fcD04228d1682"
-  );
-  const [sendingAssetToken, setSendingAssetToken] = useState<IBalance>();
-  const [historicalTransferTableColumns, setHistoricalTransferTableColumns] =
-    useState<HistoricalTransaction[]>([]);
   const [latestActiveTx, setLatestActiveTx] = useState<ActiveTransaction>();
-
-  let addressField = "";
 
   interface ICrossChain {
     transferAmount: any;
@@ -139,8 +119,6 @@ const App: React.FC = () => {
 
   const setTokenWithBalance = (bal) => {
     const tokenAsBal: IBalance = JSON.parse(bal);
-    setSendingAssetToken(tokenAsBal);
-    setReceiveTokenAddress(tokenAsBal.tokenAddress);
     setUserBalance(BigNumber.from(tokenAsBal.balance));
   };
 
@@ -152,11 +130,8 @@ const App: React.FC = () => {
         const address = await _signerG.getAddress();
         await getTokensHandler(address);
         const sendingChain = await _signerG.getChainId();
-        setGnosisChainId(sendingChain);
         setSigner(_signerG);
         setProvider(gnosisProvider);
-        // form.setFieldsValue({ receivingAddress: address });
-        addressField = address;
       }
       return true;
     } catch (e) {
@@ -183,6 +158,7 @@ const App: React.FC = () => {
     receivingAddress: string
   ): Promise<AuctionResponse | undefined> => {
     console.log(
+      "Start getting quote",
       sendingChainId,
       sendingAssetId,
       receivingChainId,
@@ -221,7 +197,6 @@ const App: React.FC = () => {
       return response;
     } catch (e) {
       setShowLoading(false);
-      setErrorMsg(e.message);
       return null;
     }
   };
@@ -229,7 +204,6 @@ const App: React.FC = () => {
   const transfer = async () => {
     const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
     const _signerG = gnosisProvider.getSigner();
-    setTransferStateStarted(true);
     setShowLoadingTransfer(true);
     const nsdk = new NxtpSdk({
       chainConfig: chainProviders,
@@ -244,13 +218,11 @@ const App: React.FC = () => {
       throw new Error("Please request quote first");
     }
 
-    if (injectedProviderChainId !== auctionResponse.bid.sendingChainId) {
-      alert("Please switch chains to the sending chain!");
-      throw new Error("Wrong chain");
-    }
+    // if (injectedProviderChainId !== auctionResponse.bid.sendingChainId) {
+    //   alert("Please switch chains to the sending chain!");
+    //   throw new Error("Wrong chain");
+    // }
     await nsdk.prepareTransfer(auctionResponse, true);
-
-    // setTransferStateStarted(false);
   };
 
   const finishTransfer = async ({
@@ -285,11 +257,6 @@ const App: React.FC = () => {
     setShowConfirmation(true);
     console.log(showConfirmation);
     setShowConfirmation(false);
-  };
-
-  const getChainName = (chainId: number): string => {
-    const chain = chainData.find((chain) => chain?.chainId === chainId);
-    return chain?.name ?? chainId.toString();
   };
 
   const generateSelectedPoolOptions = () => {
@@ -327,7 +294,7 @@ const App: React.FC = () => {
                     style={{ paddingLeft: "10px" }}
                     htmlFor="chainAddress"
                   >
-                    Select Chain Address
+                    Select the chain you want to send the assets to
                   </InputLabel>
                   <Controller
                     control={control}
@@ -397,8 +364,9 @@ const App: React.FC = () => {
                     Balance:
                   </h2>
                   <Button
-                    onClick={() =>
-                      setTransferAmount(utils.formatEther(userBalance ?? 0))
+                    onClick={
+                      () => {}
+                      // setTransferAmount(utils.formatEther(userBalance ?? 0))
                     }
                     size="md"
                   >
@@ -414,7 +382,6 @@ const App: React.FC = () => {
                     <AddressInput
                       className={classes.input}
                       address={value}
-                      defaultValue={value}
                       label={"Receiving Address"}
                       name="receivingAddress"
                       onChangeAddress={onChange}
@@ -432,7 +399,7 @@ const App: React.FC = () => {
                       onChange={onChange}
                       value={value}
                       label={"Sending Asset Token Contract"}
-                      placeholder="Sending Asset Token Contract"
+                      placeholder="Contract Address"
                       name="sendingAssetTokenContract"
                     />
                   )}
