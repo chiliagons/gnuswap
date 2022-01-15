@@ -1,5 +1,5 @@
 /* eslint-disable require-jsdoc */
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import "../App.css";
 import useStyles from "./styles";
 import {
@@ -43,7 +43,7 @@ import { useSafeAppsSDK } from "@gnosis.pm/safe-apps-react-sdk";
 import { SafeAppProvider } from "@gnosis.pm/safe-apps-provider";
 
 import { chainProviders } from "../Utils/Shared";
-import { swapConfig } from "../Constants/constants";
+import { swapConfig, chainAddresses } from "../Constants/constants";
 import { IBalance } from "../Models/Shared.model";
 import { TableContext } from "../Providers/Txprovider";
 import ErrorBoundary from "./ErrorBoundary";
@@ -60,7 +60,7 @@ const App: React.FC = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [auctionResponse, setAuctionResponse] = useState<AuctionResponse>();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedPool, setSelectedPool] = useState(swapConfig[0]);
+  const [selectedPool, setSelectedPool] = useState(chainAddresses);
   const [tokenList, setTokenList] = useState<IBalance[]>([]);
   const [errorFetchedChecker, setErrorFetchedChecker] = useState(false);
   const [userBalance, setUserBalance] = useState<BigNumber>();
@@ -260,12 +260,12 @@ const App: React.FC = () => {
   };
 
   const generateSelectedPoolOptions = () => {
-    return Object.entries(selectedPool.assets).map(([chainId, chainValue]) => {
+    return selectedPool.map((address) => {
       return (
-        chainId && (
-          <MenuItem key={chainId} value={chainValue}>
-            {chainValue}
-          </MenuItem>
+        address && (
+          <MenuItem key={address.id} value={address.chain_id}>
+             {address.title}
+           </MenuItem>
         )
       );
     });
@@ -308,7 +308,8 @@ const App: React.FC = () => {
                       >
                         {generateSelectedPoolOptions()}
                       </Select>
-                    )}
+                    )
+                  }
                   />
                 </FormControl>
               </div>
