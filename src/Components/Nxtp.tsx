@@ -324,6 +324,7 @@ const App: React.FC = () => {
         {showError && (
           <Modal
             setTrigger={setShowError}
+            title="Error"
             message={errorMessage}
             styling={classes.text}
           />
@@ -570,17 +571,12 @@ const App: React.FC = () => {
         </div>
       </Container>
       {showConfirmation && (
-        <GenericModal
-          onClose={() => setShowConfirmation(false)}
-          title="Success!"
-          body={
-            <div>
-              <Typography className={classes.text} align="center" variant="h6">
-                Your transaction has been succesfully executed!
-              </Typography>{" "}
-            </div>
-          }
-        />
+        <Modal
+            setTrigger={setShowConfirmation}
+            title="Success!"
+            message={"Your transaction has been succesfully executed!"}
+            styling={classes.text}
+          />
       )}
     </ErrorBoundary>
   );

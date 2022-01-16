@@ -3,16 +3,17 @@ import { GenericModal } from "@gnosis.pm/safe-react-components";
 import { Typography } from "@material-ui/core";
 
 interface Props {
-  setTrigger: any;
+  setTrigger: Function;
+  title: string;
   message: string;
-  styling: any;
+  styling: string;
 }
 
-export const Modal: React.FC<Props> = ({ setTrigger, message, styling }) => {
+export const Modal: React.FC<Props> = ({ setTrigger, title, message, styling }) => {
   return (
     <GenericModal
       onClose={() => setTrigger(false)}
-      title="Error"
+      title={title}
       body={
         <div>
           <Typography className={styling} align="center" variant="h6">
