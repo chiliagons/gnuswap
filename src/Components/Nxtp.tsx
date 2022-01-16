@@ -38,7 +38,7 @@ import { useSafeAppsSDK } from "@gnosis.pm/safe-apps-react-sdk";
 import { SafeAppProvider } from "@gnosis.pm/safe-apps-provider";
 
 import { chainProviders } from "../Utils/Shared";
-import { TableContext } from "../Providers/Txprovider";
+
 import ErrorBoundary from "./ErrorBoundary";
 
 import { chainAddresses, contractAddresses } from "../Constants/constants";
