@@ -318,7 +318,7 @@ export const chainAddresses = [
   },
 ];
 
-export  const contractAddresses = [
+export const contractAddresses = [
   {
     id: "test",
     symbol: "TEST",

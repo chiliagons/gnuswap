@@ -46,7 +46,11 @@ import { chainProviders } from "../Utils/Shared";
 import { TableContext } from "../Providers/Txprovider";
 import ErrorBoundary from "./ErrorBoundary";
 
-import { swapConfig, chainAddresses, contractAddresses } from "../Constants/constants";
+import {
+  swapConfig,
+  chainAddresses,
+  contractAddresses,
+} from "../Constants/constants";
 
 import { IBalance } from "../Models/Shared.model";
 import { IContractAddress, ICrossChain } from "../Models/Nxtp.model";
@@ -62,18 +66,17 @@ const App: React.FC = () => {
   const [showLoadingTransfer, setShowLoadingTransfer] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [auctionResponse, setAuctionResponse] = useState<AuctionResponse>();
-  
+
   const [chainList, setChainList] = useState(chainAddresses);
   const [contractList, setContractList] = useState(contractAddresses);
   const [tokenList, setTokenList] = useState<IBalance[]>([]);
-  
+
   const [errorFetchedChecker, setErrorFetchedChecker] = useState(false);
   const [userBalance, setUserBalance] = useState<BigNumber>();
   const [latestActiveTx, setLatestActiveTx] = useState<ActiveTransaction>();
 
-
   const { handleSubmit, control } = useForm<ICrossChain>();
-  
+
   const contractAddressHandler = ({
     contractGroupId,
     chainId,
@@ -95,7 +98,7 @@ const App: React.FC = () => {
     });
     console.log("Contract Address", contractAddress.contract_address);
     console.log(JSON.stringify(crossChainData));
-    
+
     try {
       await getTransferQuote(
         5,
@@ -301,9 +304,7 @@ const App: React.FC = () => {
     });
   };
 
-  const fillContractAddress = () => {
-
-  }
+  const fillContractAddress = () => {};
   // UI HERE
   return (
     <ErrorBoundary>
