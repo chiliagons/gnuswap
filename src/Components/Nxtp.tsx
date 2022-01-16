@@ -32,9 +32,7 @@ import { BigNumber, providers, Signer, utils } from "ethers";
 // @ts-ignore
 import {
   ActiveTransaction,
-  NxtpSdk,
-  NxtpSdkEvents,
-  HistoricalTransaction,
+  NxtpSdk
 } from "@connext/nxtp-sdk";
 // @ts-ignore
 import { AuctionResponse, getRandomBytes32 } from "@connext/nxtp-utils";
@@ -46,11 +44,7 @@ import { chainProviders } from "../Utils/Shared";
 import { TableContext } from "../Providers/Txprovider";
 import ErrorBoundary from "./ErrorBoundary";
 
-import {
-  swapConfig,
-  chainAddresses,
-  contractAddresses,
-} from "../Constants/constants";
+import { chainAddresses, contractAddresses } from "../Constants/constants";
 
 import { IBalance } from "../Models/Shared.model";
 import { IContractAddress, ICrossChain } from "../Models/Nxtp.model";
@@ -139,11 +133,6 @@ const App: React.FC = () => {
       .catch((error) => {
         console.log(error);
       });
-  };
-
-  const setTokenWithBalance = (bal) => {
-    const tokenAsBal: IBalance = JSON.parse(bal);
-    setUserBalance(BigNumber.from(tokenAsBal.balance));
   };
 
   const connectProvider = async () => {
@@ -241,11 +230,6 @@ const App: React.FC = () => {
       alert("Please request quote first");
       throw new Error("Please request quote first");
     }
-
-    // if (injectedProviderChainId !== auctionResponse.bid.sendingChainId) {
-    //   alert("Please switch chains to the sending chain!");
-    //   throw new Error("Wrong chain");
-    // }
     await nsdk.prepareTransfer(auctionResponse, true);
   };
 
@@ -304,7 +288,6 @@ const App: React.FC = () => {
     });
   };
 
-  const fillContractAddress = () => {};
   // UI HERE
   return (
     <ErrorBoundary>
