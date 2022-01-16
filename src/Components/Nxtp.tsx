@@ -38,6 +38,7 @@ import { useSafeAppsSDK } from "@gnosis.pm/safe-apps-react-sdk";
 import { SafeAppProvider } from "@gnosis.pm/safe-apps-provider";
 
 import { chainProviders } from "../Utils/Shared";
+import { Modal } from "./Modal";
 
 import ErrorBoundary from "./ErrorBoundary";
 
@@ -65,45 +66,44 @@ const App: React.FC = () => {
   const [errorFetchedChecker, setErrorFetchedChecker] = useState(false);
   const [userBalance, setUserBalance] = useState<BigNumber>();
   const [latestActiveTx, setLatestActiveTx] = useState<ActiveTransaction>();
-
+  const [showError, setShowError] = useState<Boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const { handleSubmit, control } = useForm<ICrossChain>();
-
-  
 
   const contractAddressHandler = ({
     contractGroupId,
     chainId,
   }: IContractAddress) => {
-    const chosenContractId = contractGroupId;
-    const chosenContractGroup = chosenContractId === "test" ? 0 : 1;
     const chosenContractList = contractList.find((contractGroup) => {
       return contractGroup.symbol === contractGroupId;
     });
-    
-    const chosenContractAddress = chosenContractList.contracts.find((contract) => {
-      return contract.chain_id === chainId;
-    });
+
+    const chosenContractAddress = chosenContractList.contracts.find(
+      (contract) => {
+        return contract.chain_id === chainId;
+      }
+    );
     return chosenContractAddress;
   };
 
   const onSubmit = async (crossChainData: ICrossChain) => {
-    
     try {
+      const sendingChain = await signer.getChainId();
+      console.log("sendingChain - ", sendingChain);
 
-    const sendingChain = await signer.getChainId();
-    console.log("sendingChain - ", sendingChain);
-
-    const sendingContractAddress = contractAddressHandler({
-      contractGroupId: JSON.parse(crossChainData.token).token.symbol,
-      chainId: sendingChain,
-    });
-    const receivingContractAddress = contractAddressHandler({
-      contractGroupId: JSON.parse(crossChainData.token).token.symbol,
-      chainId: crossChainData.chain,
-    });
-    console.log("Contract Address", receivingContractAddress.contract_address);
-    console.log(JSON.stringify(crossChainData));
-
+      const sendingContractAddress = contractAddressHandler({
+        contractGroupId: JSON.parse(crossChainData.token).token.symbol,
+        chainId: sendingChain,
+      });
+      const receivingContractAddress = contractAddressHandler({
+        contractGroupId: JSON.parse(crossChainData.token).token.symbol,
+        chainId: crossChainData.chain,
+      });
+      console.log(
+        "Contract Address",
+        receivingContractAddress.contract_address
+      );
+      console.log(JSON.stringify(crossChainData));
 
       await getTransferQuote(
         sendingChain,
@@ -114,6 +114,8 @@ const App: React.FC = () => {
         crossChainData.receivingAddress
       );
     } catch (e) {
+      setErrorMessage(e.message);
+      setShowError(true);
       console.log(e.message);
     }
   };
@@ -141,8 +143,10 @@ const App: React.FC = () => {
         });
         setTokenList(tokenArr);
       })
-      .catch((error) => {
-        console.log(error);
+      .catch((e) => {
+        setErrorMessage(e.message);
+        setShowError(true);
+        console.log(e);
       });
   };
 
@@ -153,7 +157,7 @@ const App: React.FC = () => {
       if (_signerG) {
         const address = await _signerG.getAddress();
         await getTokensHandler(address);
-        
+
         setSigner(_signerG);
         setProvider(gnosisProvider);
       }
@@ -220,9 +224,10 @@ const App: React.FC = () => {
       setAuctionResponse(response);
       return response;
     } catch (e) {
-      console.log(e)
-      if (e.type === 'ConfigError'){
-        alert("This chain configuration is not supported");
+      console.log(e);
+      if (e.type === "ConfigError") {
+        setErrorMessage("This chain configuration is not supported");
+        setShowError(true);
       }
       setShowLoading(false);
       return null;
@@ -230,25 +235,29 @@ const App: React.FC = () => {
   };
 
   const transfer = async () => {
-    const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
-    const _signerG = gnosisProvider.getSigner();
-    // setShowLoadingTransfer(true);
-    const nsdk = new NxtpSdk({
-      chainConfig: chainProviders,
-      signer: _signerG,
-      logger: pino({ level: "info" }),
-    });
-    if (!nsdk) {
-      return;
-    }
-    if (!auctionResponse) {
-      alert("Please request quote first");
-      throw new Error("Please request quote first");
-    }
-    const prepTransfer = await nsdk.prepareTransfer(auctionResponse, true);
-    if(prepTransfer.transactionId){
-      console.log("Prepared transaction", prepTransfer)
-      setShowLoadingTransfer(false);
+    try {
+      const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
+      const _signerG = gnosisProvider.getSigner();
+      // setShowLoadingTransfer(true);
+      const nsdk = new NxtpSdk({
+        chainConfig: chainProviders,
+        signer: _signerG,
+        logger: pino({ level: "info" }),
+      });
+      if (!nsdk) {
+        return;
+      }
+      if (!auctionResponse) {
+        throw new Error("Please request quote first");
+      }
+      const prepTransfer = await nsdk.prepareTransfer(auctionResponse, true);
+      if (prepTransfer.transactionId) {
+        console.log("Prepared transaction", prepTransfer);
+        setShowLoadingTransfer(false);
+      }
+    } catch (e) {
+      setErrorMessage(e.message);
+      setShowError(true);
     }
   };
 
@@ -312,6 +321,13 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <Divider />
       <Container>
+        {showError && (
+          <Modal
+            setTrigger={setShowError}
+            message={errorMessage}
+            styling={classes.text}
+          />
+        )}
         <div className={classes.grid}>
           <Card className={classes.card}>
             <form onSubmit={handleSubmit(onSubmit)}>
@@ -450,16 +466,18 @@ const App: React.FC = () => {
                 className={classes.formContentSubmitRow}
                 style={{ paddingTop: "1vh" }}
               >
-                <Button iconType="chain" size="lg" variant="bordered"
-                 onClick={async () => {
-                  await transfer();
-                }}>
+                <Button
+                  iconType="chain"
+                  size="lg"
+                  variant="bordered"
+                  onClick={async () => {
+                    await transfer();
+                  }}
+                >
                   {showLoadingTransfer ? "Approving..." : "Approve"}
                   <span>{showLoadingTransfer && <Loader size="xs" />}</span>
-                 
                 </Button>
-                
-                
+
                 <Button
                   iconType="rocket"
                   disabled={latestActiveTx?.status.length === 0}
@@ -467,18 +485,18 @@ const App: React.FC = () => {
                   variant="bordered"
                   onClick={async () => {
                     // if (latestActiveTx)
-                      await finishTransfer({
-                        bidSignature: latestActiveTx.bidSignature,
-                        encodedBid: latestActiveTx.encodedBid,
-                        encryptedCallData: latestActiveTx.encryptedCallData,
-                        txData: {
-                          ...latestActiveTx.crosschainTx.invariant,
-                          ...latestActiveTx.crosschainTx.receiving,
-                        },
-                      });
+                    await finishTransfer({
+                      bidSignature: latestActiveTx.bidSignature,
+                      encodedBid: latestActiveTx.encodedBid,
+                      encryptedCallData: latestActiveTx.encryptedCallData,
+                      txData: {
+                        ...latestActiveTx.crosschainTx.invariant,
+                        ...latestActiveTx.crosschainTx.receiving,
+                      },
+                    });
                   }}
                 >
-                 Transfer
+                  Transfer
                 </Button>
               </div>
             </form>
