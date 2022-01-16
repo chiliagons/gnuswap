@@ -68,34 +68,48 @@ const App: React.FC = () => {
 
   const { handleSubmit, control } = useForm<ICrossChain>();
 
+  
+
   const contractAddressHandler = ({
     contractGroupId,
     chainId,
   }: IContractAddress) => {
     const chosenContractId = contractGroupId;
     const chosenContractGroup = chosenContractId === "test" ? 0 : 1;
-    const chosenContractAddress = contractList[
-      chosenContractGroup
-    ].contracts.find((contract) => {
+    const chosenContractList = contractList.find((contractGroup) => {
+      return contractGroup.symbol === contractGroupId;
+    });
+    
+    const chosenContractAddress = chosenContractList.contracts.find((contract) => {
       return contract.chain_id === chainId;
     });
     return chosenContractAddress;
   };
 
   const onSubmit = async (crossChainData: ICrossChain) => {
-    const contractAddress = contractAddressHandler({
-      contractGroupId: "test",
+    
+    try {
+
+    const sendingChain = await signer.getChainId();
+    console.log("sendingChain - ", sendingChain);
+
+    const sendingContractAddress = contractAddressHandler({
+      contractGroupId: JSON.parse(crossChainData.token).token.symbol,
+      chainId: sendingChain,
+    });
+    const receivingContractAddress = contractAddressHandler({
+      contractGroupId: JSON.parse(crossChainData.token).token.symbol,
       chainId: crossChainData.chain,
     });
-    console.log("Contract Address", contractAddress.contract_address);
+    console.log("Contract Address", receivingContractAddress.contract_address);
     console.log(JSON.stringify(crossChainData));
 
-    try {
+
       await getTransferQuote(
-        5,
-        contractAddress.contract_address,
-        3,
-        "0xe71678794fff8846bff855f716b0ce9d9a78e844",
+        sendingChain,
+        sendingContractAddress.contract_address,
+        crossChainData.chain,
+        receivingContractAddress.contract_address,
         utils.parseEther(crossChainData.transferAmount).toString(),
         crossChainData.receivingAddress
       );
@@ -139,7 +153,7 @@ const App: React.FC = () => {
       if (_signerG) {
         const address = await _signerG.getAddress();
         await getTokensHandler(address);
-        const sendingChain = await _signerG.getChainId();
+        
         setSigner(_signerG);
         setProvider(gnosisProvider);
       }
@@ -206,6 +220,10 @@ const App: React.FC = () => {
       setAuctionResponse(response);
       return response;
     } catch (e) {
+      console.log(e)
+      if (e.type === 'ConfigError'){
+        alert("This chain configuration is not supported");
+      }
       setShowLoading(false);
       return null;
     }
@@ -214,7 +232,7 @@ const App: React.FC = () => {
   const transfer = async () => {
     const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
     const _signerG = gnosisProvider.getSigner();
-    setShowLoadingTransfer(true);
+    // setShowLoadingTransfer(true);
     const nsdk = new NxtpSdk({
       chainConfig: chainProviders,
       signer: _signerG,
@@ -227,7 +245,11 @@ const App: React.FC = () => {
       alert("Please request quote first");
       throw new Error("Please request quote first");
     }
-    await nsdk.prepareTransfer(auctionResponse, true);
+    const prepTransfer = await nsdk.prepareTransfer(auctionResponse, true);
+    if(prepTransfer.transactionId){
+      console.log("Prepared transaction", prepTransfer)
+      setShowLoadingTransfer(false);
+    }
   };
 
   const finishTransfer = async ({
@@ -428,17 +450,23 @@ const App: React.FC = () => {
                 className={classes.formContentSubmitRow}
                 style={{ paddingTop: "1vh" }}
               >
-                <Button iconType="chain" size="lg" variant="bordered">
-                  {showLoadingTransfer ? "Transferring..." : "Start Transfer"}
+                <Button iconType="chain" size="lg" variant="bordered"
+                 onClick={async () => {
+                  await transfer();
+                }}>
+                  {showLoadingTransfer ? "Approving..." : "Approve"}
                   <span>{showLoadingTransfer && <Loader size="xs" />}</span>
+                 
                 </Button>
+                
+                
                 <Button
                   iconType="rocket"
                   disabled={latestActiveTx?.status.length === 0}
                   size="lg"
                   variant="bordered"
                   onClick={async () => {
-                    if (latestActiveTx)
+                    // if (latestActiveTx)
                       await finishTransfer({
                         bidSignature: latestActiveTx.bidSignature,
                         encodedBid: latestActiveTx.encodedBid,
@@ -450,7 +478,7 @@ const App: React.FC = () => {
                       });
                   }}
                 >
-                  Finish Transfer
+                 Transfer
                 </Button>
               </div>
             </form>
