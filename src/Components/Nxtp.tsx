@@ -264,8 +264,8 @@ const App: React.FC = () => {
       return (
         address && (
           <MenuItem key={address.id} value={address.chain_id}>
-             {address.title}
-           </MenuItem>
+            {address.title}
+          </MenuItem>
         )
       );
     });
@@ -308,8 +308,7 @@ const App: React.FC = () => {
                       >
                         {generateSelectedPoolOptions()}
                       </Select>
-                    )
-                  }
+                    )}
                   />
                 </FormControl>
               </div>
