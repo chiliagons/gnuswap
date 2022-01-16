@@ -572,11 +572,11 @@ const App: React.FC = () => {
       </Container>
       {showConfirmation && (
         <Modal
-            setTrigger={setShowConfirmation}
-            title="Success!"
-            message={"Your transaction has been succesfully executed!"}
-            styling={classes.text}
-          />
+          setTrigger={setShowConfirmation}
+          title="Success!"
+          message={"Your transaction has been succesfully executed!"}
+          styling={classes.text}
+        />
       )}
     </ErrorBoundary>
   );

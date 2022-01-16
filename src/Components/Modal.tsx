@@ -9,7 +9,12 @@ interface Props {
   styling: string;
 }
 
-export const Modal: React.FC<Props> = ({ setTrigger, title, message, styling }) => {
+export const Modal: React.FC<Props> = ({
+  setTrigger,
+  title,
+  message,
+  styling,
+}) => {
   return (
     <GenericModal
       onClose={() => setTrigger(false)}
