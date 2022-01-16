@@ -43,10 +43,13 @@ import { useSafeAppsSDK } from "@gnosis.pm/safe-apps-react-sdk";
 import { SafeAppProvider } from "@gnosis.pm/safe-apps-provider";
 
 import { chainProviders } from "../Utils/Shared";
-import { swapConfig, chainAddresses } from "../Constants/constants";
-import { IBalance } from "../Models/Shared.model";
 import { TableContext } from "../Providers/Txprovider";
 import ErrorBoundary from "./ErrorBoundary";
+
+import { swapConfig, chainAddresses, contractAddresses } from "../Constants/constants";
+
+import { IBalance } from "../Models/Shared.model";
+import { IContractAddress, ICrossChain } from "../Models/Nxtp.model";
 
 const App: React.FC = () => {
   const classes = useStyles();
@@ -59,34 +62,52 @@ const App: React.FC = () => {
   const [showLoadingTransfer, setShowLoadingTransfer] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [auctionResponse, setAuctionResponse] = useState<AuctionResponse>();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedPool, setSelectedPool] = useState(chainAddresses);
+  
+  const [chainList, setChainList] = useState(chainAddresses);
+  const [contractList, setContractList] = useState(contractAddresses);
   const [tokenList, setTokenList] = useState<IBalance[]>([]);
+  
   const [errorFetchedChecker, setErrorFetchedChecker] = useState(false);
   const [userBalance, setUserBalance] = useState<BigNumber>();
   const [latestActiveTx, setLatestActiveTx] = useState<ActiveTransaction>();
 
-  interface ICrossChain {
-    transferAmount: any;
-    receivingAddress: any;
-    sendingAssetTokenContract: any;
-    receivedAmount: any;
-    chain: any;
-    token: any;
-  }
 
-  const { register, handleSubmit, control } = useForm<ICrossChain>();
+  const { handleSubmit, control } = useForm<ICrossChain>();
+  
+  const contractAddressHandler = ({
+    contractGroupId,
+    chainId,
+  }: IContractAddress) => {
+    const chosenContractId = contractGroupId;
+    const chosenContractGroup = chosenContractId === "test" ? 0 : 1;
+    const chosenContractAddress = contractList[
+      chosenContractGroup
+    ].contracts.find((contract) => {
+      return contract.chain_id === chainId;
+    });
+    return chosenContractAddress;
+  };
 
   const onSubmit = async (crossChainData: ICrossChain) => {
+    const contractAddress = contractAddressHandler({
+      contractGroupId: "test",
+      chainId: crossChainData.chain,
+    });
+    console.log("Contract Address", contractAddress.contract_address);
     console.log(JSON.stringify(crossChainData));
-    await getTransferQuote(
-      5,
-      crossChainData.sendingAssetTokenContract,
-      3,
-      "0xe71678794fff8846bff855f716b0ce9d9a78e844",
-      utils.parseEther(crossChainData.transferAmount).toString(),
-      crossChainData.receivingAddress
-    );
+    
+    try {
+      await getTransferQuote(
+        5,
+        contractAddress.contract_address,
+        3,
+        "0xe71678794fff8846bff855f716b0ce9d9a78e844",
+        utils.parseEther(crossChainData.transferAmount).toString(),
+        crossChainData.receivingAddress
+      );
+    } catch (e) {
+      console.log(e.message);
+    }
   };
 
   const ethereum = (window as any).ethereum;
@@ -259,8 +280,8 @@ const App: React.FC = () => {
     setShowConfirmation(false);
   };
 
-  const generateSelectedPoolOptions = () => {
-    return selectedPool.map((address) => {
+  const selectMenuChainAddresses = () => {
+    return chainList.map((address) => {
       return (
         address && (
           <MenuItem key={address.id} value={address.chain_id}>
@@ -280,6 +301,9 @@ const App: React.FC = () => {
     });
   };
 
+  const fillContractAddress = () => {
+
+  }
   // UI HERE
   return (
     <ErrorBoundary>
@@ -304,9 +328,10 @@ const App: React.FC = () => {
                         variant="outlined"
                         onChange={onChange}
                         value={value ? value : ""}
-                        label="Chain address"
+                        label="chainAddressSelect"
+                        id="chainAddressSelect"
                       >
-                        {generateSelectedPoolOptions()}
+                        {selectMenuChainAddresses()}
                       </Select>
                     )}
                   />
@@ -387,20 +412,6 @@ const App: React.FC = () => {
                       onChangeAddress={onChange}
                       placeholder="Receiving Address"
                       hiddenLabel={true}
-                    />
-                  )}
-                />
-                <Controller
-                  name={"sendingAssetTokenContract"}
-                  control={control}
-                  render={({ field: { onChange, value } }) => (
-                    <TextFieldInput
-                      className={classes.input}
-                      onChange={onChange}
-                      value={value}
-                      label={"Sending Asset Token Contract"}
-                      placeholder="Contract Address"
-                      name="sendingAssetTokenContract"
                     />
                   )}
                 />
