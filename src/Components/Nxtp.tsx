@@ -30,10 +30,7 @@ import { Controller, useForm } from "react-hook-form";
 
 import { BigNumber, providers, Signer, utils } from "ethers";
 // @ts-ignore
-import {
-  ActiveTransaction,
-  NxtpSdk
-} from "@connext/nxtp-sdk";
+import { ActiveTransaction, NxtpSdk } from "@connext/nxtp-sdk";
 // @ts-ignore
 import { AuctionResponse, getRandomBytes32 } from "@connext/nxtp-utils";
 import pino from "pino";
