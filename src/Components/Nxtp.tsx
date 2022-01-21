@@ -38,6 +38,7 @@ import { useSafeAppsSDK } from "@gnosis.pm/safe-apps-react-sdk";
 import { SafeAppProvider } from "@gnosis.pm/safe-apps-provider";
 
 import { chainProviders } from "../Utils/Shared";
+import { Modal } from "./Modal";
 
 import ErrorBoundary from "./ErrorBoundary";
 
@@ -65,15 +66,14 @@ const App: React.FC = () => {
   const [errorFetchedChecker, setErrorFetchedChecker] = useState(false);
   const [userBalance, setUserBalance] = useState<BigNumber>();
   const [latestActiveTx, setLatestActiveTx] = useState<ActiveTransaction>();
-
+  const [showError, setShowError] = useState<Boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const { handleSubmit, control } = useForm<ICrossChain>();
 
   const contractAddressHandler = ({
     contractGroupId,
     chainId,
   }: IContractAddress) => {
-    const chosenContractId = contractGroupId;
-    const chosenContractGroup = chosenContractId === "test" ? 0 : 1;
     const chosenContractList = contractList.find((contractGroup) => {
       return contractGroup.symbol === contractGroupId;
     });
@@ -114,6 +114,8 @@ const App: React.FC = () => {
         crossChainData.receivingAddress
       );
     } catch (e) {
+      setErrorMessage(e.message);
+      setShowError(true);
       console.log(e.message);
     }
   };
@@ -141,8 +143,10 @@ const App: React.FC = () => {
         });
         setTokenList(tokenArr);
       })
-      .catch((error) => {
-        console.log(error);
+      .catch((e) => {
+        setErrorMessage(e.message);
+        setShowError(true);
+        console.log(e);
       });
   };
 
@@ -367,7 +371,8 @@ const App: React.FC = () => {
     } catch (e) {
       console.log(e);
       if (e.type === "ConfigError") {
-        alert("This chain configuration is not supported");
+        setErrorMessage("This chain configuration is not supported");
+        setShowError(true);
       }
       setShowLoading(false);
       return null;
@@ -454,6 +459,14 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <Divider />
       <Container>
+        {showError && (
+          <Modal
+            setTrigger={setShowError}
+            title="Error"
+            message={errorMessage}
+            styling={classes.text}
+          />
+        )}
         <div className={classes.grid}>
           <Card className={classes.card}>
             <form onSubmit={handleSubmit(onSubmit)}>
@@ -696,16 +709,11 @@ const App: React.FC = () => {
         </div>
       </Container>
       {showConfirmation && (
-        <GenericModal
-          onClose={() => setShowConfirmation(false)}
+        <Modal
+          setTrigger={setShowConfirmation}
           title="Success!"
-          body={
-            <div>
-              <Typography className={classes.text} align="center" variant="h6">
-                Your transaction has been succesfully executed!
-              </Typography>{" "}
-            </div>
-          }
+          message={"Your transaction has been succesfully executed!"}
+          styling={classes.text}
         />
       )}
     </ErrorBoundary>
