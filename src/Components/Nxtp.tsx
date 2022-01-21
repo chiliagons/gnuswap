@@ -30,7 +30,7 @@ import { Controller, useForm } from "react-hook-form";
 
 import { BigNumber, providers, Signer, utils } from "ethers";
 // @ts-ignore
-import { ActiveTransaction, NxtpSdkEvents, NxtpSdk, TransactionPreparedEvent } from "@connext/nxtp-sdk";
+import { ActiveTransaction, NxtpSdkEvents, NxtpSdk } from "@connext/nxtp-sdk";
 // @ts-ignore
 import { AuctionResponse, getRandomBytes32 } from "@connext/nxtp-utils";
 import pino from "pino";
@@ -175,7 +175,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const init = async () => {
-      console.log("We are in the init....")
+      console.log("We are in the init....");
       const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
       const _signerG = gnosisProvider.getSigner();
       const nsdk = await NxtpSdk.create({
@@ -183,24 +183,20 @@ const App: React.FC = () => {
         signer: _signerG,
         logger: pino({ level: "info" }),
       });
-      console.log("We are in the init after nsdk....")
-  
-      try{
+      console.log("We are in the init after nsdk....");
 
-      
-      const activeTxs = await nsdk.getActiveTransactions();
-      // value2.setActiveTransactions(activeTxs);
-      // setActiveTransferTableColumns(activeTxs);
-      console.log("activeTxs: ", activeTxs);
-      if (activeTxs[activeTxs.length - 1]) {
-        setLatestActiveTx(activeTxs[activeTxs.length - 1]);
-      console.log("setLatestActiveTx: ", activeTxs[activeTxs.length - 1]);
-
-      } 
-    }catch(e){
+      try {
+        const activeTxs = await nsdk.getActiveTransactions();
+        // value2.setActiveTransactions(activeTxs);
+        // setActiveTransferTableColumns(activeTxs);
+        console.log("activeTxs: ", activeTxs);
+        if (activeTxs[activeTxs.length - 1]) {
+          setLatestActiveTx(activeTxs[activeTxs.length - 1]);
+          console.log("setLatestActiveTx: ", activeTxs[activeTxs.length - 1]);
+        }
+      } catch (e) {
         console.log(e);
-      
-    }
+      }
       const historicalTxs = await nsdk.getHistoricalTransactions();
       // setHistoricalTransferTableColumns(historicalTxs);
       console.log("historicalTxs: ", historicalTxs);
@@ -415,7 +411,7 @@ const App: React.FC = () => {
       signer: _signerG,
       logger: pino({ level: "info" }),
     });
-    
+
     if (!nsdk) {
       return;
     }
@@ -604,8 +600,8 @@ const App: React.FC = () => {
                     await transfer();
                   }}
                 >
-                {showLoadingTransfer ? "Starting Transfer..." : "Start"}
-                <span>{showLoadingTransfer && <Loader size="xs" />}</span>
+                  {showLoadingTransfer ? "Starting Transfer..." : "Start"}
+                  <span>{showLoadingTransfer && <Loader size="xs" />}</span>
                 </Button>
 
                 <Button
@@ -615,15 +611,15 @@ const App: React.FC = () => {
                   variant="bordered"
                   onClick={async () => {
                     if (latestActiveTx)
-                    await finishTransfer({
-                      bidSignature: latestActiveTx.bidSignature,
-                      encodedBid: latestActiveTx.encodedBid,
-                      encryptedCallData: latestActiveTx.encryptedCallData,
-                      txData: {
-                        ...latestActiveTx.crosschainTx.invariant,
-                        ...latestActiveTx.crosschainTx.receiving,
-                      },
-                    });
+                      await finishTransfer({
+                        bidSignature: latestActiveTx.bidSignature,
+                        encodedBid: latestActiveTx.encodedBid,
+                        encryptedCallData: latestActiveTx.encryptedCallData,
+                        txData: {
+                          ...latestActiveTx.crosschainTx.invariant,
+                          ...latestActiveTx.crosschainTx.receiving,
+                        },
+                      });
                   }}
                 >
                   Transfer
