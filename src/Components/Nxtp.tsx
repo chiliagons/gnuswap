@@ -30,7 +30,7 @@ import { Controller, useForm } from "react-hook-form";
 
 import { BigNumber, providers, Signer, utils } from "ethers";
 // @ts-ignore
-import { ActiveTransaction, NxtpSdk } from "@connext/nxtp-sdk";
+import { ActiveTransaction, NxtpSdkEvents, NxtpSdk, TransactionPreparedEvent } from "@connext/nxtp-sdk";
 // @ts-ignore
 import { AuctionResponse, getRandomBytes32 } from "@connext/nxtp-utils";
 import pino from "pino";
@@ -68,8 +68,6 @@ const App: React.FC = () => {
 
   const { handleSubmit, control } = useForm<ICrossChain>();
 
-  
-
   const contractAddressHandler = ({
     contractGroupId,
     chainId,
@@ -79,31 +77,33 @@ const App: React.FC = () => {
     const chosenContractList = contractList.find((contractGroup) => {
       return contractGroup.symbol === contractGroupId;
     });
-    
-    const chosenContractAddress = chosenContractList.contracts.find((contract) => {
-      return contract.chain_id === chainId;
-    });
+
+    const chosenContractAddress = chosenContractList.contracts.find(
+      (contract) => {
+        return contract.chain_id === chainId;
+      }
+    );
     return chosenContractAddress;
   };
 
   const onSubmit = async (crossChainData: ICrossChain) => {
-    
     try {
+      const sendingChain = await signer.getChainId();
+      console.log("sendingChain - ", sendingChain);
 
-    const sendingChain = await signer.getChainId();
-    console.log("sendingChain - ", sendingChain);
-
-    const sendingContractAddress = contractAddressHandler({
-      contractGroupId: JSON.parse(crossChainData.token).token.symbol,
-      chainId: sendingChain,
-    });
-    const receivingContractAddress = contractAddressHandler({
-      contractGroupId: JSON.parse(crossChainData.token).token.symbol,
-      chainId: crossChainData.chain,
-    });
-    console.log("Contract Address", receivingContractAddress.contract_address);
-    console.log(JSON.stringify(crossChainData));
-
+      const sendingContractAddress = contractAddressHandler({
+        contractGroupId: JSON.parse(crossChainData.token).token.symbol,
+        chainId: sendingChain,
+      });
+      const receivingContractAddress = contractAddressHandler({
+        contractGroupId: JSON.parse(crossChainData.token).token.symbol,
+        chainId: crossChainData.chain,
+      });
+      console.log(
+        "Contract Address",
+        receivingContractAddress.contract_address
+      );
+      console.log(JSON.stringify(crossChainData));
 
       await getTransferQuote(
         sendingChain,
@@ -153,7 +153,7 @@ const App: React.FC = () => {
       if (_signerG) {
         const address = await _signerG.getAddress();
         await getTokensHandler(address);
-        
+
         setSigner(_signerG);
         setProvider(gnosisProvider);
       }
@@ -173,6 +173,155 @@ const App: React.FC = () => {
     testFunc();
   }, [errorFetchedChecker]);
 
+  useEffect(() => {
+    const init = async () => {
+      console.log("We are in the init....")
+      const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
+      const _signerG = gnosisProvider.getSigner();
+      const nsdk = await NxtpSdk.create({
+        chainConfig: chainProviders,
+        signer: _signerG,
+        logger: pino({ level: "info" }),
+      });
+      console.log("We are in the init after nsdk....")
+  
+      try{
+
+      
+      const activeTxs = await nsdk.getActiveTransactions();
+      // value2.setActiveTransactions(activeTxs);
+      // setActiveTransferTableColumns(activeTxs);
+      console.log("activeTxs: ", activeTxs);
+      if (activeTxs[activeTxs.length - 1]) {
+        setLatestActiveTx(activeTxs[activeTxs.length - 1]);
+      console.log("setLatestActiveTx: ", activeTxs[activeTxs.length - 1]);
+
+      } 
+    }catch(e){
+        console.log(e);
+      
+    }
+      const historicalTxs = await nsdk.getHistoricalTransactions();
+      // setHistoricalTransferTableColumns(historicalTxs);
+      console.log("historicalTxs: ", historicalTxs);
+      // value.setTransactions(historicalTxs);
+
+      // nsdk.attach(NxtpSdkEvents.SenderTransactionPrepared, (data) => {
+      //   const { amount, expiry, preparedBlockNumber, ...invariant } =
+      //     data.txData;
+      //   const table = [...activeTransferTableColumns];
+      //   table.push({
+      //     crosschainTx: {
+      //       invariant,
+      //       sending: { amount, expiry, preparedBlockNumber },
+      //     },
+      //     bidSignature: data.bidSignature,
+      //     encodedBid: data.encodedBid,
+      //     encryptedCallData: data.encryptedCallData,
+      //     status: NxtpSdkEvents.SenderTransactionPrepared,
+      //     preparedTimestamp: Math.floor(Date.now() / 1000),
+      //   });
+      //   setActiveTransferTableColumns(table);
+      // });
+
+      // nsdk.attach(NxtpSdkEvents.SenderTransactionFulfilled, (data) => {
+      //   console.log("SenderTransactionFulfilled:", data);
+      //   setActiveTransferTableColumns(
+      //     activeTransferTableColumns.filter(
+      //       (t) =>
+      //         t.crosschainTx.invariant.transactionId !==
+      //         data.txData.transactionId
+      //     )
+      //   );
+      // });
+
+      // nsdk.attach(NxtpSdkEvents.SenderTransactionCancelled, (data) => {
+      //   console.log("SenderTransactionCancelled:", data);
+      //   setActiveTransferTableColumns(
+      //     activeTransferTableColumns.filter(
+      //       (t) =>
+      //         t.crosschainTx.invariant.transactionId !==
+      //         data.txData.transactionId
+      //     )
+      //   );
+      // });
+
+      // nsdk.attach(NxtpSdkEvents.ReceiverTransactionPrepared, (data) => {
+      //   se[(false);
+      //   const { amount, expiry, preparedBlockNumber, ...invariant } =
+      //     data.txData;
+      //   const index = activeTransferTableColumns.findIndex(
+      //     (col) =>
+      //       col.crosschainTx.invariant.transactionId === invariant.transactionId
+      //   );
+      //   const table = [...activeTransferTableColumns];
+      //   if (index === -1) {
+      //     // TODO: is there a better way to
+      //     // get the info here?
+      //     table.push({
+      //       preparedTimestamp: Math.floor(Date.now() / 1000),
+      //       crosschainTx: {
+      //         invariant,
+      //         sending: {} as any, // Find to do this, since it defaults to receiver side info
+      //         receiving: { amount, expiry, preparedBlockNumber },
+      //       },
+      //       bidSignature: data.bidSignature,
+      //       encodedBid: data.encodedBid,
+      //       encryptedCallData: data.encryptedCallData,
+      //       status: NxtpSdkEvents.ReceiverTransactionPrepared,
+      //     });
+      //     setActiveTransferTableColumns(table);
+      //   } else {
+      //     const item = { ...table[index] };
+      //     table[index] = {
+      //       ...item,
+      //       status: NxtpSdkEvents.ReceiverTransactionPrepared,
+      //       crosschainTx: {
+      //         ...item.crosschainTx,
+      //         receiving: { amount, expiry, preparedBlockNumber },
+      //       },
+      //     };
+      //     setActiveTransferTableColumns(table);
+      //   }
+      // });
+
+      // nsdk.attach(NxtpSdkEvents.ReceiverTransactionFulfilled, async (data) => {
+      //   console.log("ReceiverTransactionFulfilled:", data);
+      //   setActiveTransferTableColumns(
+      //     activeTransferTableColumns.filter(
+      //       (t) =>
+      //         t.crosschainTx.invariant.transactionId !==
+      //         data.txData.transactionId
+      //     )
+      //   );
+
+      //   const historicalTxs = await nsdk.getHistoricalTransactions();
+      //   setHistoricalTransferTableColumns(historicalTxs);
+      //   console.log("historicalTxs: ", historicalTxs);
+      // });
+
+      // nsdk.attach(NxtpSdkEvents.ReceiverTransactionCancelled, (data) => {
+      //   console.log("ReceiverTransactionCancelled:", data);
+      //   setActiveTransferTableColumns(
+      //     activeTransferTableColumns.filter(
+      //       (t) =>
+      //         t.crosschainTx.invariant.transactionId !==
+      //         data.txData.transactionId
+      //     )
+      //   );
+      // });
+
+      // nsdk.attach(NxtpSdkEvents.SenderTokenApprovalMined, (data) => {
+      //   console.log("SenderTokenApprovalMined:", data);
+      // });
+
+      // nsdk.attach(NxtpSdkEvents.SenderTransactionPrepareSubmitted, (data) => {
+      //   console.log("SenderTransactionPrepareSubmitted:", data);
+      // });
+    };
+    init();
+  }, [showLoadingTransfer]);
+
   const getTransferQuote = async (
     sendingChainId: number,
     sendingAssetId: string,
@@ -191,11 +340,11 @@ const App: React.FC = () => {
       receivingAddress
     );
     setShowLoading(true);
-    const provider = new providers.Web3Provider(ethereum);
-    const _signer = await provider.getSigner();
+    const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
+    const _signerG = gnosisProvider.getSigner();
     const nsdk = await NxtpSdk.create({
       chainConfig: chainProviders,
-      signer: _signer,
+      signer: _signerG,
       logger: pino({ level: "info" }),
     });
 
@@ -220,8 +369,8 @@ const App: React.FC = () => {
       setAuctionResponse(response);
       return response;
     } catch (e) {
-      console.log(e)
-      if (e.type === 'ConfigError'){
+      console.log(e);
+      if (e.type === "ConfigError") {
         alert("This chain configuration is not supported");
       }
       setShowLoading(false);
@@ -232,7 +381,7 @@ const App: React.FC = () => {
   const transfer = async () => {
     const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
     const _signerG = gnosisProvider.getSigner();
-    // setShowLoadingTransfer(true);
+    setShowLoadingTransfer(true);
     const nsdk = new NxtpSdk({
       chainConfig: chainProviders,
       signer: _signerG,
@@ -246,8 +395,8 @@ const App: React.FC = () => {
       throw new Error("Please request quote first");
     }
     const prepTransfer = await nsdk.prepareTransfer(auctionResponse, true);
-    if(prepTransfer.transactionId){
-      console.log("Prepared transaction", prepTransfer)
+    if (prepTransfer.transactionId) {
+      console.log("Prepared transaction", prepTransfer);
       setShowLoadingTransfer(false);
     }
   };
@@ -259,22 +408,19 @@ const App: React.FC = () => {
     txData,
   }) => {
     console.log("finishTransfer", txData);
-
-    const provider = new providers.Web3Provider(ethereum);
-    const signer = await provider.getSigner();
-    console.log("finishTransfer");
-
-    const sdk = new NxtpSdk({
+    const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
+    const _signerG = gnosisProvider.getSigner();
+    const nsdk = new NxtpSdk({
       chainConfig: chainProviders,
-      signer: signer,
+      signer: _signerG,
       logger: pino({ level: "info" }),
     });
-
-    if (!sdk) {
+    
+    if (!nsdk) {
       return;
     }
 
-    const finish = await sdk.fulfillTransfer({
+    const finish = await nsdk.fulfillTransfer({
       bidSignature,
       encodedBid,
       encryptedCallData,
@@ -450,35 +596,37 @@ const App: React.FC = () => {
                 className={classes.formContentSubmitRow}
                 style={{ paddingTop: "1vh" }}
               >
-                <Button iconType="chain" size="lg" variant="bordered"
-                 onClick={async () => {
-                  await transfer();
-                }}>
-                  {showLoadingTransfer ? "Approving..." : "Approve"}
-                  <span>{showLoadingTransfer && <Loader size="xs" />}</span>
-                 
+                <Button
+                  iconType="chain"
+                  size="lg"
+                  variant="bordered"
+                  onClick={async () => {
+                    await transfer();
+                  }}
+                >
+                {showLoadingTransfer ? "Starting Transfer..." : "Start"}
+                <span>{showLoadingTransfer && <Loader size="xs" />}</span>
                 </Button>
-                
-                
+
                 <Button
                   iconType="rocket"
                   disabled={latestActiveTx?.status.length === 0}
                   size="lg"
                   variant="bordered"
                   onClick={async () => {
-                    // if (latestActiveTx)
-                      await finishTransfer({
-                        bidSignature: latestActiveTx.bidSignature,
-                        encodedBid: latestActiveTx.encodedBid,
-                        encryptedCallData: latestActiveTx.encryptedCallData,
-                        txData: {
-                          ...latestActiveTx.crosschainTx.invariant,
-                          ...latestActiveTx.crosschainTx.receiving,
-                        },
-                      });
+                    if (latestActiveTx)
+                    await finishTransfer({
+                      bidSignature: latestActiveTx.bidSignature,
+                      encodedBid: latestActiveTx.encodedBid,
+                      encryptedCallData: latestActiveTx.encryptedCallData,
+                      txData: {
+                        ...latestActiveTx.crosschainTx.invariant,
+                        ...latestActiveTx.crosschainTx.receiving,
+                      },
+                    });
                   }}
                 >
-                 Transfer
+                  Transfer
                 </Button>
               </div>
             </form>
