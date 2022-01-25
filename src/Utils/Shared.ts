@@ -62,3 +62,10 @@ Object.entries(chainConfig).forEach(
     };
   }
 );
+
+export const convertToDate = (timestamp: number) => {
+  const date = new Date(timestamp * 1000);
+  const result =
+    date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear();
+  return result;
+};

@@ -122,7 +122,7 @@ const App: React.FC = () => {
 
   const ethereum = (window as any).ethereum;
 
-  const getTokensHandler = async (address,network) => {
+  const getTokensHandler = async (address, network) => {
     const tokenArr: Array<IBalance> = [];
     await fetch(
       `https://safe-transaction.${network}.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`
@@ -149,18 +149,18 @@ const App: React.FC = () => {
         console.log(e);
       });
   };
- 
+
   const connectProvider = async () => {
     try {
       const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
       const _signerG = await gnosisProvider.getSigner();
 
       if (_signerG) {
-      console.log("provider ---" , _signerG.provider["provider"].safe.network);
-        const network = _signerG.provider["provider"].safe?.network?.toLowerCase();
+        console.log("provider ---", _signerG.provider["provider"].safe.network);
+        const network =
+          _signerG.provider["provider"].safe?.network?.toLowerCase();
         const address = await _signerG.getAddress();
-        if(address)
-        await getTokensHandler(address, network);
+        if (address) await getTokensHandler(address, network);
 
         setSigner(_signerG);
         setProvider(gnosisProvider);
@@ -193,11 +193,9 @@ const App: React.FC = () => {
         logger: pino({ level: "info" }),
       });
       console.log("We are in the init after nsdk....");
-     
 
       try {
-        if(nsdk){
-          
+        if (nsdk) {
           const activeTxs = await nsdk.getActiveTransactions();
           // value2.setActiveTransactions(activeTxs);
           // setActiveTransferTableColumns(activeTxs);
@@ -207,7 +205,6 @@ const App: React.FC = () => {
             console.log("setLatestActiveTx: ", activeTxs[activeTxs.length - 1]);
           }
         }
-        
       } catch (e) {
         console.log(e);
       }
@@ -331,7 +328,7 @@ const App: React.FC = () => {
     };
     init();
   }, []);
- 
+
   const getTransferQuote = async (
     sendingChainId: number,
     sendingAssetId: string,
@@ -340,7 +337,6 @@ const App: React.FC = () => {
     amount: string,
     receivingAddress: string
   ): Promise<AuctionResponse | undefined> => {
-
     console.log(
       "Start getting quote",
       sendingChainId,
@@ -348,8 +344,7 @@ const App: React.FC = () => {
       receivingChainId,
       receivingAssetId,
       amount,
-      receivingAddress,
-
+      receivingAddress
     );
     setShowLoading(true);
     const provider = new providers.Web3Provider(ethereum);
@@ -420,14 +415,13 @@ const App: React.FC = () => {
     txData,
   }) => {
     console.log("finishTransfer", txData);
-    
+
     const provider = new providers.Web3Provider(ethereum);
     const signerW = await provider.getSigner();
     const initiator = await signer.getAddress();
     txData.initiator = initiator;
-    console.log('finishTransfer');
+    console.log("finishTransfer");
 
-    
     const nsdk = new NxtpSdk({
       chainConfig: chainProviders,
       signer: signerW,
@@ -641,15 +635,15 @@ const App: React.FC = () => {
                   variant="bordered"
                   onClick={async () => {
                     // if (latestActiveTx)
-                      await finishTransfer({
-                        bidSignature: latestActiveTx.bidSignature,
-                        encodedBid: latestActiveTx.encodedBid,
-                        encryptedCallData: latestActiveTx.encryptedCallData,
-                        txData: {
-                          ...latestActiveTx.crosschainTx.invariant,
-                          ...latestActiveTx.crosschainTx.sending,
-                        },
-                      });
+                    await finishTransfer({
+                      bidSignature: latestActiveTx.bidSignature,
+                      encodedBid: latestActiveTx.encodedBid,
+                      encryptedCallData: latestActiveTx.encryptedCallData,
+                      txData: {
+                        ...latestActiveTx.crosschainTx.invariant,
+                        ...latestActiveTx.crosschainTx.sending,
+                      },
+                    });
                   }}
                 >
                   Transfer
