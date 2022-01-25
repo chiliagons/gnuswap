@@ -2,7 +2,7 @@ export const chainConfig: Record<
   number,
   { provider: string[]; subgraph?: string; transactionManagerAddress?: string }
 > = JSON.parse(
-  '{"3":{"provider":["https://ropsten.infura.io/v3/31a0f6f85580403986edab0be5f7673c"]},"5":{"provider":["https://goerli.infura.io/v3/31a0f6f85580403986edab0be5f7673c"]}}'
+  '{"1":{"provider":["https://mainnet.infura.io/v3/31a0f6f85580403986edab0be5f7673c"]}, "3":{"provider":["https://ropsten.infura.io/v3/31a0f6f85580403986edab0be5f7673c"]},"5":{"provider":["https://goerli.infura.io/v3/31a0f6f85580403986edab0be5f7673c"]},"4":{"provider":["https://rinkeby.infura.io/v3/31a0f6f85580403986edab0be5f7673c"]}}'
 );
 
 export const chainAddresses = [
@@ -16,7 +16,7 @@ export const chainAddresses = [
         chainId: "0x3",
         chainName: "Ethereum Testnet Ropsten",
         rpcUrls: [
-          "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+          "https://ropsten.infura.io/v3/31a0f6f85580403986edab0be5f7673c",
         ],
         nativeCurrency: { name: "Ropsten Ether", symbol: "ROP", decimals: 18 },
         blockExplorerUrls: ["https://ropsten.etherscan.io"],
@@ -46,7 +46,7 @@ export const chainAddresses = [
         chainId: "0x4",
         chainName: "Ethereum Testnet Rinkeby",
         rpcUrls: [
-          "https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+          "https://rinkeby.infura.io/v3/31a0f6f85580403986edab0be5f7673c",
         ],
         nativeCurrency: { name: "Rinkeby Ether", symbol: "RIN", decimals: 18 },
         blockExplorerUrls: ["https://rinkeby.etherscan.io"],
@@ -76,7 +76,7 @@ export const chainAddresses = [
         chainId: "0x5",
         chainName: "Ethereum Testnet Görli",
         rpcUrls: [
-          "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+          "https://goerli.infura.io/v3/31a0f6f85580403986edab0be5f7673c",
         ],
         nativeCurrency: { name: "Görli Ether", symbol: "GOR", decimals: 18 },
         blockExplorerUrls: ["https://goerli.etherscan.io"],

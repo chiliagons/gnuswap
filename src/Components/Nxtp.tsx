@@ -122,10 +122,10 @@ const App: React.FC = () => {
 
   const ethereum = (window as any).ethereum;
 
-  const getTokensHandler = async (address) => {
+  const getTokensHandler = async (address,network) => {
     const tokenArr: Array<IBalance> = [];
     await fetch(
-      `https://safe-transaction.goerli.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`
+      `https://safe-transaction.${network}.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`
     )
       .then((res) => res.json())
       .then((response) => {
@@ -149,14 +149,18 @@ const App: React.FC = () => {
         console.log(e);
       });
   };
-
+ 
   const connectProvider = async () => {
     try {
       const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
       const _signerG = await gnosisProvider.getSigner();
+
       if (_signerG) {
+      console.log("provider ---" , _signerG.provider["provider"].safe.network);
+        const network = _signerG.provider["provider"].safe?.network?.toLowerCase();
         const address = await _signerG.getAddress();
-        await getTokensHandler(address);
+        if(address)
+        await getTokensHandler(address, network);
 
         setSigner(_signerG);
         setProvider(gnosisProvider);
@@ -180,24 +184,30 @@ const App: React.FC = () => {
   useEffect(() => {
     const init = async () => {
       console.log("We are in the init....");
-      const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
-      const _signerG = gnosisProvider.getSigner();
+      // here we should get the active transactions of the user or EOA
+      const provider = new providers.Web3Provider(ethereum);
+      const signerW = await provider.getSigner();
       const nsdk = await NxtpSdk.create({
         chainConfig: chainProviders,
-        signer: _signerG,
+        signer: signerW,
         logger: pino({ level: "info" }),
       });
       console.log("We are in the init after nsdk....");
+     
 
       try {
-        const activeTxs = await nsdk.getActiveTransactions();
-        // value2.setActiveTransactions(activeTxs);
-        // setActiveTransferTableColumns(activeTxs);
-        console.log("activeTxs: ", activeTxs);
-        if (activeTxs[activeTxs.length - 1]) {
-          setLatestActiveTx(activeTxs[activeTxs.length - 1]);
-          console.log("setLatestActiveTx: ", activeTxs[activeTxs.length - 1]);
+        if(nsdk){
+          
+          const activeTxs = await nsdk.getActiveTransactions();
+          // value2.setActiveTransactions(activeTxs);
+          // setActiveTransferTableColumns(activeTxs);
+          console.log("activeTxs   : ", activeTxs);
+          if (activeTxs[activeTxs.length - 1]) {
+            setLatestActiveTx(activeTxs[activeTxs.length - 1]);
+            console.log("setLatestActiveTx: ", activeTxs[activeTxs.length - 1]);
+          }
         }
+        
       } catch (e) {
         console.log(e);
       }
@@ -320,8 +330,8 @@ const App: React.FC = () => {
       // });
     };
     init();
-  }, [showLoadingTransfer]);
-
+  }, []);
+ 
   const getTransferQuote = async (
     sendingChainId: number,
     sendingAssetId: string,
@@ -330,6 +340,7 @@ const App: React.FC = () => {
     amount: string,
     receivingAddress: string
   ): Promise<AuctionResponse | undefined> => {
+
     console.log(
       "Start getting quote",
       sendingChainId,
@@ -337,17 +348,18 @@ const App: React.FC = () => {
       receivingChainId,
       receivingAssetId,
       amount,
-      receivingAddress
+      receivingAddress,
+
     );
     setShowLoading(true);
-    const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
-    const _signerG = gnosisProvider.getSigner();
+    const provider = new providers.Web3Provider(ethereum);
+    const signerW = await provider.getSigner();
     const nsdk = await NxtpSdk.create({
       chainConfig: chainProviders,
-      signer: _signerG,
+      signer: signerW,
       logger: pino({ level: "info" }),
     });
-
+    const initiator = await signer.getAddress();
     if (!nsdk) {
       return;
     }
@@ -362,6 +374,7 @@ const App: React.FC = () => {
         receivingAssetId,
         receivingAddress,
         amount,
+        initiator,
         transactionId,
         expiry: Math.floor(Date.now() / 1000) + 3600 * 24 * 3, // 3 days
       });
@@ -380,12 +393,10 @@ const App: React.FC = () => {
   };
 
   const transfer = async () => {
-    const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
-    const _signerG = gnosisProvider.getSigner();
     setShowLoadingTransfer(true);
     const nsdk = new NxtpSdk({
       chainConfig: chainProviders,
-      signer: _signerG,
+      signer: signer,
       logger: pino({ level: "info" }),
     });
     if (!nsdk) {
@@ -409,11 +420,17 @@ const App: React.FC = () => {
     txData,
   }) => {
     console.log("finishTransfer", txData);
-    const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
-    const _signerG = gnosisProvider.getSigner();
+    
+    const provider = new providers.Web3Provider(ethereum);
+    const signerW = await provider.getSigner();
+    const initiator = await signer.getAddress();
+    txData.initiator = initiator;
+    console.log('finishTransfer');
+
+    
     const nsdk = new NxtpSdk({
       chainConfig: chainProviders,
-      signer: _signerG,
+      signer: signerW,
       logger: pino({ level: "info" }),
     });
 
@@ -619,18 +636,18 @@ const App: React.FC = () => {
 
                 <Button
                   iconType="rocket"
-                  disabled={latestActiveTx?.status.length === 0}
+                  // disabled={latestActiveTx?.status.length === 0}
                   size="lg"
                   variant="bordered"
                   onClick={async () => {
-                    if (latestActiveTx)
+                    // if (latestActiveTx)
                       await finishTransfer({
                         bidSignature: latestActiveTx.bidSignature,
                         encodedBid: latestActiveTx.encodedBid,
                         encryptedCallData: latestActiveTx.encryptedCallData,
                         txData: {
                           ...latestActiveTx.crosschainTx.invariant,
-                          ...latestActiveTx.crosschainTx.receiving,
+                          ...latestActiveTx.crosschainTx.sending,
                         },
                       });
                   }}
