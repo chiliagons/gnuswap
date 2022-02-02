@@ -1,5 +1,5 @@
 /* eslint-disable require-jsdoc */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import "../App.css";
 import useStyles from "./styles";
 import {
@@ -30,7 +30,7 @@ import { Controller, useForm } from "react-hook-form";
 
 import { BigNumber, providers, Signer, utils } from "ethers";
 // @ts-ignore
-import { ActiveTransaction, NxtpSdkEvents, NxtpSdk } from "@connext/nxtp-sdk";
+import { ActiveTransaction, HistoricalTransaction, NxtpSdkEvents, NxtpSdk } from "@connext/nxtp-sdk";
 // @ts-ignore
 import { AuctionResponse, getRandomBytes32 } from "@connext/nxtp-utils";
 import pino from "pino";
@@ -47,7 +47,11 @@ import { chainAddresses, contractAddresses } from "../Constants/constants";
 import { IBalance } from "../Models/Shared.model";
 import { IContractAddress, ICrossChain } from "../Models/Nxtp.model";
 
+import { TableContext } from '../Providers/Txprovider';
+declare let window: any;
+
 const App: React.FC = () => {
+  const {historicalTransactions, activeTransactions} = useContext(TableContext);
   const classes = useStyles();
   const { sdk, safe } = useSafeAppsSDK();
   const gnosisWeb3Provider = new SafeAppProvider(safe, sdk);
@@ -70,6 +74,8 @@ const App: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const { handleSubmit, control } = useForm<ICrossChain>();
 
+  const [historicalTransferTableColumns, setHistoricalTransferTableColumns] = useState<HistoricalTransaction[]>([]);
+
   const contractAddressHandler = ({
     contractGroupId,
     chainId,
@@ -86,6 +92,7 @@ const App: React.FC = () => {
     return chosenContractAddress;
   };
 
+  // called on submission of get Quote
   const onSubmit = async (crossChainData: ICrossChain) => {
     try {
       const sendingChain = await signer.getChainId();
@@ -160,12 +167,14 @@ const App: React.FC = () => {
         const network =
           _signerG.provider["provider"].safe?.network?.toLowerCase();
         const address = await _signerG.getAddress();
-        if (address) await getTokensHandler(address, network);
-
-        setSigner(_signerG);
-        setProvider(gnosisProvider);
+        if (address) {
+          await getTokensHandler(address, network);
+          console.log("address gnosis is ", address)
+          setSigner(_signerG);
+          setProvider(gnosisProvider);
+          return true;
+        }
       }
-      return true;
     } catch (e) {
       return false;
     }
@@ -174,6 +183,7 @@ const App: React.FC = () => {
   useEffect(() => {
     async function testFunc() {
       const flag: boolean = await connectProvider();
+      console.log("Nxtp --> Flag ", flag)
       if (!flag) {
         setErrorFetchedChecker((c) => !c);
       }
@@ -183,35 +193,39 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const init = async () => {
-      console.log("We are in the init....");
-      // here we should get the active transactions of the user or EOA
-      const provider = new providers.Web3Provider(ethereum);
-      const signerW = await provider.getSigner();
-      const nsdk = await NxtpSdk.create({
-        chainConfig: chainProviders,
-        signer: signerW,
-        logger: pino({ level: "info" }),
-      });
-      console.log("We are in the init after nsdk....");
+      console.log("init triggered")
+      if(window?.ethereum?._metamask.isUnlocked()) {
+        
+        const provider = new providers.Web3Provider(ethereum);
+        const signerW = await provider.getSigner();
+        const nsdk = await NxtpSdk.create({
+          chainConfig: chainProviders,
+          signer: signerW,
+          logger: pino({ level: "info" }),
+        });
 
-      try {
-        if (nsdk) {
-          const activeTxs = await nsdk.getActiveTransactions();
-          // value2.setActiveTransactions(activeTxs);
-          // setActiveTransferTableColumns(activeTxs);
-          console.log("activeTxs   : ", activeTxs);
-          if (activeTxs[activeTxs.length - 1]) {
-            setLatestActiveTx(activeTxs[activeTxs.length - 1]);
-            console.log("setLatestActiveTx: ", activeTxs[activeTxs.length - 1]);
+        try {
+          if (nsdk) {
+            // here we should get the active transactions of the user or EOA
+            const activeTxs = await nsdk.getActiveTransactions();
+            const historicalTxs = await nsdk.getHistoricalTransactions();
+            setHistoricalTransferTableColumns(historicalTxs);
+            console.log("historicalTxs: ", historicalTxs);
+            historicalTransactions.setTransactions(historicalTxs);
+
+            // value2.setActiveTransactions(activeTxs);
+            // setActiveTransferTableColumns(activeTxs);
+            activeTransactions.setActiveTransactions(activeTxs)
+            console.log("activeTxs   : ", activeTxs);
+            if (activeTxs[activeTxs.length - 1]) {
+              setLatestActiveTx(activeTxs[activeTxs.length - 1]);
+              console.log("setLatestActiveTx: ", activeTxs[activeTxs.length - 1]);
+            }
           }
+        } catch (e) {
+          console.log(e);
         }
-      } catch (e) {
-        console.log(e);
-      }
-      const historicalTxs = await nsdk.getHistoricalTransactions();
-      // setHistoricalTransferTableColumns(historicalTxs);
-      console.log("historicalTxs: ", historicalTxs);
-      // value.setTransactions(historicalTxs);
+
 
       // nsdk.attach(NxtpSdkEvents.SenderTransactionPrepared, (data) => {
       //   const { amount, expiry, preparedBlockNumber, ...invariant } =
@@ -325,9 +339,12 @@ const App: React.FC = () => {
       // nsdk.attach(NxtpSdkEvents.SenderTransactionPrepareSubmitted, (data) => {
       //   console.log("SenderTransactionPrepareSubmitted:", data);
       // });
-    };
+    
+    }
+    
+  };
     init();
-  }, []);
+  }, [window["ethereum"]]);
 
   const getTransferQuote = async (
     sendingChainId: number,

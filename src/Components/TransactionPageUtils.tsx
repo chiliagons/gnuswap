@@ -15,7 +15,7 @@ export const activeTransactionCreator = (element, index, ethers) => {
         content: (
           <EthHashInfo
             textSize="xl"
-            hash={element.transactionHash.toString()}
+            hash={element.transactionHash?.toString() || "NA"}
             showCopyBtn
             shortenHash={4}
           />
@@ -25,7 +25,7 @@ export const activeTransactionCreator = (element, index, ethers) => {
         content: (
           <EthHashInfo
             textSize="xl"
-            hash={element.crosschainTx.invariant.receivingAddress.toString()}
+            hash={element.crosschainTx?.invariant.receivingAddress.toString()  || "NA"}
             showCopyBtn
             shortenHash={4}
           />
@@ -34,7 +34,7 @@ export const activeTransactionCreator = (element, index, ethers) => {
       {
         content: (
           <Text size="xl">
-            {ethers.utils.formatEther(element.crosschainTx.sending.amount)} TEST
+            {ethers.utils.formatEther(element.crosschainTx?.sending.amount || "0")} TEST
           </Text>
         ),
       },
@@ -45,7 +45,7 @@ export const activeTransactionCreator = (element, index, ethers) => {
             iconColor="primary"
             textSize="xl"
             iconType="allowances"
-            text={element.status}
+            text={element.status || "NA"}
           />
         ),
       },
@@ -66,7 +66,7 @@ export const historicalTransactionCreator = (element, index, ethers) => {
         content: (
           <EthHashInfo
             textSize="xl"
-            hash={element.fulfilledTxHash.toString()}
+            hash={element.fulfilledTxHash?.toString() || "NA"}
             showCopyBtn
             shortenHash={4}
           />
@@ -76,7 +76,7 @@ export const historicalTransactionCreator = (element, index, ethers) => {
         content: (
           <EthHashInfo
             textSize="xl"
-            hash={element.crosschainTx.invariant.receivingAddress.toString()}
+            hash={element.crosschainTx?.invariant.receivingAddress.toString() || "NA"}
             showCopyBtn
             shortenHash={4}
           />
@@ -85,14 +85,14 @@ export const historicalTransactionCreator = (element, index, ethers) => {
       {
         content: (
           <Text size="xl">
-            {ethers.utils.formatEther(element.crosschainTx.sending.amount)} TEST
+            {ethers.utils.formatEther(element.crosschainTx?.sending?.amount) || 0} TEST
           </Text>
         ),
       },
       {
         content: (
           <Text size="xl">
-            {ethers.utils.formatEther(element.crosschainTx.receiving.amount)}{" "}
+            {ethers.utils.formatEther(element.crosschainTx?.receiving?.amount || "0")}{" "}
             TEST
           </Text>
         ),
@@ -104,7 +104,7 @@ export const historicalTransactionCreator = (element, index, ethers) => {
             iconColor="primary"
             textSize="xl"
             iconType={element.status === "FULFILLED" ? "check" : "alert"}
-            text={element.status}
+            text={element.status  || "NA"}
           />
         ),
       },
