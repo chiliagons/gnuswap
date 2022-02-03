@@ -20,7 +20,6 @@ import {
 
 import ErrorBoundary from "../Components/ErrorBoundary";
 
-
 const TransactionPage: React.FC = () => {
   // const [Loading, setLoading] = useState(false);
   const { historicalTransactions, activeTransactions } =
@@ -40,12 +39,14 @@ const TransactionPage: React.FC = () => {
     historicalTransactions.transactions.forEach(
       (element: HistoricalTransaction, index: any) => {
         // if(element.status != "CANCELLED") {
-          historicalRows.push(historicalTransactionCreator(element, index, ethers));
+        historicalRows.push(
+          historicalTransactionCreator(element, index, ethers)
+        );
         // }
         // else {
         //   console.log("cancelled -- ", element)
         // }
-        console.log(historicalRows)
+        console.log(historicalRows);
       }
     );
 
@@ -58,38 +59,36 @@ const TransactionPage: React.FC = () => {
 
   return (
     <>
-    <ErrorBoundary>
-
-      {
-        <div>
-          <div style={{ paddingTop: "20px" }}>
-            <Title size="md">
-              Active Transactions{" "}
-              {/* {!!activeTransactions?.activeTransactions ? (
+      <ErrorBoundary>
+        {
+          <div>
+            <div style={{ paddingTop: "20px" }}>
+              <Title size="md">
+                Active Transactions{" "}
+                {/* {!!activeTransactions?.activeTransactions ? (
                 <Loader size="sm"></Loader>
               ) : (
                 noOfActiveTransactions
               )} */}
-            </Title>
-            <Divider />
-            <Table headers={activeHeaderCells} rows={activeRows} />
-          </div>
-          <div style={{ paddingTop: "20px" }}>
-            <Title size="md">
-              Historical Transactions{" "}
-               {/* {!!historicalTransactions?.transactions ? (
+              </Title>
+              <Divider />
+              <Table headers={activeHeaderCells} rows={activeRows} />
+            </div>
+            <div style={{ paddingTop: "20px" }}>
+              <Title size="md">
+                Historical Transactions{" "}
+                {/* {!!historicalTransactions?.transactions ? (
                  <Loader size="sm"></Loader>
                ) : (
                  noOfHistoricalTransactions
                )} */}
-            </Title>
-            <Divider />
-            <Table headers={historicalHeaderCells} rows={historicalRows} />
+              </Title>
+              <Divider />
+              <Table headers={historicalHeaderCells} rows={historicalRows} />
+            </div>
           </div>
-        </div>
-      }
-    </ErrorBoundary>
-
+        }
+      </ErrorBoundary>
     </>
   );
 };

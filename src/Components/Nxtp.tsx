@@ -28,9 +28,14 @@ import HelpIcon from "@material-ui/icons/Help";
 
 import { Controller, useForm } from "react-hook-form";
 
-import { BigNumber, providers, Signer, utils } from "ethers";
+import { BigNumber, FixedNumber, providers, Signer, utils } from "ethers";
 // @ts-ignore
-import { ActiveTransaction, HistoricalTransaction, NxtpSdkEvents, NxtpSdk } from "@connext/nxtp-sdk";
+import {
+  ActiveTransaction,
+  HistoricalTransaction,
+  NxtpSdkEvents,
+  NxtpSdk,
+} from "@connext/nxtp-sdk";
 // @ts-ignore
 import { AuctionResponse, getRandomBytes32 } from "@connext/nxtp-utils";
 import pino from "pino";
@@ -47,17 +52,21 @@ import { chainAddresses, contractAddresses } from "../Constants/constants";
 import { IBalance } from "../Models/Shared.model";
 import { IContractAddress, ICrossChain } from "../Models/Nxtp.model";
 
-import { TableContext } from '../Providers/Txprovider';
+import { TableContext } from "../Providers/Txprovider";
+
 declare let window: any;
+const ethereum = (window as any).ethereum;
 
 const App: React.FC = () => {
-  const {historicalTransactions, activeTransactions} = useContext(TableContext);
+  const { historicalTransactions, activeTransactions } =
+    useContext(TableContext);
   const classes = useStyles();
   const { sdk, safe } = useSafeAppsSDK();
   const gnosisWeb3Provider = new SafeAppProvider(safe, sdk);
 
   const [web3Provider, setProvider] = useState<providers.Web3Provider>();
-  const [signer, setSigner] = useState<Signer>();
+  const [signerGnosis, setSignerGnosis] = useState<Signer>();
+  const [signerWallet, setSignerWallet] = useState<Signer>();
   const [showLoading, setShowLoading] = useState(false);
   const [showLoadingTransfer, setShowLoadingTransfer] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -69,13 +78,34 @@ const App: React.FC = () => {
 
   const [errorFetchedChecker, setErrorFetchedChecker] = useState(false);
   const [userBalance, setUserBalance] = useState<BigNumber>();
+  const [transferAmount, setTransferAmount] = useState<string>();
   const [latestActiveTx, setLatestActiveTx] = useState<ActiveTransaction>();
   const [showError, setShowError] = useState<Boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const { handleSubmit, control } = useForm<ICrossChain>();
 
-  const [historicalTransferTableColumns, setHistoricalTransferTableColumns] = useState<HistoricalTransaction[]>([]);
-
+  const [historicalTransferTableColumns, setHistoricalTransferTableColumns] =
+    useState<HistoricalTransaction[]>([]);
+  
+  const connectProvider = async () => {
+    try {
+      const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
+      const _signerG = await gnosisProvider.getSigner();
+      if (_signerG) {
+        const network =
+          _signerG.provider["provider"].safe?.network?.toLowerCase();
+        const address = await _signerG.getAddress();
+        if (address) {
+          await getTokensHandler(address, network);
+          setSignerGnosis(_signerG);
+          setProvider(gnosisProvider);
+          return true;
+        }
+      }
+    } catch (e) {
+      return false;
+    }
+  };
   const contractAddressHandler = ({
     contractGroupId,
     chainId,
@@ -95,9 +125,8 @@ const App: React.FC = () => {
   // called on submission of get Quote
   const onSubmit = async (crossChainData: ICrossChain) => {
     try {
-      const sendingChain = await signer.getChainId();
-      console.log("sendingChain - ", sendingChain);
-
+      const sendingChain = await signerGnosis.getChainId();
+      
       const sendingContractAddress = contractAddressHandler({
         contractGroupId: JSON.parse(crossChainData.token).token.symbol,
         chainId: sendingChain,
@@ -106,12 +135,7 @@ const App: React.FC = () => {
         contractGroupId: JSON.parse(crossChainData.token).token.symbol,
         chainId: crossChainData.chain,
       });
-      console.log(
-        "Contract Address",
-        receivingContractAddress.contract_address
-      );
-      console.log(JSON.stringify(crossChainData));
-
+      
       await getTransferQuote(
         sendingChain,
         sendingContractAddress.contract_address,
@@ -123,12 +147,10 @@ const App: React.FC = () => {
     } catch (e) {
       setErrorMessage(e.message);
       setShowError(true);
-      console.log(e.message);
     }
   };
 
-  const ethereum = (window as any).ethereum;
-
+  // utilizing a network call to get the safe token details rather than from SDK
   const getTokensHandler = async (address, network) => {
     const tokenArr: Array<IBalance> = [];
     await fetch(
@@ -153,37 +175,24 @@ const App: React.FC = () => {
       .catch((e) => {
         setErrorMessage(e.message);
         setShowError(true);
-        console.log(e);
       });
   };
 
-  const connectProvider = async () => {
-    try {
-      const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
-      const _signerG = await gnosisProvider.getSigner();
-
-      if (_signerG) {
-        console.log("provider ---", _signerG.provider["provider"].safe.network);
-        const network =
-          _signerG.provider["provider"].safe?.network?.toLowerCase();
-        const address = await _signerG.getAddress();
-        if (address) {
-          await getTokensHandler(address, network);
-          console.log("address gnosis is ", address)
-          setSigner(_signerG);
-          setProvider(gnosisProvider);
-          return true;
-        }
+  const tokenSelected = ((element)=> {
+    try{
+      if(element.target?.value){
+        if(JSON.parse(element.target.value).balance)
+          setUserBalance( BigNumber.from(JSON.parse(element.target.value).balance));
       }
-    } catch (e) {
-      return false;
+    } catch(E){
+      console.log(E)
     }
-  };
+  })
 
+  // check if gnosis provider is connected else keep trying to connect
   useEffect(() => {
     async function testFunc() {
       const flag: boolean = await connectProvider();
-      console.log("Nxtp --> Flag ", flag)
       if (!flag) {
         setErrorFetchedChecker((c) => !c);
       }
@@ -193,11 +202,11 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const init = async () => {
-      console.log("init triggered")
-      if(window?.ethereum?._metamask.isUnlocked()) {
-        
+      console.log("init triggered");
+      if (window?.ethereum?._metamask.isUnlocked()) {
         const provider = new providers.Web3Provider(ethereum);
         const signerW = await provider.getSigner();
+        setSignerWallet(signerW);
         const nsdk = await NxtpSdk.create({
           chainConfig: chainProviders,
           signer: signerW,
@@ -215,134 +224,21 @@ const App: React.FC = () => {
 
             // value2.setActiveTransactions(activeTxs);
             // setActiveTransferTableColumns(activeTxs);
-            activeTransactions.setActiveTransactions(activeTxs)
+            activeTransactions.setActiveTransactions(activeTxs);
             console.log("activeTxs   : ", activeTxs);
             if (activeTxs[activeTxs.length - 1]) {
               setLatestActiveTx(activeTxs[activeTxs.length - 1]);
-              console.log("setLatestActiveTx: ", activeTxs[activeTxs.length - 1]);
+              console.log(
+                "setLatestActiveTx: ",
+                activeTxs[activeTxs.length - 1]
+              );
             }
           }
         } catch (e) {
           console.log(e);
         }
-
-
-      // nsdk.attach(NxtpSdkEvents.SenderTransactionPrepared, (data) => {
-      //   const { amount, expiry, preparedBlockNumber, ...invariant } =
-      //     data.txData;
-      //   const table = [...activeTransferTableColumns];
-      //   table.push({
-      //     crosschainTx: {
-      //       invariant,
-      //       sending: { amount, expiry, preparedBlockNumber },
-      //     },
-      //     bidSignature: data.bidSignature,
-      //     encodedBid: data.encodedBid,
-      //     encryptedCallData: data.encryptedCallData,
-      //     status: NxtpSdkEvents.SenderTransactionPrepared,
-      //     preparedTimestamp: Math.floor(Date.now() / 1000),
-      //   });
-      //   setActiveTransferTableColumns(table);
-      // });
-
-      // nsdk.attach(NxtpSdkEvents.SenderTransactionFulfilled, (data) => {
-      //   console.log("SenderTransactionFulfilled:", data);
-      //   setActiveTransferTableColumns(
-      //     activeTransferTableColumns.filter(
-      //       (t) =>
-      //         t.crosschainTx.invariant.transactionId !==
-      //         data.txData.transactionId
-      //     )
-      //   );
-      // });
-
-      // nsdk.attach(NxtpSdkEvents.SenderTransactionCancelled, (data) => {
-      //   console.log("SenderTransactionCancelled:", data);
-      //   setActiveTransferTableColumns(
-      //     activeTransferTableColumns.filter(
-      //       (t) =>
-      //         t.crosschainTx.invariant.transactionId !==
-      //         data.txData.transactionId
-      //     )
-      //   );
-      // });
-
-      // nsdk.attach(NxtpSdkEvents.ReceiverTransactionPrepared, (data) => {
-      //   se[(false);
-      //   const { amount, expiry, preparedBlockNumber, ...invariant } =
-      //     data.txData;
-      //   const index = activeTransferTableColumns.findIndex(
-      //     (col) =>
-      //       col.crosschainTx.invariant.transactionId === invariant.transactionId
-      //   );
-      //   const table = [...activeTransferTableColumns];
-      //   if (index === -1) {
-      //     // TODO: is there a better way to
-      //     // get the info here?
-      //     table.push({
-      //       preparedTimestamp: Math.floor(Date.now() / 1000),
-      //       crosschainTx: {
-      //         invariant,
-      //         sending: {} as any, // Find to do this, since it defaults to receiver side info
-      //         receiving: { amount, expiry, preparedBlockNumber },
-      //       },
-      //       bidSignature: data.bidSignature,
-      //       encodedBid: data.encodedBid,
-      //       encryptedCallData: data.encryptedCallData,
-      //       status: NxtpSdkEvents.ReceiverTransactionPrepared,
-      //     });
-      //     setActiveTransferTableColumns(table);
-      //   } else {
-      //     const item = { ...table[index] };
-      //     table[index] = {
-      //       ...item,
-      //       status: NxtpSdkEvents.ReceiverTransactionPrepared,
-      //       crosschainTx: {
-      //         ...item.crosschainTx,
-      //         receiving: { amount, expiry, preparedBlockNumber },
-      //       },
-      //     };
-      //     setActiveTransferTableColumns(table);
-      //   }
-      // });
-
-      // nsdk.attach(NxtpSdkEvents.ReceiverTransactionFulfilled, async (data) => {
-      //   console.log("ReceiverTransactionFulfilled:", data);
-      //   setActiveTransferTableColumns(
-      //     activeTransferTableColumns.filter(
-      //       (t) =>
-      //         t.crosschainTx.invariant.transactionId !==
-      //         data.txData.transactionId
-      //     )
-      //   );
-
-      //   const historicalTxs = await nsdk.getHistoricalTransactions();
-      //   setHistoricalTransferTableColumns(historicalTxs);
-      //   console.log("historicalTxs: ", historicalTxs);
-      // });
-
-      // nsdk.attach(NxtpSdkEvents.ReceiverTransactionCancelled, (data) => {
-      //   console.log("ReceiverTransactionCancelled:", data);
-      //   setActiveTransferTableColumns(
-      //     activeTransferTableColumns.filter(
-      //       (t) =>
-      //         t.crosschainTx.invariant.transactionId !==
-      //         data.txData.transactionId
-      //     )
-      //   );
-      // });
-
-      // nsdk.attach(NxtpSdkEvents.SenderTokenApprovalMined, (data) => {
-      //   console.log("SenderTokenApprovalMined:", data);
-      // });
-
-      // nsdk.attach(NxtpSdkEvents.SenderTransactionPrepareSubmitted, (data) => {
-      //   console.log("SenderTransactionPrepareSubmitted:", data);
-      // });
-    
-    }
-    
-  };
+      }
+    };
     init();
   }, [window["ethereum"]]);
 
@@ -364,14 +260,14 @@ const App: React.FC = () => {
       receivingAddress
     );
     setShowLoading(true);
-    const provider = new providers.Web3Provider(ethereum);
-    const signerW = await provider.getSigner();
+    // const provider = new providers.Web3Provider(ethereum);
+    // const signerW = await provider.getSigner();
     const nsdk = await NxtpSdk.create({
       chainConfig: chainProviders,
-      signer: signerW,
+      signer: signerWallet,
       logger: pino({ level: "info" }),
     });
-    const initiator = await signer.getAddress();
+    const initiator = await signerWallet.getAddress();
     if (!nsdk) {
       return;
     }
@@ -408,7 +304,7 @@ const App: React.FC = () => {
     setShowLoadingTransfer(true);
     const nsdk = new NxtpSdk({
       chainConfig: chainProviders,
-      signer: signer,
+      signer: signerGnosis,
       logger: pino({ level: "info" }),
     });
     if (!nsdk) {
@@ -431,13 +327,11 @@ const App: React.FC = () => {
     encryptedCallData,
     txData,
   }) => {
-    console.log("finishTransfer", txData);
 
     const provider = new providers.Web3Provider(ethereum);
     const signerW = await provider.getSigner();
-    const initiator = await signer.getAddress();
+    const initiator = await signerWallet.getAddress();
     txData.initiator = initiator;
-    console.log("finishTransfer");
 
     const nsdk = new NxtpSdk({
       chainConfig: chainProviders,
@@ -455,7 +349,6 @@ const App: React.FC = () => {
       encryptedCallData,
       txData,
     });
-    console.log("finish: ", finish);
     setShowConfirmation(true);
     console.log(showConfirmation);
     setShowConfirmation(false);
@@ -534,8 +427,9 @@ const App: React.FC = () => {
                     render={({ field: { onChange, value } }) => (
                       <Select
                         variant="outlined"
-                        onChange={onChange}
                         value={value ? value : ""}
+                        onChange={(value) => {onChange(value); tokenSelected(value);}
+                    }
                       >
                         {generateSelectTokenOptions()}
                       </Select>
@@ -556,7 +450,7 @@ const App: React.FC = () => {
                           label="transferAmount"
                           name="transferAmount"
                           placeholder="Transfer Amount"
-                          value={value}
+                          value={transferAmount}
                           onChange={onChange}
                           hiddenLabel={true}
                         />
@@ -576,8 +470,7 @@ const App: React.FC = () => {
                   </h2>
                   <Button
                     onClick={
-                      () => {}
-                      // setTransferAmount(utils.formatEther(userBalance ?? 0))
+                      () => {setTransferAmount(utils.formatEther(userBalance ?? 0))}
                     }
                     size="md"
                   >
@@ -685,7 +578,7 @@ const App: React.FC = () => {
               <List component="nav" aria-label="secondary mailbox folders">
                 <ListItem>
                   <Typography className={classes.text}>
-                    1. Choose the receiving network
+                    1. Choose the receiving network/chain
                   </Typography>
                 </ListItem>
                 <ListItem>
@@ -705,18 +598,17 @@ const App: React.FC = () => {
                 </ListItem>
                 <ListItem>
                   <Typography className={classes.text}>
-                    4. Get a quotation!
+                    4. Get a quotation from different routers!
                   </Typography>
                 </ListItem>
                 <ListItem>
                   <Typography className={classes.text}>
-                    5. Once quote is received request for Starting a Swap and
-                    then Finish it!!
+                    5. Once quote is received request, Start the swap! Check Transactions for Acive Transfers
                   </Typography>
                 </ListItem>
                 <ListItem>
                   <Typography className={classes.text}>
-                    6. Confirm and wait for the transfer to take place
+                    6. Once the transaction has been prepared Finish the transfer
                   </Typography>
                 </ListItem>
                 <ListItem>
@@ -725,7 +617,7 @@ const App: React.FC = () => {
                     <a
                       target="blank"
                       className={classes.a}
-                      href="https://support.connext.network/hc/en-us"
+                      href="https://github.com/chiliagons/gnuswap/issues"
                     >
                       here
                     </a>
