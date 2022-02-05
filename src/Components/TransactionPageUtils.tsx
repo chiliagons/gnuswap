@@ -4,26 +4,23 @@ import { convertToDate } from "../Utils/Shared";
 import { contractAddresses } from "../Constants/constants";
 
 const cachedMapping = {}; // further optimize by storing this cache in local storage
-const getSymbols = (contractAddress:string) => {
-  if(contractAddress){
-    if(cachedMapping[contractAddress])
-    {
-      return cachedMapping[contractAddress]
-    }
-    else{
+const getSymbols = (contractAddress: string) => {
+  if (contractAddress) {
+    if (cachedMapping[contractAddress]) {
+      return cachedMapping[contractAddress];
+    } else {
       contractAddresses.forEach((token) => {
-        if(JSON.stringify(token.contracts).indexOf(contractAddress) > -1 ) {
+        if (JSON.stringify(token.contracts).indexOf(contractAddress) > -1) {
           cachedMapping[contractAddress] = token.symbol;
-          return token.symbol
-        }
-        else{
-          // TODO: here check if its the native token of the network 
+          return token.symbol;
+        } else {
+          // TODO: here check if its the native token of the network
           return "ETH";
         }
-      })
+      });
     }
   }
-}
+};
 
 export const activeTransactionCreator = (element, index, ethers) => {
   return {

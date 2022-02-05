@@ -86,7 +86,7 @@ const App: React.FC = () => {
 
   const [historicalTransferTableColumns, setHistoricalTransferTableColumns] =
     useState<HistoricalTransaction[]>([]);
-  
+
   const connectProvider = async () => {
     try {
       const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
@@ -126,7 +126,7 @@ const App: React.FC = () => {
   const onSubmit = async (crossChainData: ICrossChain) => {
     try {
       const sendingChain = await signerGnosis.getChainId();
-      
+
       const sendingContractAddress = contractAddressHandler({
         contractGroupId: JSON.parse(crossChainData.token).token.symbol,
         chainId: sendingChain,
@@ -135,7 +135,7 @@ const App: React.FC = () => {
         contractGroupId: JSON.parse(crossChainData.token).token.symbol,
         chainId: crossChainData.chain,
       });
-      
+
       await getTransferQuote(
         sendingChain,
         sendingContractAddress.contract_address,
@@ -178,16 +178,18 @@ const App: React.FC = () => {
       });
   };
 
-  const tokenSelected = ((element)=> {
-    try{
-      if(element.target?.value){
-        if(JSON.parse(element.target.value).balance)
-          setUserBalance( BigNumber.from(JSON.parse(element.target.value).balance));
+  const tokenSelected = (element) => {
+    try {
+      if (element.target?.value) {
+        if (JSON.parse(element.target.value).balance)
+          setUserBalance(
+            BigNumber.from(JSON.parse(element.target.value).balance)
+          );
       }
-    } catch(E){
-      console.log(E)
+    } catch (E) {
+      console.log(E);
     }
-  })
+  };
 
   // check if gnosis provider is connected else keep trying to connect
   useEffect(() => {
@@ -206,6 +208,8 @@ const App: React.FC = () => {
       if (window?.ethereum?._metamask.isUnlocked()) {
         const provider = new providers.Web3Provider(ethereum);
         const signerW = await provider.getSigner();
+        const initiator = await signerW.getAddress();
+
         setSignerWallet(signerW);
         const nsdk = await NxtpSdk.create({
           chainConfig: chainProviders,
@@ -214,8 +218,10 @@ const App: React.FC = () => {
         });
 
         try {
-          if (nsdk) {
+          if (nsdk && initiator) {
             // here we should get the active transactions of the user or EOA
+            debugger
+
             const activeTxs = await nsdk.getActiveTransactions();
             const historicalTxs = await nsdk.getHistoricalTransactions();
             setHistoricalTransferTableColumns(historicalTxs);
@@ -327,7 +333,6 @@ const App: React.FC = () => {
     encryptedCallData,
     txData,
   }) => {
-
     const provider = new providers.Web3Provider(ethereum);
     const signerW = await provider.getSigner();
     const initiator = await signerWallet.getAddress();
@@ -428,8 +433,10 @@ const App: React.FC = () => {
                       <Select
                         variant="outlined"
                         value={value ? value : ""}
-                        onChange={(value) => {onChange(value); tokenSelected(value);}
-                    }
+                        onChange={(value) => {
+                          onChange(value);
+                          tokenSelected(value);
+                        }}
                       >
                         {generateSelectTokenOptions()}
                       </Select>
@@ -469,9 +476,9 @@ const App: React.FC = () => {
                     Balance:
                   </h2>
                   <Button
-                    onClick={
-                      () => {setTransferAmount(utils.formatEther(userBalance ?? 0))}
-                    }
+                    onClick={() => {
+                      setTransferAmount(utils.formatEther(userBalance ?? 0));
+                    }}
                     size="md"
                   >
                     {utils.formatEther(userBalance ?? 0)}
@@ -603,12 +610,14 @@ const App: React.FC = () => {
                 </ListItem>
                 <ListItem>
                   <Typography className={classes.text}>
-                    5. Once quote is received request, Start the swap! Check Transactions for Acive Transfers
+                    5. Once quote is received request, Start the swap! Check
+                    Transactions for Acive Transfers
                   </Typography>
                 </ListItem>
                 <ListItem>
                   <Typography className={classes.text}>
-                    6. Once the transaction has been prepared Finish the transfer
+                    6. Once the transaction has been prepared Finish the
+                    transfer
                   </Typography>
                 </ListItem>
                 <ListItem>
