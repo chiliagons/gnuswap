@@ -220,8 +220,6 @@ const App: React.FC = () => {
         try {
           if (nsdk && initiator) {
             // here we should get the active transactions of the user or EOA
-            debugger
-
             const activeTxs = await nsdk.getActiveTransactions();
             const historicalTxs = await nsdk.getHistoricalTransactions();
             setHistoricalTransferTableColumns(historicalTxs);
