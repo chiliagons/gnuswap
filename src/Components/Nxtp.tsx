@@ -25,10 +25,8 @@ import {
 } from "@material-ui/core";
 
 import HelpIcon from "@material-ui/icons/Help";
-
 import { Controller, useForm } from "react-hook-form";
-
-import { BigNumber, FixedNumber, providers, Signer, utils } from "ethers";
+import { BigNumber, ethers, providers, Signer, utils } from "ethers";
 // @ts-ignore
 import {
   ActiveTransaction,
@@ -41,17 +39,13 @@ import { AuctionResponse, getRandomBytes32 } from "@connext/nxtp-utils";
 import pino from "pino";
 import { useSafeAppsSDK } from "@gnosis.pm/safe-apps-react-sdk";
 import { SafeAppProvider } from "@gnosis.pm/safe-apps-provider";
-
 import { chainProviders } from "../Utils/Shared";
+import { connectWallet, getCurrentWalletConnected } from "../Utils/Wallet";
 import { Modal } from "./Modal";
-
 import ErrorBoundary from "./ErrorBoundary";
-
 import { chainAddresses, contractAddresses } from "../Constants/constants";
-
 import { IBalance } from "../Models/Shared.model";
 import { IContractAddress, ICrossChain } from "../Models/Nxtp.model";
-
 import { TableContext } from "../Providers/Txprovider";
 
 declare let window: any;
@@ -62,8 +56,9 @@ const App: React.FC = () => {
     useContext(TableContext);
   const classes = useStyles();
   const { sdk, safe } = useSafeAppsSDK();
+  const [walletAddress, setWallet] = useState("");
+  const [status, setStatus] = useState("");
   const gnosisWeb3Provider = new SafeAppProvider(safe, sdk);
-
   const [web3Provider, setProvider] = useState<providers.Web3Provider>();
   const [signerGnosis, setSignerGnosis] = useState<Signer>();
   const [signerWallet, setSignerWallet] = useState<Signer>();
@@ -205,20 +200,22 @@ const App: React.FC = () => {
   useEffect(() => {
     const init = async () => {
       console.log("init triggered");
-      if (window?.ethereum?._metamask.isUnlocked()) {
-        const provider = new providers.Web3Provider(ethereum);
-        const signerW = await provider.getSigner();
-        const initiator = await signerW.getAddress();
-
-        setSignerWallet(signerW);
-        const nsdk = await NxtpSdk.create({
-          chainConfig: chainProviders,
-          signer: signerW,
-          logger: pino({ level: "info" }),
-        });
-
+      await connectWallet(); // on load connect to the wallet if not already connected
+      const { address, status, providers } = await getCurrentWalletConnected();
+      setStatus(status);
+      setWallet(address);
+      if (status === "Connected") {
         try {
-          if (nsdk && initiator) {
+          const signerW = await providers.getSigner();
+
+          setSignerWallet(signerW);
+          const nsdk = await NxtpSdk.create({
+            chainConfig: chainProviders,
+            signer: signerW,
+            logger: pino({ level: "info" }),
+          });
+
+          if (nsdk && address) {
             // here we should get the active transactions of the user or EOA
             const activeTxs = await nsdk.getActiveTransactions();
             const historicalTxs = await nsdk.getHistoricalTransactions();
@@ -242,10 +239,27 @@ const App: React.FC = () => {
           console.log(e);
         }
       }
+      addWalletListener();
     };
     init();
-  }, [window["ethereum"]]);
+  }, []);
 
+  function addWalletListener() {
+    if (window.ethereum) {
+      window.ethereum.on("accountsChanged", async (accounts: any) => {
+        if (accounts.length > 0) {
+          const address = ethers.utils.getAddress(accounts[0]);
+          setWallet(address);
+          setStatus("Ready to mint!");
+        } else {
+          setWallet("");
+          setStatus("🦊 Connect to Metamask.");
+        }
+      });
+    } else {
+      setStatus("Please install Metamask.");
+    }
+  }
   const getTransferQuote = async (
     sendingChainId: number,
     sendingAssetId: string,
