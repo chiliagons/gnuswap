@@ -571,7 +571,7 @@ const App: React.FC = () => {
                         ...latestActiveTx.crosschainTx.invariant,
                         ...latestActiveTx.crosschainTx.sending,
                         amountReceived:
-                          latestActiveTx.crosschainTx.receiving.amount,
+                          latestActiveTx.crosschainTx.sending.amount,
                       },
                     });
                   }}
