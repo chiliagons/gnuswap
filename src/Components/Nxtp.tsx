@@ -228,10 +228,7 @@ const App: React.FC = () => {
             console.log("activeTxs   : ", activeTxs);
             if (activeTxs[activeTxs.length - 1]) {
               setLatestActiveTx(activeTxs[0]);
-              console.log(
-                "setLatestActiveTx: ",
-                activeTxs[0]
-              );
+              console.log("setLatestActiveTx: ", activeTxs[0]);
             }
           }
         } catch (e) {
@@ -289,7 +286,7 @@ const App: React.FC = () => {
       return;
     }
 
-    console.log("Initiating request as ",initiator )
+    console.log("Initiating request as ", initiator);
 
     // Create txid
     const transactionId = getRandomBytes32();
@@ -359,18 +356,15 @@ const App: React.FC = () => {
     if (!nsdk) {
       return;
     }
-    try{
-
-    const finish = await nsdk.fulfillTransfer({
-      bidSignature,
-      encodedBid,
-      encryptedCallData,
-      txData,
-    });
-    
-      }
-    catch(err) {
-      console.log("Unable to fulfillTransfer", err)
+    try {
+      const finish = await nsdk.fulfillTransfer({
+        bidSignature,
+        encodedBid,
+        encryptedCallData,
+        txData,
+      });
+    } catch (err) {
+      console.log("Unable to fulfillTransfer", err);
     }
     // setShowConfirmation(true);
     // console.log(showConfirmation);
@@ -542,8 +536,7 @@ const App: React.FC = () => {
                   />
                 </span>
                 <Button size="lg" type="submit" variant="bordered">
-                  Get Quote
-                  {showLoading && <Loader size="xs" />}
+                  {showLoading ? <Loader size="xs" /> : <span>Get Quote </span>}
                 </Button>
               </div>
               <Divider />
@@ -577,7 +570,8 @@ const App: React.FC = () => {
                       txData: {
                         ...latestActiveTx.crosschainTx.invariant,
                         ...latestActiveTx.crosschainTx.sending,
-                        amountReceived: latestActiveTx.crosschainTx.receiving.amount
+                        amountReceived:
+                          latestActiveTx.crosschainTx.receiving.amount,
                       },
                     });
                   }}
