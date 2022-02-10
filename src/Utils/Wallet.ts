@@ -1,6 +1,5 @@
 import { ethers, providers } from "ethers";
 
-
 declare let window: any;
 const ethereum = (window as any).ethereum;
 
@@ -39,7 +38,7 @@ export const getCurrentWalletConnected = async () => {
         return {
           address: ethers.utils.getAddress(addressArray[0]),
           status: "Connected",
-          providers: new providers.Web3Provider(ethereum)
+          providers: new providers.Web3Provider(ethereum),
         };
       } else {
         return {

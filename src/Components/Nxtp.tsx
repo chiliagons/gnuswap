@@ -199,7 +199,6 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const init = async () => {
-      console.log("init triggered");
       await connectWallet(); // on load connect to the wallet if not already connected
       const { address, status, providers } = await getCurrentWalletConnected();
       setStatus(status);
@@ -228,10 +227,10 @@ const App: React.FC = () => {
             activeTransactions.setActiveTransactions(activeTxs);
             console.log("activeTxs   : ", activeTxs);
             if (activeTxs[activeTxs.length - 1]) {
-              setLatestActiveTx(activeTxs[activeTxs.length - 1]);
+              setLatestActiveTx(activeTxs[0]);
               console.log(
                 "setLatestActiveTx: ",
-                activeTxs[activeTxs.length - 1]
+                activeTxs[0]
               );
             }
           }
@@ -285,10 +284,12 @@ const App: React.FC = () => {
       signer: signerWallet,
       logger: pino({ level: "info" }),
     });
-    const initiator = await signerWallet.getAddress();
+    const initiator = await signerGnosis.getAddress();
     if (!nsdk) {
       return;
     }
+
+    console.log("Initiating request as ",initiator )
 
     // Create txid
     const transactionId = getRandomBytes32();
@@ -347,8 +348,7 @@ const App: React.FC = () => {
   }) => {
     const provider = new providers.Web3Provider(ethereum);
     const signerW = await provider.getSigner();
-    const initiator = await signerWallet.getAddress();
-    txData.initiator = initiator;
+    // const initiator = await signerGnosis.getAddress();
 
     const nsdk = new NxtpSdk({
       chainConfig: chainProviders,
@@ -359,6 +359,7 @@ const App: React.FC = () => {
     if (!nsdk) {
       return;
     }
+    try{
 
     const finish = await nsdk.fulfillTransfer({
       bidSignature,
@@ -366,9 +367,14 @@ const App: React.FC = () => {
       encryptedCallData,
       txData,
     });
-    setShowConfirmation(true);
-    console.log(showConfirmation);
-    setShowConfirmation(false);
+    
+      }
+    catch(err) {
+      console.log("Unable to fulfillTransfer", err)
+    }
+    // setShowConfirmation(true);
+    // console.log(showConfirmation);
+    // setShowConfirmation(false);
   };
 
   const selectMenuChainAddresses = () => {
@@ -571,6 +577,7 @@ const App: React.FC = () => {
                       txData: {
                         ...latestActiveTx.crosschainTx.invariant,
                         ...latestActiveTx.crosschainTx.sending,
+                        amountReceived: latestActiveTx.crosschainTx.receiving.amount
                       },
                     });
                   }}
