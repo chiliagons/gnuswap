@@ -9,7 +9,7 @@ interface Props {
   styling: string;
 }
 
-export const Modal: React.FC<Props> = ({
+export const AlertModal: React.FC<Props> = ({
   setTrigger,
   title,
   message,

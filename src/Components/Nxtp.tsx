@@ -7,24 +7,17 @@ import {
   Card,
   Divider,
   Loader,
-  GenericModal,
   TextFieldInput,
   AddressInput,
 } from "@gnosis.pm/safe-react-components";
 import {
   MenuItem,
   Select,
-  Grid,
   Container,
-  Typography,
-  List,
-  ListItem,
-  ListItemIcon,
   FormControl,
   InputLabel,
 } from "@material-ui/core";
 
-import HelpIcon from "@material-ui/icons/Help";
 import { Controller, useForm } from "react-hook-form";
 import { BigNumber, ethers, providers, Signer, utils } from "ethers";
 // @ts-ignore
@@ -41,12 +34,13 @@ import { useSafeAppsSDK } from "@gnosis.pm/safe-apps-react-sdk";
 import { SafeAppProvider } from "@gnosis.pm/safe-apps-provider";
 import { chainProviders } from "../Utils/Shared";
 import { connectWallet, getCurrentWalletConnected } from "../Utils/Wallet";
-import { Modal } from "./Modal";
+import { AlertModal } from "./Modals/AlertModal";
 import ErrorBoundary from "./ErrorBoundary";
 import { chainAddresses, contractAddresses } from "../Constants/constants";
 import { IBalance } from "../Models/Shared.model";
 import { IContractAddress, ICrossChain } from "../Models/Nxtp.model";
 import { TableContext } from "../Providers/Txprovider";
+import { SupportModal } from "./Modals/SupportModal";
 
 declare let window: any;
 const ethereum = (window as any).ethereum;
@@ -76,6 +70,7 @@ const App: React.FC = () => {
   const [transferAmount, setTransferAmount] = useState<string>();
   const [latestActiveTx, setLatestActiveTx] = useState<ActiveTransaction>();
   const [showError, setShowError] = useState<Boolean>(false);
+  const [showSupport, setShowSupport] = useState<Boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const { handleSubmit, control } = useForm<ICrossChain>();
 
@@ -398,7 +393,7 @@ const App: React.FC = () => {
       <Divider />
       <Container>
         {showError && (
-          <Modal
+          <AlertModal
             setTrigger={setShowError}
             title="Error"
             message={errorMessage}
@@ -558,7 +553,7 @@ const App: React.FC = () => {
 
                 <Button
                   iconType="rocket"
-                  // disabled={latestActiveTx?.status.length === 0}
+                  disabled={latestActiveTx?.status.length === 0}
                   size="lg"
                   variant="bordered"
                   onClick={async () => {
@@ -581,77 +576,25 @@ const App: React.FC = () => {
               </div>
             </form>
           </Card>
-          <Grid item xs={12} sm={4}>
-            <Card className={classes.supportcard}>
-              <Typography className={classes.text} align="center" variant="h6">
-                Support
-              </Typography>
-              <List component="nav" aria-label="main mailbox folders">
-                <ListItem>
-                  <ListItemIcon>
-                    <HelpIcon />
-                  </ListItemIcon>
-                  <Typography className={classes.text}>How it works</Typography>
-                </ListItem>
-              </List>
-              <Divider />
-              <List component="nav" aria-label="secondary mailbox folders">
-                <ListItem>
-                  <Typography className={classes.text}>
-                    1. Choose the receiving network/chain
-                  </Typography>
-                </ListItem>
-                <ListItem>
-                  <Typography className={classes.text}>
-                    2. Set the asset that you want to swap
-                  </Typography>
-                </ListItem>
-                <ListItem>
-                  <Typography className={classes.text}>
-                    3. Enter the amount you want to swap
-                  </Typography>
-                </ListItem>
-                <ListItem>
-                  <Typography className={classes.text}>
-                    2. Enter the reciever address
-                  </Typography>
-                </ListItem>
-                <ListItem>
-                  <Typography className={classes.text}>
-                    4. Get a quotation from different routers!
-                  </Typography>
-                </ListItem>
-                <ListItem>
-                  <Typography className={classes.text}>
-                    5. Once quote is received request, Start the swap! Check
-                    Transactions for Acive Transfers
-                  </Typography>
-                </ListItem>
-                <ListItem>
-                  <Typography className={classes.text}>
-                    6. Once the transaction has been prepared Finish the
-                    transfer
-                  </Typography>
-                </ListItem>
-                <ListItem>
-                  <Typography className={classes.text}>
-                    7. In case of any issues you can create a support ticket{" "}
-                    <a
-                      target="blank"
-                      className={classes.a}
-                      href="https://github.com/chiliagons/gnuswap/issues"
-                    >
-                      here
-                    </a>
-                  </Typography>
-                </ListItem>
-              </List>
-            </Card>
-          </Grid>
+          <Button
+            iconType="question"
+            size="lg"
+            variant="contained"
+            onClick={() => setShowSupport(true)}
+          >
+            How it works?
+          </Button>
+          {showSupport && (
+            <SupportModal
+              setTrigger={setShowSupport}
+              title="How it works"
+              classes={classes}
+            />
+          )}
         </div>
       </Container>
       {showConfirmation && (
-        <Modal
+        <AlertModal
           setTrigger={setShowConfirmation}
           title="Success!"
           message={"Your transaction has been succesfully executed!"}
