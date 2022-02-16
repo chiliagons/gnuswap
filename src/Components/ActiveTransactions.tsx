@@ -17,8 +17,8 @@ import { activeHeaderCells } from "../Constants/TransactionPageConstant";
 import ErrorBoundary from "../Components/ErrorBoundary";
 
 const ActiveTransactions: React.FC = () => {
-  const { activeTransactions } = useContext(TableContext)
-console.log("whats this", activeTransactions)
+  const { activeTransactions } = useContext(TableContext);
+  console.log("whats this", activeTransactions);
   const activeRows: TableRow[] = [];
   let noOfActiveTransactions = 0;
 
@@ -41,10 +41,10 @@ console.log("whats this", activeTransactions)
               <Title size="md">
                 Active Transactions{" "}
                 {noOfActiveTransactions === 0 ? (
-                <Loader size="sm"></Loader>
-              ) : (
-                noOfActiveTransactions
-              )}
+                  <Loader size="sm"></Loader>
+                ) : (
+                  noOfActiveTransactions
+                )}
               </Title>
               <Divider />
               <Table headers={activeHeaderCells} rows={activeRows} />

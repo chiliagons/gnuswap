@@ -3,7 +3,7 @@ import { Button, GenericModal } from "@gnosis.pm/safe-react-components";
 
 export default class ErrorBoundary extends React.Component<
   {},
-  { hasError: Boolean }
+  { hasError: boolean }
 > {
   constructor(props) {
     super(props);
@@ -21,7 +21,7 @@ export default class ErrorBoundary extends React.Component<
     if (this.state.hasError) {
       return (
         <GenericModal
-          onClose={() => undefined}
+          onClose={() => this.setState({ hasError: false })}
           title="Something Went Wrong"
           body={
             <div>

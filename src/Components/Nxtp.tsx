@@ -598,7 +598,7 @@ const App: React.FC = () => {
           )}
         </div>
       </Container>
-        <ActiveTransactions  />
+      <ActiveTransactions />
       {showConfirmation && (
         <AlertModal
           setTrigger={setShowConfirmation}
