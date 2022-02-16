@@ -36,7 +36,7 @@ import { SafeAppProvider } from "@gnosis.pm/safe-apps-provider";
 import { chainProviders } from "../Utils/Shared";
 import { connectWallet, getCurrentWalletConnected } from "../Utils/Wallet";
 import ErrorBoundary from "./ErrorBoundary";
-import ActiveTransactions from "./ActiveTransactions";
+import TransactionTable from "./TransactionTable";
 
 import { chainAddresses, contractAddresses } from "../Constants/constants";
 
@@ -598,7 +598,10 @@ const App: React.FC = () => {
           )}
         </div>
       </Container>
-      <ActiveTransactions />
+      <TransactionTable
+              transactionList={activeTransactions}
+              transactionType={"activeTransactions"}
+            />
       {showConfirmation && (
         <AlertModal
           setTrigger={setShowConfirmation}

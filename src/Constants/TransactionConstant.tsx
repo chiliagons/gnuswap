@@ -16,3 +16,12 @@ export const activeHeaderCells: TableHeader[] = [
   { id: "amount", label: "Amount" },
   { id: "status", label: "Status" },
 ];
+
+export const transactionConfig = {
+  activeTransactions: {
+    name: "Active Transactions",
+  },
+  historicalTransactions: {
+    name: "Historical Transactions",
+  },
+};
