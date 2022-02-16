@@ -8,7 +8,7 @@ import {
 } from "@gnosis.pm/safe-react-components";
 
 import { ethers } from "ethers";
-import { activeTransactionCreator } from "./TransactionUtils";
+import { activeTransactionCreator } from "./TransactionTableUtils";
 
 import {
   transactionConfig,
