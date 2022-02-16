@@ -15,6 +15,7 @@ export const activeHeaderCells: TableHeader[] = [
   { id: "receiverAddress", label: "Receiver Address" },
   { id: "amount", label: "Amount" },
   { id: "status", label: "Status" },
+  { id: "action", label: "Action" },
 ];
 
 export const transactionConfig = {

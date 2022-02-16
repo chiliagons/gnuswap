@@ -17,7 +17,6 @@ import {
 
 import ErrorBoundary from "./ErrorBoundary";
 
-
 const TransactionTable = (transactionObj) => {
   const transactionType = transactionObj.transactionType;
   const transactions = transactionObj.transactionList[transactionType];

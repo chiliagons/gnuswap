@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, IconText, EthHashInfo } from "@gnosis.pm/safe-react-components";
+import { Text, IconText, EthHashInfo, Button } from "@gnosis.pm/safe-react-components";
 import { convertToDate } from "../Utils/Shared";
 import { contractAddresses } from "../Constants/constants";
 
@@ -75,6 +75,15 @@ export const activeTransactionCreator = (element, index, ethers) => {
           />
         ),
       },
+      {
+        content: (
+          <Button size="md" iconType="rocket" disabled={element.status === "SenderTransactionPrepared" ? false : true}>
+            {element.status === "SenderTransactionPrepared"
+              ? "Complete Transfer"
+              : "unavailable"}
+          </Button>
+        ),
+      },
     ],
   };
 };
@@ -83,6 +92,11 @@ export const historicalTransactionCreator = (element, index, ethers) => {
   return {
     id: index,
     cells: [
+      {
+        content: (
+          <Text size="xl">{convertToDate(element.preparedTimestamp)}</Text>
+        ),
+      },
       {
         content: (
           <Text size="xl">{convertToDate(element.preparedTimestamp)}</Text>

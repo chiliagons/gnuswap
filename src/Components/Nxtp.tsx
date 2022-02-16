@@ -599,9 +599,9 @@ const App: React.FC = () => {
         </div>
       </Container>
       <TransactionTable
-              transactionList={activeTransactions}
-              transactionType={"activeTransactions"}
-            />
+        transactionList={activeTransactions}
+        transactionType={"activeTransactions"}
+      />
       {showConfirmation && (
         <AlertModal
           setTrigger={setShowConfirmation}
