@@ -32,15 +32,20 @@ import { AuctionResponse, getRandomBytes32 } from "@connext/nxtp-utils";
 import pino from "pino";
 import { useSafeAppsSDK } from "@gnosis.pm/safe-apps-react-sdk";
 import { SafeAppProvider } from "@gnosis.pm/safe-apps-provider";
+
 import { chainProviders } from "../Utils/Shared";
 import { connectWallet, getCurrentWalletConnected } from "../Utils/Wallet";
-import { AlertModal } from "./Modals/AlertModal";
 import ErrorBoundary from "./ErrorBoundary";
+import ActiveTransactions from "./ActiveTransactions";
+
 import { chainAddresses, contractAddresses } from "../Constants/constants";
+
 import { IBalance } from "../Models/Shared.model";
 import { IContractAddress, ICrossChain } from "../Models/Nxtp.model";
+
 import { TableContext } from "../Providers/Txprovider";
 import { SupportModal } from "./Modals/SupportModal";
+import { AlertModal } from "./Modals/AlertModal";
 
 declare let window: any;
 const ethereum = (window as any).ethereum;
@@ -593,6 +598,7 @@ const App: React.FC = () => {
           )}
         </div>
       </Container>
+        <ActiveTransactions  />
       {showConfirmation && (
         <AlertModal
           setTrigger={setShowConfirmation}
