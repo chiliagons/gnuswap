@@ -525,7 +525,7 @@ const App: React.FC = () => {
                         }
                         label="..."
                         placeholder="Swap Amount"
-                        disabled={true}
+                        type="number"
                       />
                     )}
                   />
