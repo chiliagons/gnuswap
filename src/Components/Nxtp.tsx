@@ -47,6 +47,8 @@ import { TableContext } from "../Providers/Txprovider";
 import { SupportModal } from "./Modals/SupportModal";
 import { AlertModal } from "./Modals/AlertModal";
 
+import { finishTransfer } from "./Utils";
+
 declare let window: any;
 const ethereum = (window as any).ethereum;
 
@@ -335,40 +337,6 @@ const App: React.FC = () => {
       console.log("Prepared transaction", prepTransfer);
       setShowLoadingTransfer(false);
     }
-  };
-
-  const finishTransfer = async ({
-    bidSignature,
-    encodedBid,
-    encryptedCallData,
-    txData,
-  }) => {
-    const provider = new providers.Web3Provider(ethereum);
-    const signerW = await provider.getSigner();
-    // const initiator = await signerGnosis.getAddress();
-
-    const nsdk = new NxtpSdk({
-      chainConfig: chainProviders,
-      signer: signerW,
-      logger: pino({ level: "info" }),
-    });
-
-    if (!nsdk) {
-      return;
-    }
-    try {
-      const finish = await nsdk.fulfillTransfer({
-        bidSignature,
-        encodedBid,
-        encryptedCallData,
-        txData,
-      });
-    } catch (err) {
-      console.log("Unable to fulfillTransfer", err);
-    }
-    // setShowConfirmation(true);
-    // console.log(showConfirmation);
-    // setShowConfirmation(false);
   };
 
   const selectMenuChainAddresses = () => {

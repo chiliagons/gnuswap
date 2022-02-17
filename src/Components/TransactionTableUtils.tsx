@@ -7,6 +7,7 @@ import {
 } from "@gnosis.pm/safe-react-components";
 import { convertToDate } from "../Utils/Shared";
 import { contractAddresses } from "../Constants/constants";
+import { finishTransfer } from "./Utils";
 
 const cachedMapping = {}; // further optimize by storing this cache in local storage
 const getSymbols = (contractAddress: string) => {
@@ -27,7 +28,21 @@ const getSymbols = (contractAddress: string) => {
   }
 };
 
-export const activeTransactionCreator = (element, index, ethers) => {
+const handleFinishTransfer = async (element) => {
+  // if (latestActiveTx)
+  await finishTransfer({
+    bidSignature: element.bidSignature,
+    encodedBid: element.encodedBid,
+    encryptedCallData: element.encryptedCallData,
+    txData: {
+      ...element.crosschainTx.invariant,
+      ...element.crosschainTx.sending,
+      amountReceived: element.crosschainTx.sending.amount,
+    }
+  });
+};
+
+export const activeTransactionCreator = (element, index, ethers, finishTransfer) => {
   return {
     id: index,
     cells: [
@@ -88,6 +103,7 @@ export const activeTransactionCreator = (element, index, ethers) => {
             disabled={
               element.status === "SenderTransactionPrepared" ? false : true
             }
+            onClick={async() =>handleFinishTransfer(element)}
           >
             {element.status === "SenderTransactionPrepared"
               ? "Complete Transfer"

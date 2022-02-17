@@ -16,6 +16,7 @@ import {
 } from "../Constants/TransactionConstant";
 
 import ErrorBoundary from "./ErrorBoundary";
+import { finishTransfer } from "./Utils";
 
 const TransactionTable = (transactionObj) => {
   const transactionType = transactionObj.transactionType;
@@ -27,7 +28,7 @@ const TransactionTable = (transactionObj) => {
 
   transactions &&
     transactions.forEach((element: any, index: any) => {
-      transactionRows.push(activeTransactionCreator(element, index, ethers));
+      transactionRows.push(activeTransactionCreator(element, index, ethers, finishTransfer));
     });
 
   return (
