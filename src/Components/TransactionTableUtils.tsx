@@ -38,11 +38,16 @@ const handleFinishTransfer = async (element) => {
       ...element.crosschainTx.invariant,
       ...element.crosschainTx.sending,
       amountReceived: element.crosschainTx.sending.amount,
-    }
+    },
   });
 };
 
-export const activeTransactionCreator = (element, index, ethers, finishTransfer) => {
+export const activeTransactionCreator = (
+  element,
+  index,
+  ethers,
+  finishTransfer
+) => {
   return {
     id: index,
     cells: [
@@ -103,7 +108,7 @@ export const activeTransactionCreator = (element, index, ethers, finishTransfer)
             disabled={
               element.status === "SenderTransactionPrepared" ? false : true
             }
-            onClick={async() =>handleFinishTransfer(element)}
+            onClick={async () => handleFinishTransfer(element)}
           >
             {element.status === "SenderTransactionPrepared"
               ? "Complete Transfer"

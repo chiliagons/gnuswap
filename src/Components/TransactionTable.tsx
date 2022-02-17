@@ -28,7 +28,9 @@ const TransactionTable = (transactionObj) => {
 
   transactions &&
     transactions.forEach((element: any, index: any) => {
-      transactionRows.push(activeTransactionCreator(element, index, ethers, finishTransfer));
+      transactionRows.push(
+        activeTransactionCreator(element, index, ethers, finishTransfer)
+      );
     });
 
   return (
