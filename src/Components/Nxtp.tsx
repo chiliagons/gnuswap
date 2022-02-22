@@ -319,8 +319,7 @@ const App: React.FC = () => {
   };
 
   const transfer = async () => {
-    try{
-
+    try {
       setShowLoadingTransfer(true);
       const nsdk = new NxtpSdk({
         chainConfig: chainProviders,
@@ -338,9 +337,9 @@ const App: React.FC = () => {
         console.log("Prepared transaction", prepTransfer);
       }
       setShowLoadingTransfer(false);
-    }catch(err){
+    } catch (err) {
       setShowLoadingTransfer(false);
-      alert(err.message)
+      alert(err.message);
     }
   };
 
@@ -554,7 +553,9 @@ const App: React.FC = () => {
                 </Button>
               </div>
               <span className={classes.actionAnnouncement}>
-              {showLoadingTransfer ? "Transfer has started. Please wait." : " "}
+                {showLoadingTransfer
+                  ? "Transfer has started. Please wait."
+                  : " "}
               </span>
             </form>
           </Card>
