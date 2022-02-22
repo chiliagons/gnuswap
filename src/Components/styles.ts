@@ -21,24 +21,20 @@ export default makeStyles((theme) => ({
     paddingTop: "3px",
   },
   button: {
-    fontFamily: "Poppins",
-    backgroundColor: "#80c7b9",
-    display: "flex",
-    borderRadius: "8px",
     textTransform: "capitalize",
-    alignContent: "center",
-    flexDirection: "row",
-    justifyContent: "center",
+    width: "10px",
   },
 
   input: {
     borderRadius: 4,
-    position: "relative",
     backgroundColor: theme.palette.background.paper,
     color: "#008c73",
     border: "1px solid #ced4da",
     fontSize: 16,
-    padding: "10px 26px 10px 12px",
+    marginTop: 10,
+    marginBottom: 10,
+    minWidth: "270px",
+    maxWidth: "600px",
     transition: theme.transitions.create(["border-color", "box-shadow"]),
     // Use the system font instead of the default Roboto font.
     fontFamily: [
@@ -59,45 +55,44 @@ export default makeStyles((theme) => ({
       boxShadow: "0 0 0 0.2rem rgba(0,123,255,.25)",
     },
   },
+
   card: {
-    fontFamily: "Poppins",
-    display: "flex",
-    alignContent: "center",
-    flexDirection: "row",
-    justifyContent: "center",
-    height: "auto",
-    marginLeft: "2%",
     borderRadius: "15px",
+    maxHeight: "600px",
+    width: "50vw",
+    minWidth: "550px",
+    maxWidth: "600px",
+    display: "flex",
+    flexDirection: "column",
   },
 
   grid: {
-    fontFamily: "Poppins",
     display: "flex",
-    alignContent: "center",
-    flexDirection: "row",
-    justifyContent: "center",
-    height: "auto",
-    marginTop: 10,
-    marginBottom: 10,
+    justifyContent: "space-evenly",
   },
 
-  gridWithSpace: {
-    fontFamily: "Poppins",
+  formContentRow: {
     display: "flex",
-    alignContent: "center",
     flexDirection: "row",
-    justifyContent: "center",
-    height: "auto",
-    marginTop: 16,
-    marginBottom: 16,
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 
-  form: {
-    fontFamily: "Poppins",
-    paddingTop: "2%",
-    paddingBottom: "2%",
+  formContentSubmitRow: {
     display: "flex",
-    flexWrap: "wrap",
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    alignItems: "center",
+  },
+  formContentColumn: {
+    display: "flex",
+    flexDirection: "column",
+  },
+  actionAnnouncement: {
+    display: "flex",
     justifyContent: "center",
+    marginTop: "10px",
+    color: "#008c73",
+    fontSize: "12px",
   },
 }));

@@ -2,7 +2,7 @@ import React from "react";
 import { Container, Tabs, Tab, AppBar } from "@material-ui/core";
 import Nxtp from "../Components/Nxtp";
 import { makeStyles } from "@material-ui/core/styles";
-import TransactionPage from "../Components/TransactionPage";
+import TransactionPage from "./TransactionPage";
 import { TableContextProvider } from "../Providers/Txprovider";
 
 const useStyles = makeStyles({
@@ -56,8 +56,8 @@ const MainPage: React.FC = () => {
     <div>
       <TableContextProvider
         value={{
-          value: { transactions, setTransactions },
-          value2: { activeTransactions, setActiveTransactions },
+          historicalTransactions: { transactions, setTransactions },
+          activeTransactions: { activeTransactions, setActiveTransactions },
         }}
       >
         <AppBar position="static" color="default">

@@ -6,137 +6,157 @@ import {
   Button,
   Card,
   Divider,
-  Icon,
   Loader,
-  Text,
-  TextField,
-  GenericModal,
-  FixedIcon,
+  TextFieldInput,
+  AddressInput,
 } from "@gnosis.pm/safe-react-components";
 import {
   MenuItem,
   Select,
-  Grid,
   Container,
-  Typography,
-  List,
-  ListItem,
-  ListItemIcon,
+  FormControl,
+  InputLabel,
 } from "@material-ui/core";
-import HelpIcon from "@material-ui/icons/Help";
-import { Col, Row, Form } from "antd";
-import { BigNumber, providers, Signer, utils } from "ethers";
+
+import { Controller, useForm } from "react-hook-form";
+import { BigNumber, ethers, providers, Signer, utils } from "ethers";
 // @ts-ignore
 import {
   ActiveTransaction,
-  NxtpSdk,
-  NxtpSdkEvents,
   HistoricalTransaction,
+  NxtpSdkEvents,
+  NxtpSdk,
 } from "@connext/nxtp-sdk";
 // @ts-ignore
 import { AuctionResponse, getRandomBytes32 } from "@connext/nxtp-utils";
 import pino from "pino";
 import { useSafeAppsSDK } from "@gnosis.pm/safe-apps-react-sdk";
 import { SafeAppProvider } from "@gnosis.pm/safe-apps-provider";
+
 import { chainProviders } from "../Utils/Shared";
-import { swapConfig } from "../Constants/constants";
+import { connectWallet, getCurrentWalletConnected } from "../Utils/Wallet";
+import ErrorBoundary from "./ErrorBoundary";
+import TransactionTable from "./TransactionTable";
+
+import { chainAddresses, contractAddresses } from "../Constants/constants";
+
 import { IBalance } from "../Models/Shared.model";
+import { IContractAddress, ICrossChain } from "../Models/Nxtp.model";
+
 import { TableContext } from "../Providers/Txprovider";
+import { SupportModal } from "./Modals/SupportModal";
+import { AlertModal } from "./Modals/AlertModal";
 
-class ErrorBoundary extends React.Component<{}, { hasError: Boolean }> {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false };
-  }
+import { finishTransfer } from "./Utils";
 
-  componentDidCatch(error, info) {
-    // Display fallback UI
-    this.setState({ hasError: true });
-    // You can also log the error to an error reporting service
-    // logErrorToMyService(error, info);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <GenericModal
-          onClose={() => undefined}
-          title="Something Went Wrong"
-          body={
-            <div>
-              <h3>
-                Something went wrong. Make sure gnuswap is connected to the
-                gnosis vault. Please try again!
-              </h3>
-            </div>
-          }
-          footer={
-            <Button onClick={() => window.location.reload()} size="md">
-              Refresh
-            </Button>
-          }
-        />
-      );
-    }
-    return this.props.children;
-  }
-}
+declare let window: any;
+const ethereum = (window as any).ethereum;
 
 const App: React.FC = () => {
-  const { value, value2 } = useContext(TableContext);
+  const { historicalTransactions, activeTransactions } =
+    useContext(TableContext);
   const classes = useStyles();
   const { sdk, safe } = useSafeAppsSDK();
+  const [walletAddress, setWallet] = useState("");
+  const [status, setStatus] = useState("");
   const gnosisWeb3Provider = new SafeAppProvider(safe, sdk);
-  const [transferStateStarted, setTransferStateStarted] =
-    useState<boolean>(false);
-  const [chainData, setChainData] = useState<any[]>([]);
   const [web3Provider, setProvider] = useState<providers.Web3Provider>();
-  const [injectedProviderChainId, setInjectedProviderChainId] =
-    useState<number>();
-  const [gnosisChainId, setGnosisChainId] = useState<number>();
-  const [signer, setSigner] = useState<Signer>();
-  const [nsdk, setSdk] = useState<NxtpSdk>();
+  const [signerGnosis, setSignerGnosis] = useState<Signer>();
+  const [signerWallet, setSignerWallet] = useState<Signer>();
   const [showLoading, setShowLoading] = useState(false);
   const [showLoadingTransfer, setShowLoadingTransfer] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
   const [auctionResponse, setAuctionResponse] = useState<AuctionResponse>();
-  const [activeTransferTableColumns, setActiveTransferTableColumns] = useState<
-    ActiveTransaction[]
-  >([]);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedPool, setSelectedPool] = useState(swapConfig[0]);
+
+  const [chainList, setChainList] = useState(chainAddresses);
+  const [contractList, setContractList] = useState(contractAddresses);
   const [tokenList, setTokenList] = useState<IBalance[]>([]);
+
   const [errorFetchedChecker, setErrorFetchedChecker] = useState(false);
   const [userBalance, setUserBalance] = useState<BigNumber>();
-  const [transferAmount, setTransferAmount] = useState("");
-  const [receivingTokenAdrress, setReceiveTokenAddress] = useState(
-    "0x8a1Cad3703E0beAe0e0237369B4fcD04228d1682"
-  );
-  const [sendingAssetToken, setSendingAssetToken] = useState<IBalance>();
+  const [transferAmount, setTransferAmount] = useState<string>();
+  const [latestActiveTx, setLatestActiveTx] = useState<ActiveTransaction>();
+  const [showError, setShowError] = useState<Boolean>(false);
+  const [showSupport, setShowSupport] = useState<Boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const { handleSubmit, control } = useForm<ICrossChain>();
+
   const [historicalTransferTableColumns, setHistoricalTransferTableColumns] =
     useState<HistoricalTransaction[]>([]);
-  const [latestActiveTx, setLatestActiveTx] = useState<ActiveTransaction>();
-  const adornmentReceivingAddress = <Icon size="md" type="addressBook" />;
-  const adornSendingContractAddress = <Icon size="md" type="sent" />;
 
-  let addressField = "";
-  const [form] = Form.useForm();
-  const ethereum = (window as any).ethereum;
+  const connectProvider = async () => {
+    try {
+      const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
+      const _signerG = await gnosisProvider.getSigner();
+      if (_signerG) {
+        const network =
+          _signerG.provider["provider"].safe?.network?.toLowerCase();
+        const address = await _signerG.getAddress();
+        if (address) {
+          await getTokensHandler(address, network);
+          setSignerGnosis(_signerG);
+          setProvider(gnosisProvider);
+          return true;
+        }
+      }
+    } catch (e) {
+      return false;
+    }
+  };
+  const contractAddressHandler = ({
+    contractGroupId,
+    chainId,
+  }: IContractAddress) => {
+    const chosenContractList = contractList.find((contractGroup) => {
+      return contractGroup.symbol === contractGroupId;
+    });
 
-  const getTokensHandler = async (address) => {
+    const chosenContractAddress = chosenContractList.contracts.find(
+      (contract) => {
+        return contract.chain_id === chainId;
+      }
+    );
+    return chosenContractAddress;
+  };
+
+  // called on submission of get Quote
+  const onSubmit = async (crossChainData: ICrossChain) => {
+    try {
+      const sendingChain = await signerGnosis.getChainId();
+
+      const sendingContractAddress = contractAddressHandler({
+        contractGroupId: JSON.parse(crossChainData.token).token.symbol,
+        chainId: sendingChain,
+      });
+      const receivingContractAddress = contractAddressHandler({
+        contractGroupId: JSON.parse(crossChainData.token).token.symbol,
+        chainId: crossChainData.chain,
+      });
+
+      await getTransferQuote(
+        sendingChain,
+        sendingContractAddress.contract_address,
+        crossChainData.chain,
+        receivingContractAddress.contract_address,
+        utils.parseEther(crossChainData.transferAmount).toString(),
+        crossChainData.receivingAddress
+      );
+    } catch (e) {
+      setErrorMessage(e.message);
+      setShowError(true);
+    }
+  };
+
+  // utilizing a network call to get the safe token details rather than from SDK
+  const getTokensHandler = async (address, network) => {
     const tokenArr: Array<IBalance> = [];
-
     await fetch(
-      `https://safe-transaction.rinkeby.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`
+      `https://safe-transaction.${network}.gnosis.io/api/v1/safes/${address}/balances/?trusted=false&exclude_spam=false`
     )
       .then((res) => res.json())
       .then((response) => {
         response.forEach((_bal: IBalance) => {
-          console.log(_bal);
-          if (_bal.token !== null) {
-            tokenArr.push(_bal);
-          } else if (_bal.token === null) {
+          if (_bal.token === null) {
             _bal.token = {
               decimals: 18,
               logoUri:
@@ -144,44 +164,31 @@ const App: React.FC = () => {
               name: "Ethereum",
               symbol: "ETH",
             };
-            tokenArr.push(_bal);
           }
+          tokenArr.push(_bal);
         });
         setTokenList(tokenArr);
       })
-      .catch((error) => {
-        console.log(error);
+      .catch((e) => {
+        setErrorMessage(e.message);
+        setShowError(true);
       });
   };
 
-  const setTokenWithBalance = (bal) => {
-    const tokenAsBal: IBalance = JSON.parse(bal);
-    setSendingAssetToken(tokenAsBal);
-    setReceiveTokenAddress(tokenAsBal.tokenAddress);
-    setUserBalance(BigNumber.from(tokenAsBal.balance));
-  };
-
-  const connectProvider = async () => {
+  const tokenSelected = (element) => {
     try {
-      const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
-      const _signerG = await gnosisProvider.getSigner();
-      if (_signerG) {
-        const address = await _signerG.getAddress();
-        await getTokensHandler(address);
-        const sendingChain = await _signerG.getChainId();
-        console.log("sendingChain: ", sendingChain);
-        setGnosisChainId(sendingChain);
-        setSigner(_signerG);
-        setProvider(gnosisProvider);
-        form.setFieldsValue({ receivingAddress: address });
-        addressField = address;
+      if (element.target?.value) {
+        if (JSON.parse(element.target.value).balance)
+          setUserBalance(
+            BigNumber.from(JSON.parse(element.target.value).balance)
+          );
       }
-      return true;
-    } catch (e) {
-      return false;
+    } catch (E) {
+      console.log(E);
     }
   };
 
+  // check if gnosis provider is connected else keep trying to connect
   useEffect(() => {
     async function testFunc() {
       const flag: boolean = await connectProvider();
@@ -194,153 +201,63 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const init = async () => {
-      const json = await utils.fetchJson(
-        "https://raw.githubusercontent.com/connext/chaindata/main/crossChain.json"
-      );
-      setChainData(json);
-      const provider = new providers.Web3Provider(ethereum);
-      const signer = await provider.getSigner();
-      console.log("Signeer was triggered");
-      const { chainId } = await signer.provider!.getNetwork();
-      setInjectedProviderChainId(chainId);
-      const _sdk = new NxtpSdk(
-        chainProviders,
-        signer,
-        pino({ level: "info" }),
-        (process.env.REACT_APP_NETWORK as "mainnet") ?? "mainnet",
-        process.env.REACT_APP_NATS_URL_OVERRIDE,
-        process.env.REACT_APP_AUTH_URL_OVERRIDE
-      );
-      setSdk(_sdk);
-      const activeTxs = await _sdk.getActiveTransactions();
-      value2.setActiveTransactions(activeTxs);
-      setActiveTransferTableColumns(activeTxs);
-      console.log("activeTxs: ", activeTxs);
-      if (activeTxs[activeTxs.length - 1]) {
-        setLatestActiveTx(activeTxs[activeTxs.length - 1]);
-      }
+      await connectWallet(); // on load connect to the wallet if not already connected
+      const { address, status, providers } = await getCurrentWalletConnected();
+      setStatus(status);
+      setWallet(address);
+      if (status === "Connected") {
+        try {
+          const signerW = await providers.getSigner();
 
-      const historicalTxs = await _sdk.getHistoricalTransactions();
-      setHistoricalTransferTableColumns(historicalTxs);
-      console.log("historicalTxs: ", historicalTxs);
-      value.setTransactions(historicalTxs);
-
-      _sdk.attach(NxtpSdkEvents.SenderTransactionPrepared, (data) => {
-        const { amount, expiry, preparedBlockNumber, ...invariant } =
-          data.txData;
-        const table = [...activeTransferTableColumns];
-        table.push({
-          crosschainTx: {
-            invariant,
-            sending: { amount, expiry, preparedBlockNumber },
-          },
-          bidSignature: data.bidSignature,
-          encodedBid: data.encodedBid,
-          encryptedCallData: data.encryptedCallData,
-          status: NxtpSdkEvents.SenderTransactionPrepared,
-          preparedTimestamp: Math.floor(Date.now() / 1000),
-        });
-        setActiveTransferTableColumns(table);
-      });
-
-      _sdk.attach(NxtpSdkEvents.SenderTransactionFulfilled, (data) => {
-        console.log("SenderTransactionFulfilled:", data);
-        setActiveTransferTableColumns(
-          activeTransferTableColumns.filter(
-            (t) =>
-              t.crosschainTx.invariant.transactionId !==
-              data.txData.transactionId
-          )
-        );
-      });
-
-      _sdk.attach(NxtpSdkEvents.SenderTransactionCancelled, (data) => {
-        console.log("SenderTransactionCancelled:", data);
-        setActiveTransferTableColumns(
-          activeTransferTableColumns.filter(
-            (t) =>
-              t.crosschainTx.invariant.transactionId !==
-              data.txData.transactionId
-          )
-        );
-      });
-
-      _sdk.attach(NxtpSdkEvents.ReceiverTransactionPrepared, (data) => {
-        setShowLoadingTransfer(false);
-        const { amount, expiry, preparedBlockNumber, ...invariant } =
-          data.txData;
-        const index = activeTransferTableColumns.findIndex(
-          (col) =>
-            col.crosschainTx.invariant.transactionId === invariant.transactionId
-        );
-        const table = [...activeTransferTableColumns];
-        if (index === -1) {
-          // TODO: is there a better way to
-          // get the info here?
-          table.push({
-            preparedTimestamp: Math.floor(Date.now() / 1000),
-            crosschainTx: {
-              invariant,
-              sending: {} as any, // Find to do this, since it defaults to receiver side info
-              receiving: { amount, expiry, preparedBlockNumber },
-            },
-            bidSignature: data.bidSignature,
-            encodedBid: data.encodedBid,
-            encryptedCallData: data.encryptedCallData,
-            status: NxtpSdkEvents.ReceiverTransactionPrepared,
+          setSignerWallet(signerW);
+          const nsdk = await NxtpSdk.create({
+            chainConfig: chainProviders,
+            signer: signerW,
+            logger: pino({ level: "info" }),
           });
-          setActiveTransferTableColumns(table);
-        } else {
-          const item = { ...table[index] };
-          table[index] = {
-            ...item,
-            status: NxtpSdkEvents.ReceiverTransactionPrepared,
-            crosschainTx: {
-              ...item.crosschainTx,
-              receiving: { amount, expiry, preparedBlockNumber },
-            },
-          };
-          setActiveTransferTableColumns(table);
+
+          if (nsdk && address) {
+            // here we should get the active transactions of the user or EOA
+            const activeTxs = await nsdk.getActiveTransactions();
+            const historicalTxs = await nsdk.getHistoricalTransactions();
+            setHistoricalTransferTableColumns(historicalTxs);
+            console.log("historicalTxs: ", historicalTxs);
+            historicalTransactions.setTransactions(historicalTxs);
+
+            // value2.setActiveTransactions(activeTxs);
+            // setActiveTransferTableColumns(activeTxs);
+            activeTransactions.setActiveTransactions(activeTxs);
+            console.log("activeTxs   : ", activeTxs);
+            if (activeTxs[activeTxs.length - 1]) {
+              setLatestActiveTx(activeTxs[0]);
+              console.log("setLatestActiveTx: ", activeTxs[0]);
+            }
+          }
+        } catch (e) {
+          console.log(e);
         }
-      });
-
-      _sdk.attach(NxtpSdkEvents.ReceiverTransactionFulfilled, async (data) => {
-        console.log("ReceiverTransactionFulfilled:", data);
-        setActiveTransferTableColumns(
-          activeTransferTableColumns.filter(
-            (t) =>
-              t.crosschainTx.invariant.transactionId !==
-              data.txData.transactionId
-          )
-        );
-
-        const historicalTxs = await _sdk.getHistoricalTransactions();
-        setHistoricalTransferTableColumns(historicalTxs);
-        console.log("historicalTxs: ", historicalTxs);
-      });
-
-      _sdk.attach(NxtpSdkEvents.ReceiverTransactionCancelled, (data) => {
-        console.log("ReceiverTransactionCancelled:", data);
-        setActiveTransferTableColumns(
-          activeTransferTableColumns.filter(
-            (t) =>
-              t.crosschainTx.invariant.transactionId !==
-              data.txData.transactionId
-          )
-        );
-      });
-
-      _sdk.attach(NxtpSdkEvents.SenderTokenApprovalMined, (data) => {
-        console.log("SenderTokenApprovalMined:", data);
-      });
-
-      _sdk.attach(NxtpSdkEvents.SenderTransactionPrepareSubmitted, (data) => {
-        console.log("SenderTransactionPrepareSubmitted:", data);
-      });
+      }
+      addWalletListener();
     };
     init();
-  }, [transferStateStarted, showLoadingTransfer]);
+  }, []);
 
+  function addWalletListener() {
+    if (window.ethereum) {
+      window.ethereum.on("accountsChanged", async (accounts: any) => {
+        if (accounts.length > 0) {
+          const address = ethers.utils.getAddress(accounts[0]);
+          setWallet(address);
+          setStatus("Ready to mint!");
+        } else {
+          setWallet("");
+          setStatus("🦊 Connect to Metamask.");
+        }
+      });
+    } else {
+      setStatus("Please install Metamask.");
+    }
+  }
   const getTransferQuote = async (
     sendingChainId: number,
     sendingAssetId: string,
@@ -350,6 +267,7 @@ const App: React.FC = () => {
     receivingAddress: string
   ): Promise<AuctionResponse | undefined> => {
     console.log(
+      "Start getting quote",
       sendingChainId,
       sendingAssetId,
       receivingChainId,
@@ -358,25 +276,19 @@ const App: React.FC = () => {
       receivingAddress
     );
     setShowLoading(true);
-    const provider = new providers.Web3Provider(ethereum);
-    const _signer = await provider.getSigner();
-
-    const nsdk = new NxtpSdk(
-      chainProviders,
-      _signer,
-      pino({ level: "info" }),
-      (process.env.REACT_APP_NETWORK as "mainnet") ?? "mainnet",
-      process.env.REACT_APP_NATS_URL_OVERRIDE,
-      process.env.REACT_APP_AUTH_URL_OVERRIDE
-    );
+    // const provider = new providers.Web3Provider(ethereum);
+    // const signerW = await provider.getSigner();
+    const nsdk = await NxtpSdk.create({
+      chainConfig: chainProviders,
+      signer: signerWallet,
+      logger: pino({ level: "info" }),
+    });
+    const initiator = await signerGnosis.getAddress();
     if (!nsdk) {
       return;
     }
 
-    if (injectedProviderChainId !== sendingChainId) {
-      alert("Please switch chains to the sending chain!");
-      throw new Error("Wrong chain");
-    }
+    console.log("Initiating request as ", initiator);
 
     // Create txid
     const transactionId = getRandomBytes32();
@@ -388,6 +300,7 @@ const App: React.FC = () => {
         receivingAssetId,
         receivingAddress,
         amount,
+        initiator,
         transactionId,
         expiry: Math.floor(Date.now() / 1000) + 3600 * 24 * 3, // 3 days
       });
@@ -395,439 +308,287 @@ const App: React.FC = () => {
       setAuctionResponse(response);
       return response;
     } catch (e) {
+      console.log(e);
+      if (e.type === "ConfigError") {
+        setErrorMessage("This chain configuration is not supported");
+        setShowError(true);
+      }
       setShowLoading(false);
-      setErrorMsg(e.message);
       return null;
     }
   };
 
   const transfer = async () => {
-    const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
-    const _signerG = gnosisProvider.getSigner();
-    setTransferStateStarted(true);
-    setShowLoadingTransfer(true);
-    const nsdk = new NxtpSdk(
-      chainProviders,
-      _signerG,
-      pino({ level: "info" }),
-      (process.env.REACT_APP_NETWORK as "mainnet") ?? "mainnet",
-      process.env.REACT_APP_NATS_URL_OVERRIDE,
-      process.env.REACT_APP_AUTH_URL_OVERRIDE
-    );
-    if (!nsdk) {
-      return;
+    try {
+      setShowLoadingTransfer(true);
+      const nsdk = new NxtpSdk({
+        chainConfig: chainProviders,
+        signer: signerGnosis,
+        logger: pino({ level: "info" }),
+      });
+      if (!nsdk) {
+        return;
+      }
+      if (!auctionResponse) {
+        throw new Error("Please request quote first");
+      }
+      const prepTransfer = await nsdk.prepareTransfer(auctionResponse, true);
+      if (prepTransfer.transactionId) {
+        console.log("Prepared transaction", prepTransfer);
+      }
+      setShowLoadingTransfer(false);
+    } catch (err) {
+      setShowLoadingTransfer(false);
+      alert(err.message);
     }
-    if (!auctionResponse) {
-      alert("Please request quote first");
-      throw new Error("Please request quote first");
-    }
-
-    if (injectedProviderChainId !== auctionResponse.bid.sendingChainId) {
-      alert("Please switch chains to the sending chain!");
-      throw new Error("Wrong chain");
-    }
-    await nsdk.prepareTransfer(auctionResponse, true);
-
-    // setTransferStateStarted(false);
   };
 
-  const finishTransfer = async ({
-    bidSignature,
-    encodedBid,
-    encryptedCallData,
-    txData,
-  }) => {
-    console.log("finishTransfer", txData);
-
-    const provider = new providers.Web3Provider(ethereum);
-    const signer = await provider.getSigner();
-    console.log("finishTransfer");
-
-    const sdk = new NxtpSdk(
-      chainProviders,
-      signer,
-      pino({ level: "info" }),
-      (process.env.REACT_APP_NETWORK as "mainnet") ?? "mainnet",
-      process.env.REACT_APP_NATS_URL_OVERRIDE,
-      process.env.REACT_APP_AUTH_URL_OVERRIDE
-    );
-
-    if (!sdk) {
-      return;
-    }
-
-    const finish = await sdk.fulfillTransfer({
-      bidSignature,
-      encodedBid,
-      encryptedCallData,
-      txData,
-    });
-    console.log("finish: ", finish);
-    setShowConfirmation(true);
-    console.log(showConfirmation);
-    if (
-      finish.metaTxResponse?.transactionHash ||
-      finish.metaTxResponse?.transactionHash === ""
-    ) {
-      setActiveTransferTableColumns(
-        activeTransferTableColumns.filter(
-          (t) => t.crosschainTx.invariant.transactionId !== txData.transactionId
+  const selectMenuChainAddresses = () => {
+    return chainList.map((address) => {
+      return (
+        address && (
+          <MenuItem key={address.id} value={address.chain_id}>
+            {address.title}
+          </MenuItem>
         )
       );
-    }
-    setShowConfirmation(false);
+    });
   };
-
-  const getChainName = (chainId: number): string => {
-    const chain = chainData.find((chain) => chain?.chainId === chainId);
-    return chain?.name ?? chainId.toString();
+  const generateSelectTokenOptions = () => {
+    return tokenList.map((_bal) => {
+      return (
+        <MenuItem key={_bal.token.symbol} value={JSON.stringify(_bal)}>
+          {_bal.token.symbol}
+        </MenuItem>
+      );
+    });
   };
 
   // UI HERE
   return (
-    <>
-      <ErrorBoundary>
-        <Divider />
-        <Container>
-          <Grid className={classes.grid} container spacing={8}>
-            <Grid item xs={12} sm={8}>
-              <Card className={classes.card}>
-                <Form
-                  form={form}
-                  name="basic"
-                  labelCol={{ span: 10 }}
-                  wrapperCol={{ span: 100 }}
-                  onFinish={() => {
-                    transfer();
-                  }}
-                  initialValues={{
-                    sendingChain: getChainName(
-                      parseInt(Object.keys(selectedPool.assets)[0])
-                    ),
-                    receivingChain: getChainName(
-                      parseInt(Object.keys(selectedPool.assets)[1])
-                    ),
-                    asset: selectedPool.name,
-                    amount: "1",
-                  }}
-                >
-                  <Form.Item name="sendingChain">
-                    <Row gutter={18}>
-                      <Col span={16}></Col>
-                      <Col span={8}></Col>
-                    </Row>
-                  </Form.Item>
-
-                  <Form.Item>
-                    <Row gutter={16}>
-                      <Col span={16}>
-                        <Form.Item name="receivingChain">
-                          <Select variant="outlined">
-                            {Object.keys(selectedPool.assets).map((chainId) => (
-                              <MenuItem key={chainId} value={chainId}>
-                                {getChainName(parseInt(chainId))}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </Form.Item>
-                      </Col>
-                    </Row>
-                  </Form.Item>
-
-                  <Form.Item name="asset">
-                    <Row gutter={16}>
-                      <Col span={16}>
-                        <Form.Item name="asset">
-                          <Select
-                            variant="outlined"
-                            onChange={(e) =>
-                              setTokenWithBalance(e.target.value)
-                            }
-                          >
-                            {tokenList.map((_bal) => (
-                              <MenuItem
-                                key={_bal.token.symbol}
-                                value={JSON.stringify(_bal)}
-                              >
-                                {_bal.token.symbol}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </Form.Item>
-                      </Col>
-                    </Row>
-                  </Form.Item>
-
-                  <Form.Item>
-                    <Row gutter={18}>
-                      <Col span={16}>
-                        <TextField
-                          label="Transfer Amount"
-                          name="amount"
-                          value={transferAmount}
-                          type="text"
-                          onChange={(e) => setTransferAmount(e.target.value)}
-                          required
-                        />
-                      </Col>
-                      <Col span={8}>
-                        Balance:{" "}
-                        <Button
-                          onClick={() =>
-                            setTransferAmount(
-                              utils.formatEther(userBalance ?? 0)
-                            )
-                          }
-                          size="md"
-                        >
-                          {utils.formatEther(userBalance ?? 0)}
-                        </Button>
-                      </Col>
-                    </Row>
-                  </Form.Item>
-
-                  <Form.Item name="receivingAddress">
-                    <TextField
-                      label="Receiving Address"
-                      name="receivingAddress"
-                      aria-describedby="receivingAddress"
-                      value={addressField}
-                      type="text"
-                      startAdornment={adornmentReceivingAddress}
-                      required
-                    />
-                  </Form.Item>
-
-                  <Form.Item name="receiveTokenAdrress">
-                    <TextField
-                      label="Sending Token Contract Address"
-                      name="sendingAssetTokenContract"
-                      value={receivingTokenAdrress}
-                      placeholder={receivingTokenAdrress}
-                      type="text"
-                      onChange={(re) => {
-                        console.log(
-                          "Change receivingTokenAdrress",
-                          re.target.value
-                        );
-                        setReceiveTokenAddress(re.target.value);
-                      }}
-                      startAdornment={adornSendingContractAddress}
-                    />
-                  </Form.Item>
-
-                  <Form.Item name="receivedAmount">
-                    <Row style={{ paddingTop: 20 }} gutter={22}>
-                      <Col span={12}>
-                        <TextField
-                          name="receivedAmount"
-                          type="text"
-                          value={
-                            auctionResponse &&
-                            utils.formatEther(
-                              auctionResponse?.bid.amountReceived
-                            )
-                          }
-                          label=""
-                          disabled
-                          placeholder="..."
-                        />
-                      </Col>
-                      <Col span={6}>
-                        <Button
-                          variant="bordered"
-                          size="lg"
-                          // disabled={!web3Provider || injectedProviderChainId !== parseInt(form.getFieldValue('sendingChain'))}
-                          onClick={async () => {
-                            const sendingAssetId =
-                              sendingAssetToken.tokenAddress; // from _bal -> set the tokenaddress
-                            const receivingAssetId = receivingTokenAdrress; // from _bal -> set the tokenaddress
-                            if (!sendingAssetId || !receivingAssetId) {
-                              throw new Error(
-                                "Configuration doesn't support selected swap"
-                              );
-                            }
-
-                            await getTransferQuote(
-                              gnosisChainId,
-                              sendingAssetId,
-                              parseInt(form.getFieldValue("receivingChain")),
-                              receivingAssetId,
-                              utils.parseEther(transferAmount).toString(),
-                              form.getFieldValue("receivingAddress")
-                            );
-                          }}
-                        >
-                          <Row>Get Quote</Row>
-
-                          <Row style={{ paddingLeft: 10 }}>
-                            {showLoading && <Loader size="xs" />}
-                          </Row>
-                        </Button>
-                      </Col>
-                    </Row>
-                    <Row>
-                      {errorMsg.length !== 0 && (
-                        <Text color="error" size="sm">
-                          {errorMsg}
-                        </Text>
-                      )}
-                    </Row>
-                  </Form.Item>
-                  <Row gutter={25}>
-                    <Col span={12}>
-                      <Form.Item
-                        dependencies={["sendingChain", "receivingChain"]}
-                      >
-                        {() => (
-                          <Button
-                            iconType="chain"
-                            disabled={
-                              form.getFieldValue("sendingChain") ===
-                                form.getFieldValue("receivingChain") ||
-                              !auctionResponse
-                            }
-                            size="lg"
-                            variant="bordered"
-                            type="submit"
-                          >
-                            {showLoadingTransfer
-                              ? "Transferring..."
-                              : "Start Transfer"}
-                            <Row style={{ paddingLeft: 10 }}>
-                              {showLoadingTransfer && <Loader size="xs" />}
-                            </Row>
-                          </Button>
-                        )}
-                      </Form.Item>
-                    </Col>
-                    <Col span={10}>
-                      <Form.Item
-                        dependencies={["sendingChain", "receivingChain"]}
-                      >
-                        {() => (
-                          <Button
-                            iconType="rocket"
-                            disabled={latestActiveTx?.status.length === 0}
-                            size="lg"
-                            variant="bordered"
-                            onClick={async () => {
-                              console.log("Clicked finish");
-                              if (latestActiveTx)
-                                await finishTransfer({
-                                  bidSignature: latestActiveTx.bidSignature,
-                                  encodedBid: latestActiveTx.encodedBid,
-                                  encryptedCallData:
-                                    latestActiveTx.encryptedCallData,
-                                  txData: {
-                                    ...latestActiveTx.crosschainTx.invariant,
-                                    ...latestActiveTx.crosschainTx.receiving,
-                                  },
-                                });
-                            }}
-                          >
-                            Finish Transfer
-                          </Button>
-                        )}
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                </Form>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <Card className={classes.supportcard}>
-                <Typography
-                  className={classes.text}
-                  align="center"
-                  variant="h6"
-                >
-                  Support
-                </Typography>
-                <List component="nav" aria-label="main mailbox folders">
-                  <ListItem>
-                    <ListItemIcon>
-                      <HelpIcon />
-                    </ListItemIcon>
-                    <Typography className={classes.text}>
-                      How it works
-                    </Typography>
-                  </ListItem>
-                </List>
-                <Divider />
-                <List component="nav" aria-label="secondary mailbox folders">
-                  <ListItem>
-                    <Typography className={classes.text}>
-                      1. Choose the receiving network
-                    </Typography>
-                  </ListItem>
-                  <ListItem>
-                    <Typography className={classes.text}>
-                      2. Set the asset that you want to swap
-                    </Typography>
-                  </ListItem>
-                  <ListItem>
-                    <Typography className={classes.text}>
-                      3. Enter the amount you want to swap
-                    </Typography>
-                  </ListItem>
-                  <ListItem>
-                    <Typography className={classes.text}>
-                      2. Enter the reciever address
-                    </Typography>
-                  </ListItem>
-                  <ListItem>
-                    <Typography className={classes.text}>
-                      4. Get a quotation!
-                    </Typography>
-                  </ListItem>
-                  <ListItem>
-                    <Typography className={classes.text}>
-                      5. Once quote is received request for Starting a Swap and
-                      then Finish it!!
-                    </Typography>
-                  </ListItem>
-                  <ListItem>
-                    <Typography className={classes.text}>
-                      6. Confirm and wait for the transfer to take place
-                    </Typography>
-                  </ListItem>
-                  <ListItem>
-                    <Typography className={classes.text}>
-                      7. In case of any issues you can create a support ticket{" "}
-                      <a
-                        target="blank"
-                        className={classes.a}
-                        href="https://support.connext.network/hc/en-us"
-                      >
-                        here
-                      </a>
-                    </Typography>
-                  </ListItem>
-                </List>
-              </Card>
-            </Grid>
-          </Grid>
-        </Container>
-        {showConfirmation && (
-          <GenericModal
-            onClose={() => setShowConfirmation(false)}
-            title="Success!"
-            body={
-              <div>
-                <Typography
-                  className={classes.text}
-                  align="center"
-                  variant="h6"
-                >
-                  Your transaction has been succesfully executed!
-                </Typography>{" "}
-              </div>
-            }
+    <ErrorBoundary>
+      <Divider />
+      <Container>
+        {showError && (
+          <AlertModal
+            setTrigger={setShowError}
+            title="Error"
+            message={errorMessage}
+            styling={classes.text}
           />
         )}
-      </ErrorBoundary>
-    </>
+        <div className={classes.grid}>
+          <Card className={classes.card}>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <div className={classes.input}>
+                <FormControl>
+                  <InputLabel
+                    style={{ paddingLeft: "10px" }}
+                    htmlFor="chainAddress"
+                  >
+                    Select the chain you want to send the assets to
+                  </InputLabel>
+                  <Controller
+                    control={control}
+                    name="chain"
+                    render={({ field: { onChange, value } }) => (
+                      <Select
+                        variant="outlined"
+                        onChange={onChange}
+                        value={value ? value : ""}
+                        label="chainAddressSelect"
+                        id="chainAddressSelect"
+                      >
+                        {selectMenuChainAddresses()}
+                      </Select>
+                    )}
+                  />
+                </FormControl>
+              </div>
+              <div className={classes.input}>
+                <FormControl>
+                  <InputLabel style={{ paddingLeft: "10px" }} htmlFor="token">
+                    Select Token
+                  </InputLabel>
+                  <Controller
+                    control={control}
+                    name="token"
+                    render={({ field: { onChange, value } }) => (
+                      <Select
+                        variant="outlined"
+                        value={value ? value : ""}
+                        onChange={(value) => {
+                          onChange(value);
+                          tokenSelected(value);
+                        }}
+                      >
+                        {generateSelectTokenOptions()}
+                      </Select>
+                    )}
+                  />
+                </FormControl>
+              </div>
+              <div className={classes.formContentRow}>
+                <FormControl>
+                  <span>
+                    <Controller
+                      name={"transferAmount"}
+                      control={control}
+                      render={({ field: { onChange, value } }) => (
+                        <TextFieldInput
+                          className={classes.input}
+                          id="transferAmountInput"
+                          label="transferAmount"
+                          name="transferAmount"
+                          placeholder="Transfer Amount"
+                          value={transferAmount}
+                          onChange={onChange}
+                          hiddenLabel={true}
+                        />
+                      )}
+                    />
+                  </span>
+                </FormControl>
+                <span className={classes.formContentRow}>
+                  <h2
+                    style={{
+                      paddingLeft: "10px",
+                      paddingRight: "10px",
+                      marginBottom: 0,
+                    }}
+                  >
+                    Balance:
+                  </h2>
+                  <Button
+                    onClick={() => {
+                      setTransferAmount(utils.formatEther(userBalance ?? 0));
+                    }}
+                    size="md"
+                  >
+                    {utils.formatEther(userBalance ?? 0)}
+                  </Button>
+                </span>
+              </div>
+              <div className={classes.formContentColumn}>
+                <Controller
+                  name={"receivingAddress"}
+                  control={control}
+                  render={({ field: { onChange, value } }) => (
+                    <AddressInput
+                      className={classes.input}
+                      address={value}
+                      label={"Receiving Address"}
+                      name="receivingAddress"
+                      onChangeAddress={onChange}
+                      placeholder="Receiving Address"
+                      hiddenLabel={true}
+                    />
+                  )}
+                />
+              </div>
+              <div className={classes.formContentRow}>
+                <span>
+                  <Controller
+                    name={"receivedAmount"}
+                    control={control}
+                    render={({ field: { onChange } }) => (
+                      <TextFieldInput
+                        className={classes.input}
+                        name="receivedAmount"
+                        onChange={onChange}
+                        value={
+                          auctionResponse &&
+                          utils.formatEther(auctionResponse?.bid.amountReceived)
+                        }
+                        label="Received Amount"
+                        placeholder="Swap Amount"
+                        type="number"
+                        hiddenLabel={true}
+                      />
+                    )}
+                  />
+                </span>
+                <Button size="lg" type="submit" variant="bordered">
+                  {showLoading ? <Loader size="xs" /> : <span>Get Quote </span>}
+                </Button>
+              </div>
+              <Divider />
+              <div
+                className={classes.formContentSubmitRow}
+                style={{ paddingTop: "1vh" }}
+              >
+                <Button
+                  iconType="chain"
+                  size="lg"
+                  variant="bordered"
+                  onClick={async () => {
+                    await transfer();
+                  }}
+                >
+                  {showLoadingTransfer ? "Starting Transfer..." : "Start"}
+                  <span>{showLoadingTransfer && <Loader size="xs" />}</span>
+                </Button>
+
+                <Button
+                  iconType="rocket"
+                  disabled={latestActiveTx?.status.length === 0}
+                  size="lg"
+                  variant="bordered"
+                  onClick={async () => {
+                    // if (latestActiveTx)
+                    await finishTransfer({
+                      bidSignature: latestActiveTx.bidSignature,
+                      encodedBid: latestActiveTx.encodedBid,
+                      encryptedCallData: latestActiveTx.encryptedCallData,
+                      txData: {
+                        ...latestActiveTx.crosschainTx.invariant,
+                        ...latestActiveTx.crosschainTx.sending,
+                        amountReceived:
+                          latestActiveTx.crosschainTx.sending.amount,
+                      },
+                    });
+                  }}
+                >
+                  Transfer
+                </Button>
+              </div>
+              <span className={classes.actionAnnouncement}>
+                {showLoadingTransfer
+                  ? "Transfer has started. Please wait."
+                  : " "}
+              </span>
+            </form>
+          </Card>
+          <Button
+            iconType="question"
+            size="lg"
+            variant="contained"
+            onClick={() => setShowSupport(true)}
+          >
+            How it works?
+          </Button>
+          {showSupport && (
+            <SupportModal
+              setTrigger={setShowSupport}
+              title="How it works"
+              classes={classes}
+            />
+          )}
+        </div>
+      </Container>
+      <TransactionTable
+        transactionList={activeTransactions}
+        transactionType={"activeTransactions"}
+      />
+      {showConfirmation && (
+        <AlertModal
+          setTrigger={setShowConfirmation}
+          title="Success!"
+          message={"Your transaction has been succesfully executed!"}
+          styling={classes.text}
+        />
+      )}
+    </ErrorBoundary>
   );
 };
 
