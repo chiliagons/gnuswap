@@ -319,23 +319,28 @@ const App: React.FC = () => {
   };
 
   const transfer = async () => {
-    setShowLoadingTransfer(true);
-    const nsdk = new NxtpSdk({
-      chainConfig: chainProviders,
-      signer: signerGnosis,
-      logger: pino({ level: "info" }),
-    });
-    if (!nsdk) {
-      return;
-    }
-    if (!auctionResponse) {
-      alert("Please request quote first");
-      throw new Error("Please request quote first");
-    }
-    const prepTransfer = await nsdk.prepareTransfer(auctionResponse, true);
-    if (prepTransfer.transactionId) {
-      console.log("Prepared transaction", prepTransfer);
+    try{
+
+      setShowLoadingTransfer(true);
+      const nsdk = new NxtpSdk({
+        chainConfig: chainProviders,
+        signer: signerGnosis,
+        logger: pino({ level: "info" }),
+      });
+      if (!nsdk) {
+        return;
+      }
+      if (!auctionResponse) {
+        throw new Error("Please request quote first");
+      }
+      const prepTransfer = await nsdk.prepareTransfer(auctionResponse, true);
+      if (prepTransfer.transactionId) {
+        console.log("Prepared transaction", prepTransfer);
+      }
       setShowLoadingTransfer(false);
+    }catch(err){
+      setShowLoadingTransfer(false);
+      alert(err.message)
     }
   };
 
@@ -496,9 +501,10 @@ const App: React.FC = () => {
                           auctionResponse &&
                           utils.formatEther(auctionResponse?.bid.amountReceived)
                         }
-                        label="..."
+                        label="Received Amount"
                         placeholder="Swap Amount"
                         type="number"
+                        hiddenLabel={true}
                       />
                     )}
                   />
@@ -547,6 +553,9 @@ const App: React.FC = () => {
                   Transfer
                 </Button>
               </div>
+              <span className={classes.actionAnnouncement}>
+              {showLoadingTransfer ? "Transfer has started. Please wait." : " "}
+              </span>
             </form>
           </Card>
           <Button

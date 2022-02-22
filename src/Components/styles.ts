@@ -88,4 +88,11 @@ export default makeStyles((theme) => ({
     display: "flex",
     flexDirection: "column",
   },
+  actionAnnouncement: {
+    display: "flex",
+    justifyContent: "center",
+    marginTop: "10px",
+    color: "#008c73",
+    fontSize: "12px",
+  },
 }));
