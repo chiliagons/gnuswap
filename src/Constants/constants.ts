@@ -348,18 +348,18 @@ export const contractAddresses = [
     ],
   },
   {
-    id: "gather",
-    symbol: "GTH",
+    id: "usdt",
+    symbol: "USDT",
     contracts: [
       {
-        contract_address: "0xe4149e6851f5f904e21c97210f8862ff98b43173",
-        chain_id: 4,
-        contract_decimals: 18,
+        contract_address: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+        chain_id: 1,
+        contract_decimals: 6,
       },
       {
-        contract_address: "0x14f896e39b374114dd1c750415be0d1f3eab9ce3",
-        chain_id: 97,
-        contract_decimals: 18,
+        contract_address: "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+        chain_id: 137,
+        contract_decimals: 6,
       },
     ],
   },
