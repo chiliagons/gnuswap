@@ -2,7 +2,7 @@ export const chainConfig: Record<
   number,
   { provider: string[]; subgraph?: string; transactionManagerAddress?: string }
 > = JSON.parse(
-  '{"1":{"provider":["https://mainnet.infura.io/v3/31a0f6f85580403986edab0be5f7673c"]}, "137":{"provider":["https://polygon-mainnet.g.alchemy.com/v2/cFIHD92RIO17NEFpWtXQOqBxTx6hhLxsc"]}, "3":{"provider":["https://ropsten.infura.io/v3/31a0f6f85580403986edab0be5f7673c"]},"5":{"provider":["https://goerli.infura.io/v3/31a0f6f85580403986edab0be5f7673c"]},"4":{"provider":["https://rinkeby.infura.io/v3/31a0f6f85580403986edab0be5f7673c"]}}'
+  '{"1":{"provider":["https://mainnet.infura.io/v3/31a0f6f85580403986edab0be5f7673c"]}, "137":{"provider":["https://polygon-mainnet.g.alchemy.com/v2/cFIHD92RIO17NEFpWtXQOqBxTx6hhLxs"]}, "3":{"provider":["https://ropsten.infura.io/v3/31a0f6f85580403986edab0be5f7673c"]},"5":{"provider":["https://goerli.infura.io/v3/31a0f6f85580403986edab0be5f7673c"]},"4":{"provider":["https://rinkeby.infura.io/v3/31a0f6f85580403986edab0be5f7673c"]}}'
 );
 
 export const chainAddresses = [
