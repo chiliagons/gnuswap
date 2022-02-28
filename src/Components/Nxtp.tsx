@@ -138,8 +138,14 @@ const App: React.FC = () => {
         sendingContractAddress.contract_address,
         crossChainData.chain,
         receivingContractAddress.contract_address,
-        utils.parseUnits(crossChainData.transferAmount, 
-                          sendingContractAddress.contract_decimals?sendingContractAddress.contract_decimals:18).toString(),
+        utils
+          .parseUnits(
+            crossChainData.transferAmount,
+            sendingContractAddress.contract_decimals
+              ? sendingContractAddress.contract_decimals
+              : 18
+          )
+          .toString(),
         crossChainData.receivingAddress
       );
     } catch (e) {
