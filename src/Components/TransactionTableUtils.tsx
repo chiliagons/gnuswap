@@ -110,7 +110,8 @@ export const activeTransactionCreator = (
             }
             onClick={async () => handleFinishTransfer(element)}
           >
-            {element.status.toLowerCase() === "ReceiverTransactionPrepared".toLowerCase()
+            {element.status.toLowerCase() ===
+            "ReceiverTransactionPrepared".toLowerCase()
               ? "Complete Transfer"
               : "unavailable"}
           </Button>

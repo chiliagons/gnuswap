@@ -310,10 +310,10 @@ const App: React.FC = () => {
     } catch (e) {
       if (e.type === "ConfigError") {
         setErrorMessage("This chain configuration is not supported");
-      }else{
-        setErrorMessage(e.message)
+      } else {
+        setErrorMessage(e.message);
       }
-      setShowError(true)
+      setShowError(true);
       setShowLoading(false);
       return null;
     }

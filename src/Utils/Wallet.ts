@@ -6,7 +6,7 @@ const ethereum = (window as any).ethereum;
 export const connectWallet = async () => {
   if (ethereum) {
     try {
-      const currentAddress = ethereum.selectedAddress
+      const currentAddress = ethereum.selectedAddress;
       const obj = {
         address: ethers.utils.getAddress(currentAddress),
         status: "Connected",
@@ -29,7 +29,7 @@ export const connectWallet = async () => {
 export const getCurrentWalletConnected = async () => {
   if (ethereum) {
     try {
-      const currentAddress = ethereum.selectedAddress
+      const currentAddress = ethereum.selectedAddress;
       if (!!currentAddress) {
         return {
           address: ethers.utils.getAddress(currentAddress),
