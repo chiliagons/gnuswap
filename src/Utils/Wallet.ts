@@ -6,11 +6,9 @@ const ethereum = (window as any).ethereum;
 export const connectWallet = async () => {
   if (ethereum) {
     try {
-      const addressArray = await ethereum.request({
-        method: "eth_requestAccounts",
-      });
+      const currentAddress = ethereum.selectedAddress
       const obj = {
-        address: ethers.utils.getAddress(addressArray[0]),
+        address: ethers.utils.getAddress(currentAddress),
         status: "Connected",
       };
       return obj;
@@ -31,12 +29,10 @@ export const connectWallet = async () => {
 export const getCurrentWalletConnected = async () => {
   if (ethereum) {
     try {
-      const addressArray = await ethereum.request({
-        method: "eth_accounts",
-      });
-      if (addressArray.length > 0) {
+      const currentAddress = ethereum.selectedAddress
+      if (!!currentAddress) {
         return {
-          address: ethers.utils.getAddress(addressArray[0]),
+          address: ethers.utils.getAddress(currentAddress),
           status: "Connected",
           providers: new providers.Web3Provider(ethereum),
         };

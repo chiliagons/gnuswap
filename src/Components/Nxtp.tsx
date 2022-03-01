@@ -308,11 +308,12 @@ const App: React.FC = () => {
       setAuctionResponse(response);
       return response;
     } catch (e) {
-      console.log(e);
       if (e.type === "ConfigError") {
         setErrorMessage("This chain configuration is not supported");
-        setShowError(true);
+      }else{
+        setErrorMessage(e.message)
       }
+      setShowError(true)
       setShowLoading(false);
       return null;
     }
@@ -369,7 +370,7 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <Divider />
       <Container>
-        {showError && (
+        {showError === true && (
           <AlertModal
             setTrigger={setShowError}
             title="Error"
@@ -529,7 +530,7 @@ const App: React.FC = () => {
                   <span>{showLoadingTransfer && <Loader size="xs" />}</span>
                 </Button>
 
-                <Button
+                {/* <Button
                   iconType="rocket"
                   disabled={latestActiveTx?.status.length === 0}
                   size="lg"
@@ -550,7 +551,7 @@ const App: React.FC = () => {
                   }}
                 >
                   Transfer
-                </Button>
+                </Button> */}
               </div>
               <span className={classes.actionAnnouncement}>
                 {showLoadingTransfer
