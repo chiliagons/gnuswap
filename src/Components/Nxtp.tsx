@@ -85,8 +85,6 @@ const App: React.FC = () => {
   const [historicalTransferTableColumns, setHistoricalTransferTableColumns] =
     useState<HistoricalTransaction[]>([]);
 
-
-
   const connectProvider = async () => {
     try {
       const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
@@ -121,7 +119,6 @@ const App: React.FC = () => {
     );
     return chosenContractAddress;
   };
-
 
   // called on submission of get Quote
   const onSubmit = async (crossChainData: ICrossChain) => {
@@ -214,10 +211,10 @@ const App: React.FC = () => {
     const init = async () => {
       // await connectWallet(); // on load connect to the wallet if not already connected
       // const { address, status, providers } = await getCurrentWalletConnected();
-      const providers = new ethers.providers.Web3Provider(window.ethereum)
+      const providers = new ethers.providers.Web3Provider(window.ethereum);
       await providers.send("eth_requestAccounts", []);
-      const owner1 = providers.getSigner(0)
-      const status = "Connected"
+      const owner1 = providers.getSigner(0);
+      const status = "Connected";
       const address = await owner1.getAddress();
       console.log(address, status, providers);
       setStatus(status);
@@ -262,7 +259,7 @@ const App: React.FC = () => {
 
   function addWalletListener() {
     if (window.ethereum) {
-      window.ethereum.on('accountsChanged', handleAccountsChanged);
+      window.ethereum.on("accountsChanged", handleAccountsChanged);
     } else {
       setStatus("Please install Metamask.");
     }
@@ -271,9 +268,9 @@ const App: React.FC = () => {
   function handleAccountsChanged(accounts) {
     if (accounts.length === 0) {
       // MetaMask is locked or the user has not connected any accounts
-      console.log('Please connect to MetaMask.');
+      console.log("Please connect to MetaMask.");
     } else if (accounts[0] !== walletAddress) {
-      console.log('Changing account to', accounts[0], ethereum.selectedAddress);
+      console.log("Changing account to", accounts[0], ethereum.selectedAddress);
 
       setWallet(accounts[0]);
       // Do any other work!
@@ -551,7 +548,6 @@ const App: React.FC = () => {
                   <span>{showLoadingTransfer && <Loader size="xs" />}</span>
                 </Button>
                 <Button
-
                   iconType="rocket"
                   disabled={latestActiveTx?.status.length === 0}
                   size="lg"

@@ -106,7 +106,7 @@ export const activeTransactionCreator = (
             size="md"
             iconType="rocket"
             disabled={
-              element.status === "SenderTransactionPrepared" ? false : true
+              element.status === "ReceiverTransactionPrepared" ? false : true
             }
             onClick={async () => handleFinishTransfer(element)}
           >
