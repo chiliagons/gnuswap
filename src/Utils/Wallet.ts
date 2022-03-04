@@ -4,7 +4,7 @@ declare let window: any;
 const ethereum = (window as any).ethereum;
 
 export const connectWallet = async () => {
-  if (ethereum) {
+  if (ethereum && ethereum.isMetaMask) {
     try {
       const currentAddress = ethereum.selectedAddress;
       const obj = {

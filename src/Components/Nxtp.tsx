@@ -1,5 +1,7 @@
 /* eslint-disable require-jsdoc */
 import React, { useEffect, useState, useContext } from "react";
+import { useMetamask } from "use-metamask";
+const { connect, getAccounts, getChain, metaState } = useMetamask();
 import "../App.css";
 import useStyles from "./styles";
 import {
@@ -63,6 +65,7 @@ const App: React.FC = () => {
   const [web3Provider, setProvider] = useState<providers.Web3Provider>();
   const [signerGnosis, setSignerGnosis] = useState<Signer>();
   const [signerWallet, setSignerWallet] = useState<Signer>();
+  const { connect, metaState } = useMetamask();
   const [showLoading, setShowLoading] = useState(false);
   const [showLoadingTransfer, setShowLoadingTransfer] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -208,14 +211,30 @@ const App: React.FC = () => {
   }, [errorFetchedChecker]);
 
   useEffect(() => {
-    const init = async () => {
-      await connectWallet(); // on load connect to the wallet if not already connected
-      const { address, status, providers } = await getCurrentWalletConnected();
-      setStatus(status);
+      if (!metaState.isConnected) {
+        (async () => {
+          try {
+            await connect(ethers);
+          } catch (error) {
+            console.log(error);
+          }
+        })();
+      }
+    }, []);
+    
+    useEffect(() => {
+      if (metaState.isAvailable) {
+        (async () => {
+      // await connectWallet(); // on load connect to the wallet if not already connected
+      const address = await getAccounts();
+      const provider = new providers.Web3Provider( window.ethereum)
+      // const { address, status, providers } = await getCurrentWalletConnected();
+      // setStatus(status);
+      console.log("Connected address is ", address, provider)
       setWallet(address);
-      if (status === "Connected") {
+      // if (status === "Connected") {
         try {
-          const signerW = await providers.getSigner();
+          const signerW = await provider.getSigner();
 
           setSignerWallet(signerW);
           const nsdk = await NxtpSdk.create({
@@ -244,10 +263,10 @@ const App: React.FC = () => {
         } catch (e) {
           console.log(e);
         }
-      }
+      // }
       addWalletListener();
-    };
-    init();
+    });
+  }
   }, []);
 
   function addWalletListener() {
@@ -291,6 +310,7 @@ const App: React.FC = () => {
       signer: signerWallet,
       logger: pino({ level: "info" }),
     });
+
     const initiator = await signerGnosis.getAddress();
     if (!nsdk) {
       return;
