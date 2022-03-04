@@ -221,7 +221,7 @@ const App: React.FC = () => {
       const address = await owner1.getAddress();
       console.log(address, status, providers);
       setStatus(status);
-      setWallet(owner1._address);
+      setWallet(address);
       if (status === "Connected") {
         try {
           const signerW = await providers.getSigner();
@@ -233,7 +233,7 @@ const App: React.FC = () => {
             logger: pino({ level: "info" }),
           });
 
-          if (nsdk && walletAddress) {
+          if (nsdk && address) {
             console.log("FETCHING ACTIVE TXS");
             // here we should get the active transactions of the user or EOA
             const activeTxs = await nsdk.getActiveTransactions();
