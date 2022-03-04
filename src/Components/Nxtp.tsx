@@ -1,7 +1,5 @@
 /* eslint-disable require-jsdoc */
 import React, { useEffect, useState, useContext } from "react";
-import { useMetamask } from "use-metamask";
-const { connect, getAccounts, getChain, metaState } = useMetamask();
 import "../App.css";
 import useStyles from "./styles";
 import {
@@ -34,6 +32,7 @@ import { AuctionResponse, getRandomBytes32 } from "@connext/nxtp-utils";
 import pino from "pino";
 import { useSafeAppsSDK } from "@gnosis.pm/safe-apps-react-sdk";
 import { SafeAppProvider } from "@gnosis.pm/safe-apps-provider";
+// import { EthersAdapter } from '@gnosis.pm/safe-core-sdk'
 
 import { chainProviders } from "../Utils/Shared";
 import { connectWallet, getCurrentWalletConnected } from "../Utils/Wallet";
@@ -65,7 +64,6 @@ const App: React.FC = () => {
   const [web3Provider, setProvider] = useState<providers.Web3Provider>();
   const [signerGnosis, setSignerGnosis] = useState<Signer>();
   const [signerWallet, setSignerWallet] = useState<Signer>();
-  const { connect, metaState } = useMetamask();
   const [showLoading, setShowLoading] = useState(false);
   const [showLoadingTransfer, setShowLoadingTransfer] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -86,6 +84,8 @@ const App: React.FC = () => {
 
   const [historicalTransferTableColumns, setHistoricalTransferTableColumns] =
     useState<HistoricalTransaction[]>([]);
+
+
 
   const connectProvider = async () => {
     try {
@@ -211,30 +211,20 @@ const App: React.FC = () => {
   }, [errorFetchedChecker]);
 
   useEffect(() => {
-      if (!metaState.isConnected) {
-        (async () => {
-          try {
-            await connect(ethers);
-          } catch (error) {
-            console.log(error);
-          }
-        })();
-      }
-    }, []);
-    
-    useEffect(() => {
-      if (metaState.isAvailable) {
-        (async () => {
+    const init = async () => {
       // await connectWallet(); // on load connect to the wallet if not already connected
-      const address = await getAccounts();
-      const provider = new providers.Web3Provider( window.ethereum)
       // const { address, status, providers } = await getCurrentWalletConnected();
-      // setStatus(status);
-      console.log("Connected address is ", address, provider)
-      setWallet(address);
-      // if (status === "Connected") {
+      const providers = new ethers.providers.Web3Provider(window.ethereum)
+      await providers.send("eth_requestAccounts", []);
+      const owner1 = providers.getSigner(0)
+      const status = "Connected"
+      const address = await owner1.getAddress();
+      console.log(address, status, providers);
+      setStatus(status);
+      setWallet(owner1._address);
+      if (status === "Connected") {
         try {
-          const signerW = await provider.getSigner();
+          const signerW = await providers.getSigner();
 
           setSignerWallet(signerW);
           const nsdk = await NxtpSdk.create({
@@ -243,7 +233,8 @@ const App: React.FC = () => {
             logger: pino({ level: "info" }),
           });
 
-          if (nsdk && address) {
+          if (nsdk) {
+            console.log("FETCHING ACTIVE TXS");
             // here we should get the active transactions of the user or EOA
             const activeTxs = await nsdk.getActiveTransactions();
             const historicalTxs = await nsdk.getHistoricalTransactions();
@@ -263,26 +254,29 @@ const App: React.FC = () => {
         } catch (e) {
           console.log(e);
         }
-      // }
+      }
       addWalletListener();
-    });
-  }
-  }, []);
+    };
+    init();
+  }, [walletAddress]);
 
   function addWalletListener() {
     if (window.ethereum) {
-      window.ethereum.on("accountsChanged", async (accounts: any) => {
-        if (accounts.length > 0) {
-          const address = ethers.utils.getAddress(accounts[0]);
-          setWallet(address);
-          setStatus("Ready to mint!");
-        } else {
-          setWallet("");
-          setStatus("🦊 Connect to Metamask.");
-        }
-      });
+      window.ethereum.on('accountsChanged', handleAccountsChanged);
     } else {
       setStatus("Please install Metamask.");
+    }
+  }
+
+  function handleAccountsChanged(accounts) {
+    if (accounts.length === 0) {
+      // MetaMask is locked or the user has not connected any accounts
+      console.log('Please connect to MetaMask.');
+    } else if (accounts[0] !== walletAddress) {
+      console.log('Changing account to', accounts[0], ethereum.selectedAddress);
+
+      setWallet(accounts[0]);
+      // Do any other work!
     }
   }
   const getTransferQuote = async (
@@ -310,7 +304,6 @@ const App: React.FC = () => {
       signer: signerWallet,
       logger: pino({ level: "info" }),
     });
-
     const initiator = await signerGnosis.getAddress();
     if (!nsdk) {
       return;

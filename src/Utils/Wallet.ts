@@ -6,9 +6,11 @@ const ethereum = (window as any).ethereum;
 export const connectWallet = async () => {
   if (ethereum && ethereum.isMetaMask) {
     try {
-      const currentAddress = ethereum.selectedAddress;
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      console.log("The accounts that are connected are " , accounts)
+        const account = ethereum.selectedAddress;
       const obj = {
-        address: ethers.utils.getAddress(currentAddress),
+        address: ethers.utils.getAddress(account),
         status: "Connected",
       };
       return obj;
