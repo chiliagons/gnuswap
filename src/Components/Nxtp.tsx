@@ -233,7 +233,7 @@ const App: React.FC = () => {
             logger: pino({ level: "info" }),
           });
 
-          if (nsdk) {
+          if (nsdk && walletAddress) {
             console.log("FETCHING ACTIVE TXS");
             // here we should get the active transactions of the user or EOA
             const activeTxs = await nsdk.getActiveTransactions();

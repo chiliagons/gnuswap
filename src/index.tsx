@@ -10,11 +10,10 @@ ReactDOM.render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <GlobalStyle />
-      
-        <SafeProvider>
-          <MainPage />
-        </SafeProvider>
-      
+
+      <SafeProvider>
+        <MainPage />
+      </SafeProvider>
     </ThemeProvider>
   </React.StrictMode>,
   document.getElementById("root")
