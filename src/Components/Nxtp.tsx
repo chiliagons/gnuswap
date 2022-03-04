@@ -119,6 +119,7 @@ const App: React.FC = () => {
     return chosenContractAddress;
   };
 
+
   // called on submission of get Quote
   const onSubmit = async (crossChainData: ICrossChain) => {
     try {
@@ -138,7 +139,14 @@ const App: React.FC = () => {
         sendingContractAddress.contract_address,
         crossChainData.chain,
         receivingContractAddress.contract_address,
-        utils.parseEther(crossChainData.transferAmount).toString(),
+        utils
+          .parseUnits(
+            crossChainData.transferAmount,
+            sendingContractAddress.contract_decimals
+              ? sendingContractAddress.contract_decimals
+              : 18
+          )
+          .toString(),
         crossChainData.receivingAddress
       );
     } catch (e) {
@@ -370,7 +378,7 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <Divider />
       <Container>
-        {showError === true && (
+        {showError && (
           <AlertModal
             setTrigger={setShowError}
             title="Error"
@@ -529,8 +537,8 @@ const App: React.FC = () => {
                   {showLoadingTransfer ? "Starting Transfer..." : "Start"}
                   <span>{showLoadingTransfer && <Loader size="xs" />}</span>
                 </Button>
+                <Button
 
-                {/* <Button
                   iconType="rocket"
                   disabled={latestActiveTx?.status.length === 0}
                   size="lg"
@@ -551,7 +559,7 @@ const App: React.FC = () => {
                   }}
                 >
                   Transfer
-                </Button> */}
+                </Button>
               </div>
               <span className={classes.actionAnnouncement}>
                 {showLoadingTransfer
