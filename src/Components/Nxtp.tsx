@@ -119,6 +119,7 @@ const App: React.FC = () => {
     return chosenContractAddress;
   };
 
+
   // called on submission of get Quote
   const onSubmit = async (crossChainData: ICrossChain) => {
     try {
@@ -315,11 +316,12 @@ const App: React.FC = () => {
       setAuctionResponse(response);
       return response;
     } catch (e) {
-      console.log(e);
       if (e.type === "ConfigError") {
         setErrorMessage("This chain configuration is not supported");
-        setShowError(true);
+      } else {
+        setErrorMessage(e.message);
       }
+      setShowError(true);
       setShowLoading(false);
       return null;
     }
@@ -535,8 +537,8 @@ const App: React.FC = () => {
                   {showLoadingTransfer ? "Starting Transfer..." : "Start"}
                   <span>{showLoadingTransfer && <Loader size="xs" />}</span>
                 </Button>
-
                 <Button
+
                   iconType="rocket"
                   disabled={latestActiveTx?.status.length === 0}
                   size="lg"
