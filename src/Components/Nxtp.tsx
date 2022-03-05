@@ -59,7 +59,6 @@ const App: React.FC = () => {
   const classes = useStyles();
   const { sdk, safe } = useSafeAppsSDK();
   const [walletAddress, setWallet] = useState("");
-  const [status, setStatus] = useState("");
   const gnosisWeb3Provider = new SafeAppProvider(safe, sdk);
   const [web3Provider, setProvider] = useState<providers.Web3Provider>();
   const [signerGnosis, setSignerGnosis] = useState<Signer>();
@@ -68,19 +67,20 @@ const App: React.FC = () => {
   const [showLoadingTransfer, setShowLoadingTransfer] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [auctionResponse, setAuctionResponse] = useState<AuctionResponse>();
-
-  const [chainList, setChainList] = useState(chainAddresses);
-  const [contractList, setContractList] = useState(contractAddresses);
+  const [chainList, ] = useState(chainAddresses);
+  const [contractList, ] = useState(contractAddresses);
   const [tokenList, setTokenList] = useState<IBalance[]>([]);
 
   const [errorFetchedChecker, setErrorFetchedChecker] = useState(false);
   const [userBalance, setUserBalance] = useState<BigNumber>();
+
   const [transferAmount, setTransferAmount] = useState<string>();
   const [latestActiveTx, setLatestActiveTx] = useState<ActiveTransaction>();
   const [showError, setShowError] = useState<Boolean>(false);
   const [showSupport, setShowSupport] = useState<Boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const { handleSubmit, control } = useForm<ICrossChain>();
+  const [selectedTokenDecimals, setSelectedTokenDecimals] = useState<number>(18);
 
   const [historicalTransferTableColumns, setHistoricalTransferTableColumns] =
     useState<HistoricalTransaction[]>([]);
@@ -141,7 +141,7 @@ const App: React.FC = () => {
         receivingContractAddress.contract_address,
         utils
           .parseUnits(
-            crossChainData.transferAmount,
+            transferAmount.toString(),
             sendingContractAddress.contract_decimals
               ? sendingContractAddress.contract_decimals
               : 18
@@ -164,7 +164,7 @@ const App: React.FC = () => {
       .then((res) => res.json())
       .then((response) => {
         response.forEach((_bal: IBalance) => {
-          if (_bal.balance === null) {
+          if (_bal.token === null) {
             _bal.token = {
               decimals: 18,
               logoUri:
@@ -186,10 +186,14 @@ const App: React.FC = () => {
   const tokenSelected = (element) => {
     try {
       if (element.target?.value) {
-        if (JSON.parse(element.target.value).balance)
+        const token = JSON.parse(element.target.value)
+        if (token.balance){
+          setSelectedTokenDecimals(token.token?.decimals);
           setUserBalance(
-            BigNumber.from(JSON.parse(element.target.value).balance)
+            BigNumber.from(token.balance)
           );
+          
+        }
       }
     } catch (E) {
       console.log(E);
@@ -213,7 +217,6 @@ const App: React.FC = () => {
       await providers.send("eth_requestAccounts", []);
       const owner1 = providers.getSigner(0);
       const address = await owner1.getAddress();
-      setStatus(status);
       setWallet(address);
  
         try {
@@ -249,7 +252,7 @@ const App: React.FC = () => {
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", handleAccountsChanged);
     } else {
-      setStatus("Please install Metamask.");
+      console.log("Please install Metamask.");
     }
   }
 
@@ -345,6 +348,7 @@ const App: React.FC = () => {
   };
   const generateSelectTokenOptions = () => {
     return tokenList.map((_bal) => {
+      if(_bal.token.symbol === 'USDT')
       return (
         <MenuItem key={_bal.token.symbol} value={JSON.stringify(_bal)}>
           {_bal.token.symbol}
@@ -397,7 +401,7 @@ const App: React.FC = () => {
               <div className={classes.input}>
                 <FormControl>
                   <InputLabel style={{ paddingLeft: "10px" }} htmlFor="token">
-                    Select Token
+                    Select Token (USDT, USDC)
                   </InputLabel>
                   <Controller
                     control={control}
@@ -431,7 +435,9 @@ const App: React.FC = () => {
                           name="transferAmount"
                           placeholder="Transfer Amount"
                           value={transferAmount}
-                          onChange={onChange}
+                          onChange={(event) => {
+                            setTransferAmount(event.target.value)}
+                          }
                           hiddenLabel={true}
                         />
                       )}
@@ -446,15 +452,15 @@ const App: React.FC = () => {
                       marginBottom: 0,
                     }}
                   >
-                    Balance:
+                    Balance
                   </h2>
                   <Button
                     onClick={() => {
-                      setTransferAmount(utils.formatEther(userBalance ?? 0));
+                      setTransferAmount(utils.formatUnits(userBalance ?? 0, selectedTokenDecimals));
                     }}
                     size="md"
                   >
-                    {utils.formatEther(userBalance ?? 0)}
+                    {utils.formatUnits(userBalance ?? 0, selectedTokenDecimals)}
                   </Button>
                 </span>
               </div>
@@ -487,7 +493,7 @@ const App: React.FC = () => {
                         onChange={onChange}
                         value={
                           auctionResponse &&
-                          utils.formatEther(auctionResponse?.bid.amountReceived)
+                          utils.formatUnits(auctionResponse?.bid.amountReceived,selectedTokenDecimals)
                         }
                         label="Received Amount"
                         placeholder="Swap Amount"

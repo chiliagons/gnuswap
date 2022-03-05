@@ -31,8 +31,8 @@ export const finishTransfer = async ({
       encodedBid,
       encryptedCallData,
       txData,
-      relayerFee : "780"
-    } );
+      // relayerFee: "780",
+    });
   } catch (err) {
     console.log("Unable to fulfillTransfer", err);
   }
