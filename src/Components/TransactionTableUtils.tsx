@@ -37,7 +37,7 @@ const handleFinishTransfer = async (element) => {
     txData: {
       ...element.crosschainTx.invariant,
       ...element.crosschainTx.sending,
-      amountReceived: element.crosschainTx.sending.amount,
+      amountReceived: element.crosschainTx.receiving.amount,
     },
   });
 };

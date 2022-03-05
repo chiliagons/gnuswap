@@ -164,7 +164,7 @@ const App: React.FC = () => {
       .then((res) => res.json())
       .then((response) => {
         response.forEach((_bal: IBalance) => {
-          if (_bal.token === null) {
+          if (_bal.balance === null) {
             _bal.token = {
               decimals: 18,
               logoUri:
@@ -209,20 +209,15 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const init = async () => {
-      // await connectWallet(); // on load connect to the wallet if not already connected
-      // const { address, status, providers } = await getCurrentWalletConnected();
       const providers = new ethers.providers.Web3Provider(window.ethereum);
       await providers.send("eth_requestAccounts", []);
       const owner1 = providers.getSigner(0);
-      const status = "Connected";
       const address = await owner1.getAddress();
-      console.log(address, status, providers);
       setStatus(status);
       setWallet(address);
-      if (status === "Connected") {
+ 
         try {
           const signerW = await providers.getSigner();
-
           setSignerWallet(signerW);
           const nsdk = await NxtpSdk.create({
             chainConfig: chainProviders,
@@ -231,27 +226,20 @@ const App: React.FC = () => {
           });
 
           if (nsdk && address) {
-            console.log("FETCHING ACTIVE TXS");
             // here we should get the active transactions of the user or EOA
             const activeTxs = await nsdk.getActiveTransactions();
             const historicalTxs = await nsdk.getHistoricalTransactions();
             setHistoricalTransferTableColumns(historicalTxs);
-            console.log("historicalTxs: ", historicalTxs);
             historicalTransactions.setTransactions(historicalTxs);
-
-            // value2.setActiveTransactions(activeTxs);
-            // setActiveTransferTableColumns(activeTxs);
             activeTransactions.setActiveTransactions(activeTxs);
-            console.log("activeTxs   : ", activeTxs);
             if (activeTxs[activeTxs.length - 1]) {
               setLatestActiveTx(activeTxs[0]);
-              console.log("setLatestActiveTx: ", activeTxs[0]);
             }
           }
         } catch (e) {
           console.log(e);
         }
-      }
+      
       addWalletListener();
     };
     init();
@@ -267,13 +255,9 @@ const App: React.FC = () => {
 
   function handleAccountsChanged(accounts) {
     if (accounts.length === 0) {
-      // MetaMask is locked or the user has not connected any accounts
       console.log("Please connect to MetaMask.");
     } else if (accounts[0] !== walletAddress) {
-      console.log("Changing account to", accounts[0], ethereum.selectedAddress);
-
       setWallet(accounts[0]);
-      // Do any other work!
     }
   }
   const getTransferQuote = async (
@@ -284,18 +268,7 @@ const App: React.FC = () => {
     amount: string,
     receivingAddress: string
   ): Promise<AuctionResponse | undefined> => {
-    console.log(
-      "Start getting quote",
-      sendingChainId,
-      sendingAssetId,
-      receivingChainId,
-      receivingAssetId,
-      amount,
-      receivingAddress
-    );
     setShowLoading(true);
-    // const provider = new providers.Web3Provider(ethereum);
-    // const signerW = await provider.getSigner();
     const nsdk = await NxtpSdk.create({
       chainConfig: chainProviders,
       signer: signerWallet,
@@ -305,9 +278,6 @@ const App: React.FC = () => {
     if (!nsdk) {
       return;
     }
-
-    console.log("Initiating request as ", initiator);
-
     // Create txid
     const transactionId = getRandomBytes32();
     try {
@@ -562,7 +532,7 @@ const App: React.FC = () => {
                         ...latestActiveTx.crosschainTx.invariant,
                         ...latestActiveTx.crosschainTx.sending,
                         amountReceived:
-                          latestActiveTx.crosschainTx.sending.amount,
+                          latestActiveTx.crosschainTx.receiving.amount,
                       },
                     });
                   }}
