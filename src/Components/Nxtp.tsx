@@ -67,8 +67,8 @@ const App: React.FC = () => {
   const [showLoadingTransfer, setShowLoadingTransfer] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [auctionResponse, setAuctionResponse] = useState<AuctionResponse>();
-  const [chainList, ] = useState(chainAddresses);
-  const [contractList, ] = useState(contractAddresses);
+  const [chainList] = useState(chainAddresses);
+  const [contractList] = useState(contractAddresses);
   const [tokenList, setTokenList] = useState<IBalance[]>([]);
 
   const [errorFetchedChecker, setErrorFetchedChecker] = useState(false);
@@ -80,7 +80,8 @@ const App: React.FC = () => {
   const [showSupport, setShowSupport] = useState<Boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const { handleSubmit, control } = useForm<ICrossChain>();
-  const [selectedTokenDecimals, setSelectedTokenDecimals] = useState<number>(18);
+  const [selectedTokenDecimals, setSelectedTokenDecimals] =
+    useState<number>(18);
 
   const [historicalTransferTableColumns, setHistoricalTransferTableColumns] =
     useState<HistoricalTransaction[]>([]);
@@ -186,13 +187,10 @@ const App: React.FC = () => {
   const tokenSelected = (element) => {
     try {
       if (element.target?.value) {
-        const token = JSON.parse(element.target.value)
-        if (token.balance){
+        const token = JSON.parse(element.target.value);
+        if (token.balance) {
           setSelectedTokenDecimals(token.token?.decimals);
-          setUserBalance(
-            BigNumber.from(token.balance)
-          );
-          
+          setUserBalance(BigNumber.from(token.balance));
         }
       }
     } catch (E) {
@@ -218,31 +216,31 @@ const App: React.FC = () => {
       const owner1 = providers.getSigner(0);
       const address = await owner1.getAddress();
       setWallet(address);
- 
-        try {
-          const signerW = await providers.getSigner();
-          setSignerWallet(signerW);
-          const nsdk = await NxtpSdk.create({
-            chainConfig: chainProviders,
-            signer: signerW,
-            logger: pino({ level: "info" }),
-          });
 
-          if (nsdk && address) {
-            // here we should get the active transactions of the user or EOA
-            const activeTxs = await nsdk.getActiveTransactions();
-            const historicalTxs = await nsdk.getHistoricalTransactions();
-            setHistoricalTransferTableColumns(historicalTxs);
-            historicalTransactions.setTransactions(historicalTxs);
-            activeTransactions.setActiveTransactions(activeTxs);
-            if (activeTxs[activeTxs.length - 1]) {
-              setLatestActiveTx(activeTxs[0]);
-            }
+      try {
+        const signerW = await providers.getSigner();
+        setSignerWallet(signerW);
+        const nsdk = await NxtpSdk.create({
+          chainConfig: chainProviders,
+          signer: signerW,
+          logger: pino({ level: "info" }),
+        });
+
+        if (nsdk && address) {
+          // here we should get the active transactions of the user or EOA
+          const activeTxs = await nsdk.getActiveTransactions();
+          const historicalTxs = await nsdk.getHistoricalTransactions();
+          setHistoricalTransferTableColumns(historicalTxs);
+          historicalTransactions.setTransactions(historicalTxs);
+          activeTransactions.setActiveTransactions(activeTxs);
+          if (activeTxs[activeTxs.length - 1]) {
+            setLatestActiveTx(activeTxs[0]);
           }
-        } catch (e) {
-          console.log(e);
         }
-      
+      } catch (e) {
+        console.log(e);
+      }
+
       addWalletListener();
     };
     init();
@@ -348,12 +346,12 @@ const App: React.FC = () => {
   };
   const generateSelectTokenOptions = () => {
     return tokenList.map((_bal) => {
-      if(_bal.token.symbol === 'USDT')
-      return (
-        <MenuItem key={_bal.token.symbol} value={JSON.stringify(_bal)}>
-          {_bal.token.symbol}
-        </MenuItem>
-      );
+      if (_bal.token.symbol === "USDT")
+        return (
+          <MenuItem key={_bal.token.symbol} value={JSON.stringify(_bal)}>
+            {_bal.token.symbol}
+          </MenuItem>
+        );
     });
   };
 
@@ -436,8 +434,8 @@ const App: React.FC = () => {
                           placeholder="Transfer Amount"
                           value={transferAmount}
                           onChange={(event) => {
-                            setTransferAmount(event.target.value)}
-                          }
+                            setTransferAmount(event.target.value);
+                          }}
                           hiddenLabel={true}
                         />
                       )}
@@ -456,7 +454,12 @@ const App: React.FC = () => {
                   </h2>
                   <Button
                     onClick={() => {
-                      setTransferAmount(utils.formatUnits(userBalance ?? 0, selectedTokenDecimals));
+                      setTransferAmount(
+                        utils.formatUnits(
+                          userBalance ?? 0,
+                          selectedTokenDecimals
+                        )
+                      );
                     }}
                     size="md"
                   >
@@ -493,7 +496,10 @@ const App: React.FC = () => {
                         onChange={onChange}
                         value={
                           auctionResponse &&
-                          utils.formatUnits(auctionResponse?.bid.amountReceived,selectedTokenDecimals)
+                          utils.formatUnits(
+                            auctionResponse?.bid.amountReceived,
+                            selectedTokenDecimals
+                          )
                         }
                         label="Received Amount"
                         placeholder="Swap Amount"
