@@ -10,9 +10,7 @@ import {
 import { contractAddresses } from "../Constants/constants";
 import { ethers } from "ethers";
 import { activeTransactionCreator } from "./TransactionTableUtils";
-import {
-  ActiveTransaction,
-} from "@connext/nxtp-sdk";
+import { ActiveTransaction } from "@connext/nxtp-sdk";
 import {
   transactionConfig,
   activeHeaderCells,
@@ -56,27 +54,42 @@ const getDetails = (contractList, contractAddress: string, symbol: boolean) => {
   }
 };
 
-
-
-const TransactionTable = (transactionObj:TxObj) => {
+const TransactionTable = (transactionObj: TxObj) => {
   const [contractList] = useState(contractAddresses);
   const transactionType = transactionObj.transactionType;
   const transactionName = transactionConfig[transactionType]?.name;
-  const transactions =transactionObj.transactionList[transactionType];
+  const transactions = transactionObj.transactionList[transactionType];
   const noOfTransactions = transactions ? transactions.length : 0;
   const transactionRows: TableRow[] = [];
   useEffect(() => {
     async function txUpdate() {
       transactions &&
-      transactions.forEach((element: any, index: any) => {
-        const symbol =  getDetails(contractList, element.crosschainTx?.invariant.sendingAssetId, true);
-        const decimals =  getDetails(contractList, element.crosschainTx?.invariant.sendingAssetId, false);
-        transactionRows.push(
-          activeTransactionCreator(element, index, ethers, finishTransfer, symbol, decimals)
-        );
-      console.log("TransactionTable Render called", transactionRows);
+        transactions.forEach((element: any, index: any) => {
+          const symbol = getDetails(
+            contractList,
+            element.crosschainTx?.invariant.sendingAssetId,
+            true
+          );
+          const decimals = getDetails(
+            contractList,
+            element.crosschainTx?.invariant.sendingAssetId,
+            false
+          );
+          if(decimals){
+            transactionRows.push(
+              activeTransactionCreator(
+                element,
+                index,
+                ethers,
+                finishTransfer,
+                symbol,
+                decimals
+              )
+            );
+            console.log("TransactionTable Render called", transactionRows);
+          }
 
-      });
+        });
     }
     txUpdate();
   }, [noOfTransactions]);

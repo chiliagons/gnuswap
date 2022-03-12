@@ -331,7 +331,7 @@ export const chainAddresses = [
 ];
 
 export const contractAddresses = [
-  { 
+  {
     id: "test",
     symbol: "TEST",
     contracts: [
@@ -381,7 +381,8 @@ export const contractAddresses = [
         contract_decimals: 18,
       },
     ],
-  },{
+  },
+  {
     id: "usdt",
     symbol: "USDT",
     contracts: [

@@ -68,9 +68,9 @@ export const activeTransactionCreator = (
           <Text size="xl">
             {ethers.utils.formatUnits(
               element.crosschainTx?.sending.amount,
-              decimals
+              decimals || 18
             ) || 0}{" "}
-            {symbol}
+            {symbol || ""}
           </Text>
         ),
       },
@@ -106,7 +106,13 @@ export const activeTransactionCreator = (
   };
 };
 
-export const historicalTransactionCreator = (element, index, ethers, symbol, decimals) => {
+export const historicalTransactionCreator = (
+  element,
+  index,
+  ethers,
+  symbol,
+  decimals
+) => {
   return {
     id: index,
     cells: [
@@ -148,9 +154,9 @@ export const historicalTransactionCreator = (element, index, ethers, symbol, dec
           <Text size="xl">
             {ethers.utils.formatUnits(
               element.crosschainTx?.sending?.amount,
-              decimals
+              decimals || 18
             ) || 0}{" "}
-            {symbol}
+            {symbol  || ""}
           </Text>
         ),
       },
@@ -160,7 +166,7 @@ export const historicalTransactionCreator = (element, index, ethers, symbol, dec
             {ethers.utils.formatEther(
               element.crosschainTx?.receiving?.amount || "0"
             )}{" "}
-            {symbol}
+            {symbol || "" }
           </Text>
         ),
       },
