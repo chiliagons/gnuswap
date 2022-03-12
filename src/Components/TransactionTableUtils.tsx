@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 import {
   Text,
@@ -7,39 +7,8 @@ import {
   Button,
 } from "@gnosis.pm/safe-react-components";
 import { convertToDate } from "../Utils/Shared";
-import { contractAddresses } from "../Constants/constants";
-import { finishTransfer } from "./Utils";
 
-const cachedMapping = {}; // further optimize by storing this cache in local storage
-const getDetails = (contractAddress: string, symbol: boolean) => {
-  const [contractList] = useState(contractAddresses);
-  console.log("contractList", contractList);
-  if (contractAddress) {
-    if (cachedMapping[contractAddress]) {
-      return symbol
-        ? cachedMapping[contractAddress]["symbol"]
-        : cachedMapping[contractAddress]["contracts"][0]["contract_decimals"];
-    } else {
-      contractList.forEach((token) => {
-        if (
-          JSON.stringify(token.contracts)
-            .toLowerCase()
-            .indexOf(contractAddress) > -1
-        ) {
-          cachedMapping[contractAddress] = token;
-          return symbol
-            ? cachedMapping[contractAddress]["symbol"]
-            : cachedMapping[contractAddress]["contracts"][0][
-                "contract_decimals"
-              ];
-        } else {
-          // TODO: here check if its the native token of the network
-          return symbol ? "ETH" : 18;
-        }
-      });
-    }
-  }
-};
+import { finishTransfer } from "./Utils";
 
 const handleFinishTransfer = async (element) => {
   // if (latestActiveTx)
@@ -59,7 +28,9 @@ export const activeTransactionCreator = (
   element,
   index,
   ethers,
-  finishTransfer
+  finishTransfer,
+  symbol,
+  decimals
 ) => {
   return {
     id: index,
@@ -97,9 +68,9 @@ export const activeTransactionCreator = (
           <Text size="xl">
             {ethers.utils.formatUnits(
               element.crosschainTx?.sending.amount,
-              getDetails(element.crosschainTx?.invariant.sendingAssetId, false)
+              decimals
             ) || 0}{" "}
-            {getDetails(element.crosschainTx?.invariant.sendingAssetId, true)}
+            {symbol}
           </Text>
         ),
       },
@@ -135,7 +106,7 @@ export const activeTransactionCreator = (
   };
 };
 
-export const historicalTransactionCreator = (element, index, ethers) => {
+export const historicalTransactionCreator = (element, index, ethers, symbol, decimals) => {
   return {
     id: index,
     cells: [
@@ -177,9 +148,9 @@ export const historicalTransactionCreator = (element, index, ethers) => {
           <Text size="xl">
             {ethers.utils.formatUnits(
               element.crosschainTx?.sending?.amount,
-              getDetails(element.crosschainTx?.invariant.sendingAssetId, false)
+              decimals
             ) || 0}{" "}
-            {getDetails(element.crosschainTx?.invariant.sendingAssetId, true)}
+            {symbol}
           </Text>
         ),
       },
@@ -189,7 +160,7 @@ export const historicalTransactionCreator = (element, index, ethers) => {
             {ethers.utils.formatEther(
               element.crosschainTx?.receiving?.amount || "0"
             )}{" "}
-            {getDetails(element.crosschainTx?.invariant.receivingAssetId, true)}
+            {symbol}
           </Text>
         ),
       },
