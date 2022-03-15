@@ -177,6 +177,7 @@ const App: React.FC = () => {
           tokenArr.push(_bal);
         });
         setTokenList(tokenArr);
+        console.log(tokenArr);
       })
       .catch((e) => {
         setErrorMessage(e.message);
@@ -258,6 +259,7 @@ const App: React.FC = () => {
     if (accounts.length === 0) {
       console.log("Please connect to MetaMask.");
     } else if (accounts[0] !== walletAddress) {
+      console.log("Accounts changed!")
       setWallet(accounts[0]);
     }
   }
@@ -346,7 +348,7 @@ const App: React.FC = () => {
   };
   const generateSelectTokenOptions = () => {
     return tokenList.map((_bal) => {
-      if (_bal.token.symbol === "USDT")
+      // if (_bal.token.symbol === "USDT")
         return (
           <MenuItem key={_bal.token.symbol} value={JSON.stringify(_bal)}>
             {_bal.token.symbol}
@@ -542,7 +544,7 @@ const App: React.FC = () => {
                       encryptedCallData: latestActiveTx.encryptedCallData,
                       txData: {
                         ...latestActiveTx.crosschainTx.invariant,
-                        ...latestActiveTx.crosschainTx.sending,
+                        ...latestActiveTx.crosschainTx.receiving,
                         amountReceived:
                           latestActiveTx.crosschainTx.receiving.amount,
                       },

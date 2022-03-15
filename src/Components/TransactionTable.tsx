@@ -75,7 +75,7 @@ const TransactionTable = (transactionObj: TxObj) => {
             element.crosschainTx?.invariant.sendingAssetId,
             false
           );
-          if(decimals){
+          if (decimals) {
             transactionRows.push(
               activeTransactionCreator(
                 element,
@@ -88,7 +88,6 @@ const TransactionTable = (transactionObj: TxObj) => {
             );
             console.log("TransactionTable Render called", transactionRows);
           }
-
         });
     }
     txUpdate();
@@ -99,16 +98,16 @@ const TransactionTable = (transactionObj: TxObj) => {
         {
           <div>
             <div style={{ paddingTop: "20px" }}>
-              <Title size="md">
-                {`${transactionName} `}
-                {noOfTransactions === (null || undefined) ? (
-                  <Loader size="sm"></Loader>
-                ) : (
-                  noOfTransactions
-                )}
-              </Title>
-              <Divider />
-              <Table headers={activeHeaderCells} rows={transactionRows} />
+            {transactionRows && (
+              <><Title size="md">
+                  {`${transactionName} `}
+                  {/* {noOfTransactions === (null || undefined) ? (
+                    <Loader size="sm"></Loader>
+                  ) : (
+                    noOfTransactions
+                  )} */}
+                </Title><Divider /><Table headers={activeHeaderCells} rows={transactionRows} /></>
+            )}
             </div>
           </div>
         }

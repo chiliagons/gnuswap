@@ -12,13 +12,14 @@ import { finishTransfer } from "./Utils";
 
 const handleFinishTransfer = async (element) => {
   // if (latestActiveTx)
+  console.log("element", element)
   await finishTransfer({
     bidSignature: element.bidSignature,
     encodedBid: element.encodedBid,
     encryptedCallData: element.encryptedCallData,
     txData: {
       ...element.crosschainTx.invariant,
-      ...element.crosschainTx.sending,
+      ...element.crosschainTx.receiving,
       amountReceived: element.crosschainTx.receiving.amount,
     },
   });
@@ -66,11 +67,11 @@ export const activeTransactionCreator = (
       {
         content: (
           <Text size="xl">
-            {ethers.utils.formatUnits(
+            {/* {ethers.utils.formatUnits(
               element.crosschainTx?.sending.amount,
               decimals || 18
             ) || 0}{" "}
-            {symbol || ""}
+            {symbol || ""} */} 1
           </Text>
         ),
       },
@@ -156,7 +157,7 @@ export const historicalTransactionCreator = (
               element.crosschainTx?.sending?.amount,
               decimals || 18
             ) || 0}{" "}
-            {symbol  || ""}
+            {symbol || ""}
           </Text>
         ),
       },
@@ -166,7 +167,7 @@ export const historicalTransactionCreator = (
             {ethers.utils.formatEther(
               element.crosschainTx?.receiving?.amount || "0"
             )}{" "}
-            {symbol || "" }
+            {symbol || ""}
           </Text>
         ),
       },

@@ -15,6 +15,7 @@ export const finishTransfer = async ({
   const provider = new providers.Web3Provider(ethereum);
   const signerW = await provider.getSigner();
   // const initiator = await signerGnosis.getAddress();
+  console.log("txData fulfillTransfer", txData);
 
   const nsdk = new NxtpSdk({
     chainConfig: chainProviders,
