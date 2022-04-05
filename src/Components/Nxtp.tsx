@@ -55,7 +55,7 @@ import { finishTransfer } from "./Utils";
 declare let window: any;
 const ethereum = (window as any).ethereum;
 const steps = [
-  { id: "connect", label: "Connect to Owner Wallet" },
+  { id: "connect", label: "Connect Owner Wallet" },
   { id: "chain", label: "Choose Chain to Send Assets" },
   { id: "asset", label: "Select an Asset" },
   { id: "quote", label: "Get a Quote" },
@@ -224,59 +224,63 @@ const App: React.FC = () => {
           id: "0x5",
           token: "ETH",
           label: "Goerli Testnet",
-          rpcUrl: "https://goerli.infura.io/v3/31a0f6f85580403986edab0be5f7673c",
+          rpcUrl:
+            "https://goerli.infura.io/v3/31a0f6f85580403986edab0be5f7673c",
         },
       ],
       appMetadata: {
         name: "GNUSWAP",
         icon: '<?xml version="1.0" standalone="no"?> <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd"> <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="512.000000pt" height="512.000000pt" viewBox="0 0 512.000000 512.000000" preserveAspectRatio="xMidYMid meet"> <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)" fill="#000000" stroke="none"> </g> </svg>',
         description: "gnuswap - cross chain swap using gnosis safe",
-      }
-    }
-  
+      },
+    };
+
     // eslint-disable-next-line new-cap
-    return Onboard(config)
-  }
+    return Onboard(config);
+  };
 
   const onboard = () => {
-    console.log("currentOnboardInstance?.state.get(----)",currentOnboardInstance?.state.get())
-  if (!currentOnboardInstance  || currentOnboardInstance?.state.get().chains.length < 1) {
-    currentOnboardInstance = getOnboard()
-  }
+    console.log(
+      "currentOnboardInstance?.state.get(----)",
+      currentOnboardInstance?.state.get()
+    );
+    if (
+      !currentOnboardInstance ||
+      currentOnboardInstance?.state.get().chains.length < 1
+    ) {
+      currentOnboardInstance = getOnboard();
+    }
 
-  return currentOnboardInstance
-}
+    return currentOnboardInstance;
+  };
 
   const disconnectWallet = async () => {
     // eslint-disable-next-line new-cap
     setStepNumber(0);
-    await onboard().disconnectWallet({ label: 'Metamask' })
+    await onboard().disconnectWallet({ label: "Metamask" });
     setWallet("");
-  }
+  };
 
   const connectWallet = async () => {
     // This should be the wallet that is connected to the safe currently
     // So we need to get the gnosis provider
-    let [primaryWallet] = await onboard().state.get().wallets
-    if(!primaryWallet){
+    let [primaryWallet] = await onboard().state.get().wallets;
+    if (!primaryWallet) {
       const connectedWallets = await onboard().connectWallet();
 
       console.log(connectedWallets);
     }
 
-     [primaryWallet] = onboard().state.get().wallets
-    console.log("primaryWallet -- ",primaryWallet);
+    [primaryWallet] = onboard().state.get().wallets;
+    console.log("primaryWallet -- ", primaryWallet);
 
-    const providers = new ethers.providers.Web3Provider(
-      primaryWallet.provider
-    );
+    const providers = new ethers.providers.Web3Provider(primaryWallet.provider);
     const owner1 = providers.getSigner(0);
     const address = await owner1.getAddress();
     console.log("Metamask providers ---> ", address, ownerList);
 
     if (ownerList.findIndex((addr) => addr === address) > -1) {
-    setWallet(address);
-
+      setWallet(address);
 
       try {
         const signerW = await providers.getSigner();
@@ -338,6 +342,7 @@ const App: React.FC = () => {
       });
       setShowLoading(false);
       setAuctionResponse(response);
+      setStepNumber(4);
       return response;
     } catch (e) {
       if (e.type === "ConfigError") {
@@ -345,7 +350,7 @@ const App: React.FC = () => {
       } else {
         setErrorMessage(e.message);
       }
-      setStepNumber(4);
+      setStepNumber(3);
       setShowError(true);
       setShowLoading(false);
       return null;
@@ -418,39 +423,35 @@ const App: React.FC = () => {
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className={classes.formContentRow}>
                 <span>
-                <EthHashInfo
-                  shortName="User"
-                  hash={walletAddress}
-                  name="Selected Owner"
-                  shortenHash={14}
-                  showCopyBtn
-                  shouldShowShortName
-                />
+                  <EthHashInfo
+                    shortName="User"
+                    hash={walletAddress}
+                    name="Selected Owner"
+                    shortenHash={14}
+                    showCopyBtn
+                    shouldShowShortName
+                  />
                 </span>
                 <span className={classes.formContentRow}>
-                  {
-                    walletAddress?
-                    (
-                      <Button
-                    iconType="wallet"
-                    size="md"
-                    variant="contained"
-                    onClick={() => disconnectWallet()}
-                  >
-                    Disconnect
-                  </Button>
-                    ):(
-                      <Button
-                    iconType="wallet"
-                    size="md"
-                    variant="contained"
-                    onClick={() => connectWallet()}
-                  >
-                    Connect
-                  </Button>
-                    )
-                  }
-                  
+                  {walletAddress ? (
+                    <Button
+                      iconType="wallet"
+                      size="md"
+                      variant="contained"
+                      onClick={() => disconnectWallet()}
+                    >
+                      Disconnect
+                    </Button>
+                  ) : (
+                    <Button
+                      iconType="wallet"
+                      size="md"
+                      variant="contained"
+                      onClick={() => connectWallet()}
+                    >
+                      Connect
+                    </Button>
+                  )}
                 </span>
               </div>
               <div className={classes.input}>
@@ -642,7 +643,11 @@ const App: React.FC = () => {
             </form>
           </Card>
 
-          <Stepper steps={steps} activeStepIndex={stepNumber} orientation="vertical" />
+          <Stepper
+            steps={steps}
+            activeStepIndex={stepNumber}
+            orientation="vertical"
+          />
           <Button
             iconType="question"
             size="lg"
@@ -680,4 +685,3 @@ export default App;
 function disconnectWallet(): void {
   throw new Error("Function not implemented.");
 }
-
