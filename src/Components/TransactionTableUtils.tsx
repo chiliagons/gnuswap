@@ -12,7 +12,7 @@ import { finishTransfer } from "./Utils";
 
 const handleFinishTransfer = async (element) => {
   // if (latestActiveTx)
-  console.log("element", element)
+  console.log("element", element);
   await finishTransfer({
     bidSignature: element.bidSignature,
     encodedBid: element.encodedBid,
@@ -71,7 +71,8 @@ export const activeTransactionCreator = (
               element.crosschainTx?.sending.amount,
               decimals || 18
             ) || 0}{" "}
-            {symbol || ""} */} 1
+            {symbol || ""} */}{" "}
+            1
           </Text>
         ),
       },

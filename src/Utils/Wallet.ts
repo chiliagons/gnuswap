@@ -1,64 +1,49 @@
-import { ethers, providers } from "ethers";
+import Onboard from '@web3-onboard/core'
+import injectedModule from '@web3-onboard/injected-wallets'
+import { ChainInfo } from '@gnosis.pm/safe-react-gateway-sdk'
+const ETH_MAINNET_RPC = `https://mainnet.infura.io/v3/31a0f6f85580403986edab0be5f7673c`
 
-declare let window: any;
-const ethereum = (window as any).ethereum;
+const injected = injectedModule()
 
-export const connectWallet = async () => {
-  if (ethereum && ethereum.isMetaMask) {
-    try {
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      console.log("The accounts that are connected are ", accounts);
-      const account = ethereum.selectedAddress;
-      const obj = {
-        address: ethers.utils.getAddress(account),
-        status: "Connected",
-      };
-      return obj;
-    } catch (err: any) {
-      return {
-        address: "",
-        status: "😥 " + err.message,
-      };
+type ChainId = ChainInfo['chainId']
+// const getNetworkName = (chainId: ChainId) => {
+//   // 'mainnet' is hardcoded in onboard v1
+//   const NETWORK_NAMES: Record<ChainId, string> = {
+//     [CHAIN_ID.ETHEREUM]: 'mainnet',
+//   }
+
+//   // Ledger requires lowercase names
+//   return NETWORK_NAMES[chainId] || getChainName().toLowerCase()
+// }
+const getOnboard = (chainId: ChainId) => {
+  const config = {
+    networkId: parseInt(chainId, 10),
+    // networkName: getNetworkName(chainId),
+    wallets: [injected],
+    chains: [
+      {
+        id: "0x5",
+        token: "ETH",
+        label: "Goerli Testnet",
+        rpcUrl: "https://goerli.infura.io/v3/31a0f6f85580403986edab0be5f7673c",
+      },
+    ],
+    appMetadata: {
+      name: "GNUSWAP",
+      icon: '<?xml version="1.0" standalone="no"?> <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd"> <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="512.000000pt" height="512.000000pt" viewBox="0 0 512.000000 512.000000" preserveAspectRatio="xMidYMid meet"> <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)" fill="#000000" stroke="none"> </g> </svg>',
+      description: "gnuswap - cross chain swap using gnosis safe",
     }
-  } else {
-    return {
-      address: "",
-      status: "Please install metamask.",
-    };
   }
-};
 
-export const getCurrentWalletConnected = async () => {
-  if (ethereum) {
-    try {
-      const currentAddress = ethereum.selectedAddress;
-      if (!!currentAddress) {
-        return {
-          address: ethers.utils.getAddress(currentAddress),
-          status: "Connected",
-          providers: new providers.Web3Provider(ethereum),
-        };
-      } else {
-        return {
-          address: "",
-          status: "🦊 Please connect to Metamask",
-          providers: null,
-        };
-      }
-    } catch (err: any) {
-      return {
-        address: "",
-        status: "😥 " + err.message,
-        providers: null,
-      };
-    }
-  } else {
-    return {
-      address: "",
-      status: "Please install Metamask.",
-      providers: null,
-    };
-  }
-};
+  // eslint-disable-next-line new-cap
+  return Onboard(config)
+}
+// const onboard = (): API => {
+//   const chainId = _getChainId()
+//   if (!currentOnboardInstance || currentOnboardInstance.getState().appNetworkId.toString() !== chainId) {
+//     currentOnboardInstance = getOnboard(chainId)
+//   }
+
+//   return currentOnboardInstance
+// }
+// export default onboard

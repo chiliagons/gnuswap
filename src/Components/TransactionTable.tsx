@@ -98,16 +98,20 @@ const TransactionTable = (transactionObj: TxObj) => {
         {
           <div>
             <div style={{ paddingTop: "20px" }}>
-            {transactionRows && (
-              <><Title size="md">
-                  {`${transactionName} `}
-                  {/* {noOfTransactions === (null || undefined) ? (
+              {transactionRows && (
+                <>
+                  <Title size="md">
+                    {`${transactionName} `}
+                    {/* {noOfTransactions === (null || undefined) ? (
                     <Loader size="sm"></Loader>
                   ) : (
                     noOfTransactions
                   )} */}
-                </Title><Divider /><Table headers={activeHeaderCells} rows={transactionRows} /></>
-            )}
+                  </Title>
+                  <Divider />
+                  <Table headers={activeHeaderCells} rows={transactionRows} />
+                </>
+              )}
             </div>
           </div>
         }

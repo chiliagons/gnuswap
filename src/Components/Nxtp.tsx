@@ -6,9 +6,11 @@ import {
   Button,
   Card,
   Divider,
+  EthHashInfo,
   Loader,
   TextFieldInput,
   AddressInput,
+  Stepper,
 } from "@gnosis.pm/safe-react-components";
 import {
   MenuItem,
@@ -32,10 +34,10 @@ import { AuctionResponse, getRandomBytes32 } from "@connext/nxtp-utils";
 import pino from "pino";
 import { useSafeAppsSDK } from "@gnosis.pm/safe-apps-react-sdk";
 import { SafeAppProvider } from "@gnosis.pm/safe-apps-provider";
-// import { EthersAdapter } from '@gnosis.pm/safe-core-sdk'
+import Onboard from "@web3-onboard/core";
+import injectedModule from "@web3-onboard/injected-wallets";
 
 import { chainProviders } from "../Utils/Shared";
-import { connectWallet, getCurrentWalletConnected } from "../Utils/Wallet";
 import ErrorBoundary from "./ErrorBoundary";
 import TransactionTable from "./TransactionTable";
 
@@ -52,15 +54,26 @@ import { finishTransfer } from "./Utils";
 
 declare let window: any;
 const ethereum = (window as any).ethereum;
-
+const steps = [
+  { id: "connect", label: "Connect to Owner Wallet" },
+  { id: "chain", label: "Choose Chain to Send Assets" },
+  { id: "asset", label: "Select an Asset" },
+  { id: "quote", label: "Get a Quote" },
+  { id: "start", label: "Start A Transfer" },
+  { id: "finish", label: "Finish Transfer in Table" },
+];
+let currentOnboardInstance;
 const App: React.FC = () => {
   const { historicalTransactions, activeTransactions } =
     useContext(TableContext);
   const classes = useStyles();
-  const { sdk, safe } = useSafeAppsSDK();
-  const [walletAddress, setWallet] = useState("");
+  const { sdk, connected, safe } = useSafeAppsSDK();
+
   const gnosisWeb3Provider = new SafeAppProvider(safe, sdk);
-  const [web3Provider, setProvider] = useState<providers.Web3Provider>();
+
+  const [ownerList, setOwnerList] = useState<string[]>([]);
+  const [walletAddress, setWallet] = useState("");
+  const [stepNumber, setStepNumber] = useState(0);
   const [signerGnosis, setSignerGnosis] = useState<Signer>();
   const [signerWallet, setSignerWallet] = useState<Signer>();
   const [showLoading, setShowLoading] = useState(false);
@@ -70,10 +83,7 @@ const App: React.FC = () => {
   const [chainList] = useState(chainAddresses);
   const [contractList] = useState(contractAddresses);
   const [tokenList, setTokenList] = useState<IBalance[]>([]);
-
-  const [errorFetchedChecker, setErrorFetchedChecker] = useState(false);
   const [userBalance, setUserBalance] = useState<BigNumber>();
-
   const [transferAmount, setTransferAmount] = useState<string>();
   const [latestActiveTx, setLatestActiveTx] = useState<ActiveTransaction>();
   const [showError, setShowError] = useState<Boolean>(false);
@@ -82,26 +92,33 @@ const App: React.FC = () => {
   const { handleSubmit, control } = useForm<ICrossChain>();
   const [selectedTokenDecimals, setSelectedTokenDecimals] =
     useState<number>(18);
-
   const [historicalTransferTableColumns, setHistoricalTransferTableColumns] =
     useState<HistoricalTransaction[]>([]);
 
+  const injected = injectedModule();
+
+  // check if gnosis provider is connected else keep trying to connect
+  useEffect(() => {
+    async function connectedToSafe() {
+      console.log("The safe is connected", safe);
+      await connectProvider();
+    }
+    connectedToSafe();
+  }, [connected]);
+
   const connectProvider = async () => {
     try {
-      const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
-      const _signerG = await gnosisProvider.getSigner();
-      if (_signerG) {
-        const network =
-          _signerG.provider["provider"].safe?.network?.toLowerCase();
-        const address = await _signerG.getAddress();
-        if (address) {
-          await getTokensHandler(address, network);
-          setSignerGnosis(_signerG);
-          setProvider(gnosisProvider);
-          return true;
-        }
+      if (safe.safeAddress) {
+        const network = safe["network"].toLowerCase();
+        await getTokensHandler(safe.safeAddress, network);
+        const gnosisProvider = new providers.Web3Provider(gnosisWeb3Provider);
+        const _signerG = await gnosisProvider.getSigner();
+        setSignerGnosis(_signerG);
+        setOwnerList(safe.owners);
+        return true;
       }
     } catch (e) {
+      console.error("Error in connect - > ", e);
       return false;
     }
   };
@@ -199,24 +216,67 @@ const App: React.FC = () => {
     }
   };
 
-  // check if gnosis provider is connected else keep trying to connect
-  useEffect(() => {
-    async function testFunc() {
-      const flag: boolean = await connectProvider();
-      if (!flag) {
-        setErrorFetchedChecker((c) => !c);
+  const getOnboard = () => {
+    const config = {
+      wallets: [injected],
+      chains: [
+        {
+          id: "0x5",
+          token: "ETH",
+          label: "Goerli Testnet",
+          rpcUrl: "https://goerli.infura.io/v3/31a0f6f85580403986edab0be5f7673c",
+        },
+      ],
+      appMetadata: {
+        name: "GNUSWAP",
+        icon: '<?xml version="1.0" standalone="no"?> <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd"> <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="512.000000pt" height="512.000000pt" viewBox="0 0 512.000000 512.000000" preserveAspectRatio="xMidYMid meet"> <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)" fill="#000000" stroke="none"> </g> </svg>',
+        description: "gnuswap - cross chain swap using gnosis safe",
       }
     }
-    testFunc();
-  }, [errorFetchedChecker]);
+  
+    // eslint-disable-next-line new-cap
+    return Onboard(config)
+  }
 
-  useEffect(() => {
-    const init = async () => {
-      const providers = new ethers.providers.Web3Provider(window.ethereum);
-      await providers.send("eth_requestAccounts", []);
-      const owner1 = providers.getSigner(0);
-      const address = await owner1.getAddress();
-      setWallet(address);
+  const onboard = () => {
+    console.log("currentOnboardInstance?.state.get(----)",currentOnboardInstance?.state.get())
+  if (!currentOnboardInstance  || currentOnboardInstance?.state.get().chains.length < 1) {
+    currentOnboardInstance = getOnboard()
+  }
+
+  return currentOnboardInstance
+}
+
+  const disconnectWallet = async () => {
+    // eslint-disable-next-line new-cap
+    setStepNumber(0);
+    await onboard().disconnectWallet({ label: 'Metamask' })
+    setWallet("");
+  }
+
+  const connectWallet = async () => {
+    // This should be the wallet that is connected to the safe currently
+    // So we need to get the gnosis provider
+    let [primaryWallet] = await onboard().state.get().wallets
+    if(!primaryWallet){
+      const connectedWallets = await onboard().connectWallet();
+
+      console.log(connectedWallets);
+    }
+
+     [primaryWallet] = onboard().state.get().wallets
+    console.log("primaryWallet -- ",primaryWallet);
+
+    const providers = new ethers.providers.Web3Provider(
+      primaryWallet.provider
+    );
+    const owner1 = providers.getSigner(0);
+    const address = await owner1.getAddress();
+    console.log("Metamask providers ---> ", address, ownerList);
+
+    if (ownerList.findIndex((addr) => addr === address) > -1) {
+    setWallet(address);
+
 
       try {
         const signerW = await providers.getSigner();
@@ -226,7 +286,7 @@ const App: React.FC = () => {
           signer: signerW,
           logger: pino({ level: "info" }),
         });
-
+        setStepNumber(1);
         if (nsdk && address) {
           // here we should get the active transactions of the user or EOA
           const activeTxs = await nsdk.getActiveTransactions();
@@ -241,28 +301,9 @@ const App: React.FC = () => {
       } catch (e) {
         console.log(e);
       }
-
-      addWalletListener();
-    };
-    init();
-  }, [walletAddress]);
-
-  function addWalletListener() {
-    if (window.ethereum) {
-      window.ethereum.on("accountsChanged", handleAccountsChanged);
-    } else {
-      console.log("Please install Metamask.");
     }
-  }
+  };
 
-  function handleAccountsChanged(accounts) {
-    if (accounts.length === 0) {
-      console.log("Please connect to MetaMask.");
-    } else if (accounts[0] !== walletAddress) {
-      console.log("Accounts changed!")
-      setWallet(accounts[0]);
-    }
-  }
   const getTransferQuote = async (
     sendingChainId: number,
     sendingAssetId: string,
@@ -304,6 +345,7 @@ const App: React.FC = () => {
       } else {
         setErrorMessage(e.message);
       }
+      setStepNumber(4);
       setShowError(true);
       setShowLoading(false);
       return null;
@@ -329,6 +371,7 @@ const App: React.FC = () => {
         console.log("Prepared transaction", prepTransfer);
       }
       setShowLoadingTransfer(false);
+      setStepNumber(5);
     } catch (err) {
       setShowLoadingTransfer(false);
       alert(err.message);
@@ -349,11 +392,11 @@ const App: React.FC = () => {
   const generateSelectTokenOptions = () => {
     return tokenList.map((_bal) => {
       // if (_bal.token.symbol === "USDT")
-        return (
-          <MenuItem key={_bal.token.symbol} value={JSON.stringify(_bal)}>
-            {_bal.token.symbol}
-          </MenuItem>
-        );
+      return (
+        <MenuItem key={_bal.token.symbol} value={JSON.stringify(_bal)}>
+          {_bal.token.symbol}
+        </MenuItem>
+      );
     });
   };
 
@@ -373,6 +416,43 @@ const App: React.FC = () => {
         <div className={classes.grid}>
           <Card className={classes.card}>
             <form onSubmit={handleSubmit(onSubmit)}>
+              <div className={classes.formContentRow}>
+                <span>
+                <EthHashInfo
+                  shortName="User"
+                  hash={walletAddress}
+                  name="Selected Owner"
+                  shortenHash={14}
+                  showCopyBtn
+                  shouldShowShortName
+                />
+                </span>
+                <span className={classes.formContentRow}>
+                  {
+                    walletAddress?
+                    (
+                      <Button
+                    iconType="wallet"
+                    size="md"
+                    variant="contained"
+                    onClick={() => disconnectWallet()}
+                  >
+                    Disconnect
+                  </Button>
+                    ):(
+                      <Button
+                    iconType="wallet"
+                    size="md"
+                    variant="contained"
+                    onClick={() => connectWallet()}
+                  >
+                    Connect
+                  </Button>
+                    )
+                  }
+                  
+                </span>
+              </div>
               <div className={classes.input}>
                 <FormControl>
                   <InputLabel
@@ -531,7 +611,7 @@ const App: React.FC = () => {
                   {showLoadingTransfer ? "Starting Transfer..." : "Start"}
                   <span>{showLoadingTransfer && <Loader size="xs" />}</span>
                 </Button>
-                <Button
+                {/* <Button
                   iconType="rocket"
                   disabled={latestActiveTx?.status.length === 0}
                   size="lg"
@@ -552,7 +632,7 @@ const App: React.FC = () => {
                   }}
                 >
                   Transfer
-                </Button>
+                </Button> */}
               </div>
               <span className={classes.actionAnnouncement}>
                 {showLoadingTransfer
@@ -561,6 +641,8 @@ const App: React.FC = () => {
               </span>
             </form>
           </Card>
+
+          <Stepper steps={steps} activeStepIndex={stepNumber} orientation="vertical" />
           <Button
             iconType="question"
             size="lg"
@@ -595,3 +677,7 @@ const App: React.FC = () => {
 };
 
 export default App;
+function disconnectWallet(): void {
+  throw new Error("Function not implemented.");
+}
+
