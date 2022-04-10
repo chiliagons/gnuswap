@@ -10,12 +10,15 @@ import {
 } from "@gnosis.pm/safe-react-components";
 import { contractAddresses } from "../Constants/constants";
 import { ethers } from "ethers";
-import { activeTransactionCreator, historicalTransactionCreator } from "./TransactionTableUtils";
+import {
+  activeTransactionCreator,
+  historicalTransactionCreator,
+} from "./TransactionTableUtils";
 import { ActiveTransaction } from "@connext/nxtp-sdk";
 import {
   transactionConfig,
   activeHeaderCells,
-  historicalHeaderCells
+  historicalHeaderCells,
 } from "../Constants/TransactionConstant";
 
 import ErrorBoundary from "./ErrorBoundary";
@@ -65,15 +68,19 @@ const getDetails = (contractList, contractAddress: string, symbol: boolean) => {
 
 const TransactionTable = (transactionObj: TxObj) => {
   const [contractList] = useState(contractAddresses);
-  
+
   const tableTxObj = {} as TxData;
-  tableTxObj.transactionType =  transactionObj.transactionType;
-  tableTxObj.transactionName =  transactionConfig[tableTxObj.transactionType]?.name;
-  const transactions = transactionObj.transactionList[tableTxObj.transactionType];
+  tableTxObj.transactionType = transactionObj.transactionType;
+  tableTxObj.transactionName =
+    transactionConfig[tableTxObj.transactionType]?.name;
+  const transactions =
+    transactionObj.transactionList[tableTxObj.transactionType];
   tableTxObj.noOfTransactions = transactions ? transactions.length : 0;
 
   const [transactionRows, setTransactionRows] = useState<TableRow[]>([]);
-  const [historicalTransactionRows, setHistoricalTransactionRows] = useState<TableRow[]>([]);
+  const [historicalTransactionRows, setHistoricalTransactionRows] = useState<
+    TableRow[]
+  >([]);
 
   const manyRows: TableRow[] = Array.from(new Array<string>(1).keys()).map(
     (val, idx) => ({
@@ -81,13 +88,13 @@ const TransactionTable = (transactionObj: TxObj) => {
       cells: [
         {
           content: <Text size="xl">test</Text>,
-        }
+        },
       ],
     })
   );
   useEffect(() => {
     async function txUpdate() {
-      const _transactionRows:TableRow[] = [];
+      const _transactionRows: TableRow[] = [];
       transactions &&
         transactions.forEach((element: any, index: any) => {
           const symbol = getDetails(
@@ -112,8 +119,10 @@ const TransactionTable = (transactionObj: TxObj) => {
               )
             );
             console.log("TransactionTable Render called", _transactionRows);
-          }
-          else if(decimals && tableTxObj.transactionType === "historicalTransactions"){
+          } else if (
+            decimals &&
+            tableTxObj.transactionType === "historicalTransactions"
+          ) {
             _transactionRows.push(
               historicalTransactionCreator(
                 element,
@@ -123,16 +132,17 @@ const TransactionTable = (transactionObj: TxObj) => {
                 decimals
               )
             );
-            console.log("TransactionTable Render called for historical", _transactionRows);
+            console.log(
+              "TransactionTable Render called for historical",
+              _transactionRows
+            );
           }
         });
-        if(tableTxObj.transactionType === "activeTransactions"){
-          setTransactionRows(_transactionRows);
-        }
-        else if(tableTxObj.transactionType === "historicalTransactions"){
-          setHistoricalTransactionRows(_transactionRows);
-        }
-        
+      if (tableTxObj.transactionType === "activeTransactions") {
+        setTransactionRows(_transactionRows);
+      } else if (tableTxObj.transactionType === "historicalTransactions") {
+        setHistoricalTransactionRows(_transactionRows);
+      }
     }
     txUpdate();
   }, [tableTxObj.noOfTransactions]);
@@ -142,36 +152,41 @@ const TransactionTable = (transactionObj: TxObj) => {
         {
           <div>
             <div style={{ paddingTop: "20px" }}>
-              {transactionRows && tableTxObj.transactionType === "activeTransactions" && (
-                <>
-                  <Title size="md">
-                    {`${tableTxObj.transactionName} `}
-                    {tableTxObj.noOfTransactions === (null || undefined) ? (
-                    <Loader size="sm"></Loader>
-                  ) : (
-                    tableTxObj.noOfTransactions 
-                  )}
-                  </Title>
-                  <Divider />
-                  <Table headers={activeHeaderCells} rows={transactionRows} />
-                </>
-              )}
+              {transactionRows &&
+                tableTxObj.transactionType === "activeTransactions" && (
+                  <>
+                    <Title size="md">
+                      {`${tableTxObj.transactionName} `}
+                      {tableTxObj.noOfTransactions === (null || undefined) ? (
+                        <Loader size="sm"></Loader>
+                      ) : (
+                        tableTxObj.noOfTransactions
+                      )}
+                    </Title>
+                    <Divider />
+                    <Table headers={activeHeaderCells} rows={transactionRows} />
+                  </>
+                )}
             </div>
             <div style={{ paddingTop: "20px" }}>
-              {historicalTransactionRows && tableTxObj.transactionType === "historicalTransactions" && (
-                <>
-                  <Title size="md">
-                    {`${tableTxObj.transactionName} `}
-                    {tableTxObj.noOfTransactions === (null || undefined) ? (
-                    <Loader size="sm"></Loader>
-                  ) : (
-                    tableTxObj.noOfTransactions 
-                  )}
-                  </Title>
-                  <Divider />
-                  <Table headers={historicalHeaderCells} rows={historicalTransactionRows} />
-                </>
-              )}
+              {historicalTransactionRows &&
+                tableTxObj.transactionType === "historicalTransactions" && (
+                  <>
+                    <Title size="md">
+                      {`${tableTxObj.transactionName} `}
+                      {tableTxObj.noOfTransactions === (null || undefined) ? (
+                        <Loader size="sm"></Loader>
+                      ) : (
+                        tableTxObj.noOfTransactions
+                      )}
+                    </Title>
+                    <Divider />
+                    <Table
+                      headers={historicalHeaderCells}
+                      rows={historicalTransactionRows}
+                    />
+                  </>
+                )}
             </div>
           </div>
         }

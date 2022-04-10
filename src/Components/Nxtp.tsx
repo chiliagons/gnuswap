@@ -295,7 +295,7 @@ const App: React.FC = () => {
           // here we should get the active transactions of the user or EOA
           const activeTxs = await nsdk.getActiveTransactions();
           const historicalTxs = await nsdk.getHistoricalTransactions();
-          
+
           setHistoricalTransferTableColumns(historicalTxs);
           historicalTransactions.setHistoricalTransactions(historicalTxs);
           activeTransactions.setActiveTransactions(activeTxs);
