@@ -67,12 +67,10 @@ export const activeTransactionCreator = (
       {
         content: (
           <Text size="xl">
-            {/* {ethers.utils.formatUnits(
-              element.crosschainTx?.sending.amount,
-              decimals || 18
-            ) || 0}{" "}
-            {symbol || ""} */}{" "}
-            1
+            {ethers.utils.formatEther(
+              element.crosschainTx?.receiving?.amount || "0"
+            )}{" "}
+            {symbol || ""}
           </Text>
         ),
       },

@@ -1,24 +1,20 @@
-# THIS APP IS NOT PRODUCTION READY, IT IS IN DEVELOPMENT
+# Disclaimer
 
-## DEVELOPMENT PHASES
-
-### 1. UI Implementation
-
-This is the current phase, here we implement all the UI elements required. REMINDER: Implementation is not complete.
-
-### 2. Error Handling
-
-This is the phase in which most of the implementation will be complete and additional error handling will be provided.
-
-### 3. Final fine tuning and production ready testing
-
-The last phase will incorporate all the final goto production blockers and deploy to production.
+Please do your own research and due diligence, the team is not responsible for any loss of funds. If there is a technical issue, we would like to hear of it. 
+Please raise a issue in the github issue tracker.
 
 <p align="center">
 <img src="public/gnuswap.png" width="20%">
 </p>
 <h1 align="center">gnuswap</h1>
 gnuswap is an Gnosis Safe App to exchange token across multiple chains. Gnosis safe is a widely used application by companies, asset holders as it helps in managing asset owned by multiple stakeholders by levarages multisig capabilities of the gnosis safe. It helps transfer assets easily within the safe.
+
+gnuswap is powered by the nxtp sdk from connext.network. gnuswap is a simple skin overlay over this sdk.
+
+## URL to use the safe with connext
+```
+https://gnuswap.vercel.app/
+```
 
 ## App screen
 
@@ -29,6 +25,7 @@ gnuswap is an Gnosis Safe App to exchange token across multiple chains. Gnosis s
 - Easy hassle free swapping of tokens cross chain
 - Directly integrated with gnosis safe
 - Uses Connext to do cross chain swapping
+- Currently only supports USDT. It will support other tokens soon after launch.
 
 ## Why a Gnosis application
 
@@ -46,6 +43,5 @@ gnuswap is an Gnosis Safe App to exchange token across multiple chains. Gnosis s
 We integrated Gnosis Safe using the gnosis safe sdk with connext network nxtp sdk.
 We utilized the Gnosis UI SDK to keep the elements as native as possible.
 
-## Future Scope
 
-- Show Liquidity across different networks
+
