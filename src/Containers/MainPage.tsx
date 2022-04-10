@@ -45,7 +45,7 @@ function a11yProps(index) {
 const MainPage: React.FC = () => {
   const classes = useStyles();
   const [value, setValue] = React.useState(0);
-  const [transactions, setTransactions] = React.useState(null);
+  const [historicalTransactions, setHistoricalTransactions] = React.useState(null);
   const [activeTransactions, setActiveTransactions] = React.useState(null);
 
   const handleChange = (event, newValue) => {
@@ -56,7 +56,7 @@ const MainPage: React.FC = () => {
     <div>
       <TableContextProvider
         value={{
-          historicalTransactions: { transactions, setTransactions },
+          historicalTransactions: { historicalTransactions, setHistoricalTransactions },
           activeTransactions: { activeTransactions, setActiveTransactions },
         }}
       >

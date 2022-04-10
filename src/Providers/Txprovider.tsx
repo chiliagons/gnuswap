@@ -3,8 +3,8 @@ import { ActiveTransaction, HistoricalTransaction } from "@connext/nxtp-sdk";
 
 export const TableContext = createContext({
   historicalTransactions: {
-    transactions: null,
-    setTransactions: (transactions: HistoricalTransaction[]) => {},
+    historicalTransactions: null,
+    setHistoricalTransactions: (historicalTransactions: HistoricalTransaction[]) => {},
   },
   activeTransactions: {
     activeTransactions: null,
