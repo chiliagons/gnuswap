@@ -67,9 +67,11 @@ export const activeTransactionCreator = (
       {
         content: (
           <Text size="xl">
-            {ethers.utils.formatEther(
-              element.crosschainTx?.receiving?.amount || "0"
-            )}{" "}
+            {ethers.utils.formatUnits(
+              element.crosschainTx?.receiving?.amount || 0,
+              decimals || 18
+            ) 
+            }{" "}
             {symbol || ""}
           </Text>
         ),
@@ -123,11 +125,6 @@ export const historicalTransactionCreator = (
       },
       {
         content: (
-          <Text size="xl">{convertToDate(element.preparedTimestamp)}</Text>
-        ),
-      },
-      {
-        content: (
           <EthHashInfo
             textSize="xl"
             hash={element.fulfilledTxHash?.toString() || "NA"}
@@ -153,9 +150,9 @@ export const historicalTransactionCreator = (
         content: (
           <Text size="xl">
             {ethers.utils.formatUnits(
-              element.crosschainTx?.sending?.amount,
+              element.crosschainTx?.sending?.amount || 0,
               decimals || 18
-            ) || 0}{" "}
+            ) }{" "}
             {symbol || ""}
           </Text>
         ),
@@ -163,9 +160,13 @@ export const historicalTransactionCreator = (
       {
         content: (
           <Text size="xl">
-            {ethers.utils.formatEther(
-              element.crosschainTx?.receiving?.amount || "0"
-            )}{" "}
+            {
+            ethers.utils.formatUnits(
+              element.crosschainTx?.receiving?.amount || 0 ,
+              decimals || 18
+            )
+            }
+            {" "}
             {symbol || ""}
           </Text>
         ),
