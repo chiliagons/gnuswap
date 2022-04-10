@@ -55,7 +55,6 @@ const MainPage: React.FC = () => {
 
   return (
     <div>
-
       <TableContextProvider
         value={{
           historicalTransactions: {

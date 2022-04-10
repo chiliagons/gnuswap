@@ -308,6 +308,7 @@ const App: React.FC = () => {
       }
     }
   };
+
   const getTransferQuote = async (
     sendingChainId: number,
     sendingAssetId: string,
@@ -326,7 +327,6 @@ const App: React.FC = () => {
     if (!nsdk) {
       return;
     }
-
     // Create txid
     const transactionId = getRandomBytes32();
     try {

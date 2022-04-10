@@ -1,97 +1,198 @@
-import React, { useContext } from 'react';
-import { Table, Title, TableHeader, TableRow, Text, Divider, IconText, EthHashInfo, Loader } from '@gnosis.pm/safe-react-components';
-import { TableContext } from '../Providers/Txprovider';
-import { HistoricalTransaction } from '@connext/nxtp-sdk';
-import { ethers } from 'ethers';
+import React, { useState, useEffect } from "react";
 
-const TransactionPage: React.FC = () => {
-  //const [Loading, setLoading] = useState(false);
-  const { value, value2 } = useContext(TableContext);
+import {
+  Table,
+  Text,
+  Title,
+  TableRow,
+  Divider,
+  Loader,
+} from "@gnosis.pm/safe-react-components";
+import { contractAddresses } from "../Constants/constants";
+import { ethers } from "ethers";
+import {
+  activeTransactionCreator,
+  historicalTransactionCreator,
+} from "./TransactionTableUtils";
+import { ActiveTransaction } from "@connext/nxtp-sdk";
+import {
+  transactionConfig,
+  activeHeaderCells,
+  historicalHeaderCells,
+} from "../Constants/TransactionConstant";
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  //const [transactions, setTransactions] = React.useState(MockTransactions);
-  const headerCells: TableHeader[] = [
-    { id: 'date', label: 'Date' },
-    { id: 'transactionHash', label: 'Tx Hash' },
-    { id: 'receiverAddress', label: 'Receiver Address' },
-    { id: 'fromAmount', label: 'From Amount' },
-    { id: 'toAmount', label: 'To Amount' },
-    { id: 'status', label: 'Status' },
-  ];
+import ErrorBoundary from "./ErrorBoundary";
+import { finishTransfer } from "./Utils";
 
-  const activeHeaderCells: TableHeader[] = [
-    { id: 'date', label: 'Date' },
-    { id: 'transactionHash', label: 'Tx Hash' },
-    { id: 'receiverAddress', label: 'Receiver Address' },
-    { id: 'amount', label: 'Amount' },
-    { id: 'status', label: 'Status' },
-  ];
+interface TxObj {
+  transactionList: any;
+  transactionType: string;
+}
 
-  const rows: TableRow[] = [];
-  const activeRows: TableRow[] = [];
-  let noOfActiveTransactions = -1;
-  let noOfHistoricalTransactions = -1;
-  function convertToDate(timestamp: number) {
-    var date = new Date(timestamp * 1000);
-    var result = date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
-    return result;
-  }
-  if (value.transactions && value2.activeTransactions) {
-    noOfActiveTransactions = value2.activeTransactions.length;
-    noOfHistoricalTransactions = value.transactions.length;
+interface TxData {
+  noOfTransactions: number;
+  transactionType: string;
+  transactionName: string;
+}
 
-    value.transactions.forEach((element: HistoricalTransaction, index: any) => {
-      rows.push({
-        id: index,
-        cells: [
-          { content: <Text size="xl">{convertToDate(element.preparedTimestamp)}</Text> },
-          { content: <EthHashInfo textSize="xl" hash={element.fulfilledTxHash.toString()} showCopyBtn shortenHash={4} /> },
-          { content: <EthHashInfo textSize="xl" hash={element.crosschainTx.invariant.receivingAddress.toString()} showCopyBtn shortenHash={4} /> },
-          { content: <Text size="xl">{ethers.utils.formatEther(element.crosschainTx.sending.amount)} TEST</Text> },
-          { content: <Text size="xl">{ethers.utils.formatEther(element.crosschainTx.receiving.amount)} TEST</Text> },
-          {
-            content: (
-              <IconText iconSize="md" iconColor="primary" textSize="xl" iconType={element.status === 'FULFILLED' ? 'check' : 'alert'} text={element.status} />
-            ),
-          },
-        ],
+const cachedMapping = {}; // further optimize by storing this cache in local storage
+const getDetails = (contractList, contractAddress: string, symbol: boolean) => {
+  console.log("contractList", contractList);
+  if (contractAddress) {
+    if (cachedMapping[contractAddress]) {
+      return symbol
+        ? cachedMapping[contractAddress]["symbol"]
+        : cachedMapping[contractAddress]["contracts"][0]["contract_decimals"];
+    } else {
+      contractList.forEach((token) => {
+        if (
+          JSON.stringify(token.contracts)
+            .toLowerCase()
+            .indexOf(contractAddress) > -1
+        ) {
+          cachedMapping[contractAddress] = token;
+          const returnValue = symbol
+            ? cachedMapping[contractAddress]["symbol"]
+            : cachedMapping[contractAddress]["contracts"][0][
+                "contract_decimals"
+              ];
+          return returnValue;
+        } else {
+          // TODO: here check if its the native token of the network
+          return symbol ? "ETH" : 18;
+        }
       });
-    });
-
-    value2.activeTransactions.forEach((element: any, index: any) => {
-      activeRows.push({
-        id: index,
-        cells: [
-          { content: <Text size="xl">{convertToDate(element.preparedTimestamp)}</Text> },
-          { content: <EthHashInfo textSize="xl" hash={element.transactionHash.toString()} showCopyBtn shortenHash={4} /> },
-          { content: <EthHashInfo textSize="xl" hash={element.crosschainTx.invariant.receivingAddress.toString()} showCopyBtn shortenHash={4} /> },
-          { content: <Text size="xl">{ethers.utils.formatEther(element.crosschainTx.sending.amount)} TEST</Text> },
-          {
-            content: <IconText iconSize="md" iconColor="primary" textSize="xl" iconType="alert" text={element.status} />,
-          },
-        ],
-      });
-    });
+    }
   }
+};
 
+const TransactionTable = (transactionObj: TxObj) => {
+  const [contractList] = useState(contractAddresses);
+
+  const tableTxObj = {} as TxData;
+  tableTxObj.transactionType = transactionObj.transactionType;
+  tableTxObj.transactionName =
+    transactionConfig[tableTxObj.transactionType]?.name;
+  const transactions =
+    transactionObj.transactionList[tableTxObj.transactionType];
+  tableTxObj.noOfTransactions = transactions ? transactions.length : 0;
+
+  const [transactionRows, setTransactionRows] = useState<TableRow[]>([]);
+  const [historicalTransactionRows, setHistoricalTransactionRows] = useState<
+    TableRow[]
+  >([]);
+
+  const manyRows: TableRow[] = Array.from(new Array<string>(1).keys()).map(
+    (val, idx) => ({
+      id: idx.toString(),
+      cells: [
+        {
+          content: <Text size="xl">test</Text>,
+        },
+      ],
+    })
+  );
+  useEffect(() => {
+    async function txUpdate() {
+      const _transactionRows: TableRow[] = [];
+      transactions &&
+        transactions.forEach((element: any, index: any) => {
+          const symbol = getDetails(
+            contractList,
+            element.crosschainTx?.invariant.sendingAssetId,
+            true
+          );
+          const decimals = getDetails(
+            contractList,
+            element.crosschainTx?.invariant.sendingAssetId,
+            false
+          );
+          if (decimals && tableTxObj.transactionType === "activeTransactions") {
+            _transactionRows.push(
+              activeTransactionCreator(
+                element,
+                index,
+                ethers,
+                finishTransfer,
+                symbol,
+                decimals
+              )
+            );
+            console.log("TransactionTable Render called", _transactionRows);
+          } else if (
+            decimals &&
+            tableTxObj.transactionType === "historicalTransactions"
+          ) {
+            _transactionRows.push(
+              historicalTransactionCreator(
+                element,
+                index,
+                ethers,
+                symbol,
+                decimals
+              )
+            );
+            console.log(
+              "TransactionTable Render called for historical",
+              _transactionRows
+            );
+          }
+        });
+      if (tableTxObj.transactionType === "activeTransactions") {
+        setTransactionRows(_transactionRows);
+      } else if (tableTxObj.transactionType === "historicalTransactions") {
+        setHistoricalTransactionRows(_transactionRows);
+      }
+    }
+    txUpdate();
+  }, [tableTxObj.noOfTransactions]);
   return (
     <>
-      {
-        <div>
-          <div style={{ paddingTop: '20px' }}>
-            <Title size="md">Active Transactions : {noOfActiveTransactions === -1 ? <Loader size="sm"></Loader> : noOfActiveTransactions}</Title>
-            <Divider />
-            <Table headers={activeHeaderCells} rows={activeRows} />
+      <ErrorBoundary>
+        {
+          <div>
+            <div style={{ paddingTop: "20px" }}>
+              {transactionRows &&
+                tableTxObj.transactionType === "activeTransactions" && (
+                  <>
+                    <Title size="md">
+                      {`${tableTxObj.transactionName} `}
+                      {tableTxObj.noOfTransactions === (null || undefined) ? (
+                        <Loader size="sm"></Loader>
+                      ) : (
+                        tableTxObj.noOfTransactions
+                      )}
+                    </Title>
+                    <Divider />
+                    <Table headers={activeHeaderCells} rows={transactionRows} />
+                  </>
+                )}
+            </div>
+            <div style={{ paddingTop: "20px" }}>
+              {historicalTransactionRows &&
+                tableTxObj.transactionType === "historicalTransactions" && (
+                  <>
+                    <Title size="md">
+                      {`${tableTxObj.transactionName} `}
+                      {tableTxObj.noOfTransactions === (null || undefined) ? (
+                        <Loader size="sm"></Loader>
+                      ) : (
+                        tableTxObj.noOfTransactions
+                      )}
+                    </Title>
+                    <Divider />
+                    <Table
+                      headers={historicalHeaderCells}
+                      rows={historicalTransactionRows}
+                    />
+                  </>
+                )}
+            </div>
           </div>
-          <div style={{ paddingTop: '20px' }}>
-            <Title size="md">Historical Transactions: {noOfHistoricalTransactions === -1 ? <Loader size="sm"></Loader> : noOfHistoricalTransactions}</Title>
-            <Divider />
-            <Table headers={headerCells} rows={rows} />
-          </div>
-        </div>
-      }
+        }
+      </ErrorBoundary>
     </>
   );
 };
 
-export default TransactionPage;
+export default TransactionTable;
